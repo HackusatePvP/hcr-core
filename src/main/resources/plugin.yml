@@ -2,6 +2,13 @@ name: HCF
 version: '${project.version}'
 main: dev.hcr.hcf.HCF
 commands:
+  balance:
+    aliases: [bal]
+    description: View your current balance.
+  economy:
+    aliases: [eco]
+    description: Economy management command.
+    permission: hcf.commands.admin.economy
   faction:
     aliases: [factions, f]
     description: Main faction command.

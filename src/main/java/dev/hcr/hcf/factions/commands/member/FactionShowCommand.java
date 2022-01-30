@@ -1,5 +1,6 @@
 package dev.hcr.hcf.factions.commands.member;
 
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.structure.SystemFaction;
@@ -78,13 +79,12 @@ public class FactionShowCommand extends FactionCommand {
     private void printPlayerInfo(Faction faction, CommandSender sender) {
         List<String> message = new ArrayList<>();
         PlayerFaction playerFaction = (PlayerFaction) faction;
-        DecimalFormat format = new DecimalFormat("#.##");
         message.add("&7&m-----------------------------------------------------");
         message.add("&c&l" + playerFaction.getName().toUpperCase() + ": &7[&6" + playerFaction.getOnlineMembers().size() + "&7/&6" + playerFaction.getFactionMembers().size() + "&7]");
         message.add("  &7Home: &cNA"); //TODO implement faction home + claims
-        message.add("  &7Balance: &c" + format.format(playerFaction.getBalance()));
+        message.add("  &7Balance: &c" + HCF.getPlugin().getFormat().format(playerFaction.getBalance()));
         message.add("  &7Leader: &c" + playerFaction.getLeader()); //TODO convert uuid to leader name
-        message.add("  &7DTR: &c1.01"); //TODO Implement dtr for factions
+        message.add("  &7Current DTR: " + playerFaction.getFormattedCurrentDTR());
         message.add("  &7Points: &c" + playerFaction.getPoints()); //TODO implement faction points
         message.add("&7&m-----------------------------------------------------");
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));

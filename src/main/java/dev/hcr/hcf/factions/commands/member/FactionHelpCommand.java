@@ -11,7 +11,7 @@ public class FactionHelpCommand extends FactionCommand {
     private final TreeMap<String, Integer> pageMap = new TreeMap<>();
 
     public FactionHelpCommand() {
-        super("help", "Display faction command information.");
+        super("help", "Display faction command information.", "", new String[]{"h"});
         pagination();
     }
 

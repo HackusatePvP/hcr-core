@@ -11,6 +11,7 @@ public abstract class FactionCommand {
     private final String description;
     private String[] aliases;
     private final static Map<String, FactionCommand> commandMap = new HashMap<>();
+    private final static Map<String, FactionCommand> aliasMap = new HashMap<>();
 
     public FactionCommand(String name, String description) {
         this.name = name;
@@ -30,7 +31,7 @@ public abstract class FactionCommand {
         this.description = description;
         commandMap.put(name.toLowerCase(), this);
         for (String s : aliases) {
-            commandMap.put(s.toLowerCase(), this);
+            aliasMap.put(s.toLowerCase(), this);
         }
     }
 
@@ -40,7 +41,7 @@ public abstract class FactionCommand {
         this.permission = permission;
         commandMap.put(name.toLowerCase(), this);
         for (String s : aliases) {
-            commandMap.put(s.toLowerCase(), this);
+            aliasMap.put(s.toLowerCase(), this);
         }
     }
 
@@ -57,7 +58,10 @@ public abstract class FactionCommand {
     }
 
     public static FactionCommand getCommand(String name) {
-        return commandMap.get(name.toLowerCase());
+        if (commandMap.get(name) == null) {
+            return aliasMap.get(name);
+        }
+        return commandMap.get(name);
     }
 
     public static List<String> getRegisteredCommands() {

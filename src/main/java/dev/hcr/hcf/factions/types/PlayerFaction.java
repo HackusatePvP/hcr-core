@@ -1,26 +1,36 @@
 package dev.hcr.hcf.factions.types;
 
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
+import dev.hcr.hcf.factions.structure.regen.RegenStatus;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
+import dev.hcr.hcf.utils.backend.ConfigurationType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class PlayerFaction extends Faction {
     private final UUID leader;
     private double balance;
     private int points;
+    private double currentDTR, maxDTR;
+    private RegenStatus regenStatus = RegenStatus.FULL;
     private final Map<String, UUID> factionInviteMap = new HashMap<>();
     private final Collection<UUID> factionMembers = new HashSet<>();
     private final Map<UUID, Role> roleMap = new HashMap<>();
 
+    private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
     public PlayerFaction(String name, UUID leader) {
         super(UUID.randomUUID(), name);
         this.leader = leader;
+        this.currentDTR = 1.1;
+        this.maxDTR = 1.1;
         User user = User.getUser(leader);
         factionMembers.add(leader);
         user.setFaction(this);
@@ -29,6 +39,41 @@ public class PlayerFaction extends Faction {
 
     public UUID getLeader() {
         return leader;
+    }
+
+    public double getMaxDTR() {
+        double dtr = 1.1 * factionMembers.size();
+        if (dtr > ConfigurationType.getConfiguration("faction.properties").getDouble("max-dtr")) {
+            return 5.5;
+        }
+        return dtr;
+    }
+
+    public double getCurrentDTR() {
+        return currentDTR;
+    }
+
+    public void setCurrentDTR(double dtr) {
+        this.currentDTR = dtr;
+    }
+
+    public void decreaseDTR(double amount) {
+        this.currentDTR -= amount;
+        // Setup regen task
+        this.regenStatus = RegenStatus.PAUSED;
+        HCF.getPlugin().getRegenTask().setupFactionRegen(this);
+    }
+
+    public void increaseDTR(double amount) {
+        this.currentDTR += amount;
+    }
+
+    public String getFormattedMaxDTR() {
+        return decimalFormat.format(getMaxDTR());
+    }
+
+    public String getFormattedCurrentDTR() {
+        return regenStatus.getColor() + regenStatus.getUnicode() + " " + decimalFormat.format(currentDTR);
     }
 
     public double getBalance() {
@@ -67,6 +112,14 @@ public class PlayerFaction extends Faction {
             return;
         }
         roleMap.put(user.getUuid(), role);
+    }
+
+    public void depositBalance(double balance) {
+        this.balance += balance;
+    }
+
+    public void withdrawBalance(double balance) {
+        this.balance -= balance;
     }
 
     public boolean addUserToFaction(User user) {
@@ -135,5 +188,9 @@ public class PlayerFaction extends Faction {
         for (Player player : getOnlineMembers()) {
             player.sendMessage(CC.translate(message));
         }
+    }
+
+    public void setRegenStatus(RegenStatus status) {
+        this.regenStatus = status;
     }
 }

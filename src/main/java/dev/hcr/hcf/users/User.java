@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class User {
     private final UUID uuid;
     private final String name;
+    private double balance;
     private ChatChannel channel = ChatChannel.PUBLIC;
     private Faction faction;
 
@@ -29,6 +30,22 @@ public class User {
 
     public void setChannel(ChatChannel channel) {
         this.channel = channel;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void addToBalance(double amount) {
+        balance += amount;
+    }
+
+    public void takeFromBalance(double amount) {
+        balance -= amount;
+    }
+
+    public void setBalance(double amount) {
+        balance = amount;
     }
 
     public Faction getFaction() {
