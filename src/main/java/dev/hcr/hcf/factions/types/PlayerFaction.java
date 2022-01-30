@@ -1,8 +1,10 @@
 package dev.hcr.hcf.factions.types;
 
 import dev.hcr.hcf.factions.Faction;
+import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
+import dev.hcr.hcf.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -20,6 +22,7 @@ public class PlayerFaction extends Faction {
         super(UUID.randomUUID(), name);
         this.leader = leader;
         User user = User.getUser(leader);
+        factionMembers.add(leader);
         user.setFaction(this);
         roleMap.put(leader, Role.LEADER);
     }
@@ -66,9 +69,16 @@ public class PlayerFaction extends Faction {
         roleMap.put(user.getUuid(), role);
     }
 
-    public void addUserToFaction(User user) {
+    public boolean addUserToFaction(User user) {
+        PlayerJoinFactionEvent event = new PlayerJoinFactionEvent(this, user.toPlayer());
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return false;
+        }
         factionMembers.add(user.getUuid());
         roleMap.put(user.getUuid(), Role.MEMBER);
+        user.setFaction(this);
+        return true;
     }
 
     public User getMember(UUID uuid) {
@@ -107,16 +117,23 @@ public class PlayerFaction extends Faction {
 
     public boolean sendInvite(Player inviter, User user) {
         factionInviteMap.put(user.getName(), inviter.getUniqueId());
-        // TODO: 1/29/2022 send faction message to log invite
+        broadcast(CC.translate("&7[&4" + getName().toUpperCase() + "&7] &c" + inviter.getName() + " &7has invited &e" + user.getName() + " &7to the faction!"));
 
         if (user.toPlayer() != null) {
             Player player = user.toPlayer();
-            player.sendMessage("&aYou have been invited to &b" + getName() + "&a. /f join <" + getName() + ">");
+            // TODO: 1/30/2022 Make the message clickable to execute the join  command
+            player.sendMessage(CC.translate("&aYou have been invited to &b" + getName() + "&a. /f join <" + getName() + ">"));
         }
         return true;
     }
 
     public boolean hasInvite(Player player) {
         return factionInviteMap.containsKey(player.getName());
+    }
+
+    public void broadcast(String message) {
+        for (Player player : getOnlineMembers()) {
+            player.sendMessage(CC.translate(message));
+        }
     }
 }
