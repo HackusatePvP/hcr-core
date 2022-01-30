@@ -1,7 +1,6 @@
 package dev.hcr.hcf.factions.structure;
 
 import dev.hcr.hcf.factions.Faction;
-import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
