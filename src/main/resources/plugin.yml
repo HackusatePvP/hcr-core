@@ -1,0 +1,7 @@
+name: HCF
+version: '${project.version}'
+main: dev.hcr.hcf.HCF
+commands:
+  faction:
+    aliases: [factions, f]
+    description: Main faction command.
