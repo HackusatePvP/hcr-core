@@ -77,7 +77,6 @@ public class FactionShowCommand extends FactionCommand {
 
     private void printPlayerInfo(Faction faction, CommandSender sender) {
         List<String> message = new ArrayList<>();
-
         PlayerFaction playerFaction = (PlayerFaction) faction;
         DecimalFormat format = new DecimalFormat("#.##");
         message.add("&7&m-----------------------------------------------------");
@@ -88,7 +87,6 @@ public class FactionShowCommand extends FactionCommand {
         message.add("  &7DTR: &c1.01"); //TODO Implement dtr for factions
         message.add("  &7Points: &c" + playerFaction.getPoints()); //TODO implement faction points
         message.add("&7&m-----------------------------------------------------");
-
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));
     }
 
