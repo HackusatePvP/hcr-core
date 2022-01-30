@@ -8,30 +8,35 @@ import java.util.*;
 public abstract class FactionCommand {
     private final String name;
     private String permission;
+    private final String description;
     private String[] aliases;
     private final static Map<String, FactionCommand> commandMap = new HashMap<>();
 
-    public FactionCommand(String name) {
+    public FactionCommand(String name, String description) {
         this.name = name;
+        this.description = description;
         commandMap.put(name.toLowerCase(), this);
     }
 
-    public FactionCommand(String name, String permission) {
+    public FactionCommand(String name, String permission, String description) {
         this.name = name;
+        this.description = description;
         this.permission = "hcf.faction.commands." + permission;
         commandMap.put(name.toLowerCase(), this);
     }
 
-    public FactionCommand(String name, String... aliases) {
+    public FactionCommand(String name, String description, String... aliases) {
         this.name = name;
+        this.description = description;
         commandMap.put(name.toLowerCase(), this);
         for (String s : aliases) {
             commandMap.put(s.toLowerCase(), this);
         }
     }
 
-    public FactionCommand(String name, String permission, String... aliases) {
+    public FactionCommand(String name, String description, String permission, String... aliases) {
         this.name = name;
+        this.description = description;
         this.permission = permission;
         commandMap.put(name.toLowerCase(), this);
         for (String s : aliases) {
@@ -41,6 +46,10 @@ public abstract class FactionCommand {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public String getPermission() {

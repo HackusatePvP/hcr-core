@@ -9,7 +9,7 @@ import java.util.List;
 public class FactionTestCommand extends FactionCommand {
 
     public FactionTestCommand() {
-        super("test", "test");
+        super("test", "test", "test");
     }
 
     @Override

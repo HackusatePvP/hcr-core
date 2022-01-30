@@ -12,7 +12,7 @@ import java.util.List;
 public class FactionCreateCommand extends FactionCommand {
 
     public FactionCreateCommand() {
-        super("create");
+        super("create", "Create a new faction.");
     }
 
     @Override

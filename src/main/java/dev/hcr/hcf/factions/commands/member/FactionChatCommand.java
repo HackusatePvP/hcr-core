@@ -16,7 +16,7 @@ import java.util.List;
 public class FactionChatCommand extends FactionCommand {
 
     public FactionChatCommand() {
-        super("chat");
+        super("chat", "Change your current chat channel.");
     }
 
     @Override

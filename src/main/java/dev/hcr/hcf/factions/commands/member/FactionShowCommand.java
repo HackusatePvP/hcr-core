@@ -20,7 +20,7 @@ import java.util.List;
 public class FactionShowCommand extends FactionCommand {
 
     public FactionShowCommand() {
-        super("show");
+        super("show", "View other factions information.");
     }
 
     @Override

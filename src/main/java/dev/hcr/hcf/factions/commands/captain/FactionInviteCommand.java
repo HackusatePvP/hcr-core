@@ -12,14 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class FactionInviteCommand extends FactionCommand {
 
     public FactionInviteCommand() {
-        super("invite");
+        super("invite", "Invite a player to your faction.");
     }
 
     @Override

@@ -17,7 +17,10 @@ public class DefaultFactionCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command c, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "/" + label + " help");
+            FactionCommand helpCommand = FactionCommand.getCommand("help");
+            if (helpCommand != null) {
+                helpCommand.execute(sender, c, label, args);
+            }
             return true;
         }
         FactionCommand command = FactionCommand.getCommand(args[0]);
