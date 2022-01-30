@@ -1,0 +1,25 @@
+# Change log 2022.01.a1 (1/30/2022)
+- Improved faction command framework; Alases are now mapped separately from the main command map. 
+- Added more commands.
+  - Core
+    - [BalanceCommand](https://)
+    - [Economy](https://)
+  - Factions    
+    - [FactionDepositCommand](https://)
+    - [FactionLeaveCommand](https://)
+- Improved Faction functionality. 
+  - Added regen task and status.
+  - Added faction balance.  
+  - Added faction relations.
+  - Added faction events to improve api and implementations.
+    - [PlayerFactionJoinEvent](https://)
+    - [PlayerFactionLeaveEvent](https://)
+- Improved User functionality.
+  - Added user balance.
+  - Added user [ChatChannel](https://)
+- Improved Faction Design.
+  - Cleaned up [FactionShowCommand](https://)
+  - Added messages to faction commands.
+- Added more configurations.
+  - Added properties' configuration file for factions [faction.properties](https://)
+- Improved and fixed tab completers for various commands.    
