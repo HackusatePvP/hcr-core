@@ -2,24 +2,25 @@
 - Improved faction command framework; Alases are now mapped separately from the main command map. 
 - Added more commands.
   - Core
-    - [BalanceCommand](https://)
-    - [Economy](https://)
+    - [BalanceCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/BalanceCommand.java)
+    - [Economy](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/admin/EconomyCommand.java)
   - Factions    
-    - [FactionDepositCommand](https://)
-    - [FactionLeaveCommand](https://)
+    - [FactionDepositCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionDepositCommand.java)
+    - [FactionLeaveCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionLeaveCommand.java)
+    - [FactionWithdrawCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/captain/FactionWithdrawCommand.java)
 - Improved Faction functionality. 
   - Added regen task and status.
   - Added faction balance.  
   - Added faction relations.
   - Added faction events to improve api and implementations.
-    - [PlayerFactionJoinEvent](https://)
-    - [PlayerFactionLeaveEvent](https://)
+    - [PlayerFactionJoinEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/events/members/PlayerJoinFactionEvent.java)
+    - [PlayerFactionLeaveEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/events/members/PlayerFactionLeaveEvent.java)
 - Improved User functionality.
   - Added user balance.
-  - Added user [ChatChannel](https://)
+  - Added user [ChatChannel](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/users/User.java)
 - Improved Faction Design.
-  - Cleaned up [FactionShowCommand](https://)
+  - Cleaned up [FactionShowCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionShowCommand.java)
   - Added messages to faction commands.
 - Added more configurations.
-  - Added properties' configuration file for factions [faction.properties](https://)
+  - Added properties' configuration file for factions [faction.properties](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/factions/faction.properties)
 - Improved and fixed tab completers for various commands.    
