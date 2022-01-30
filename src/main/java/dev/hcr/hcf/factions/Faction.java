@@ -1,6 +1,7 @@
 package dev.hcr.hcf.factions;
 
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +18,10 @@ public abstract class Faction {
         factionNameMap.put(name.toLowerCase(), this);
         this.uniqueID = uuid;
         factionUUIDMap.put(uniqueID, this);
+    }
+
+    public static Collection<Faction> getFactions() {
+        return factionUUIDMap.values();
     }
 
     public static Faction getFactionByName(String name) {

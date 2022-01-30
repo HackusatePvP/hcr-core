@@ -5,8 +5,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.util.StringUtil;
 
-public class DefaultFactionCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class DefaultFactionCommand implements CommandExecutor, TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command c, String label, String[] args) {
@@ -19,7 +25,7 @@ public class DefaultFactionCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Could not find argument \"" + args[0] + "\". /" + label + " help");
             return true;
         }
-        if (!command.getPermission().isEmpty()) {
+        if (!command.getPermission().replace("hcf.faction.commands.", "").isEmpty()) {
             if (!sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(ChatColor.RED + "No permission.");
                 return true;
@@ -27,5 +33,21 @@ public class DefaultFactionCommand implements CommandExecutor {
         }
         command.execute(sender, c, label, args);
         return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command c, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1) {
+            StringUtil.copyPartialMatches(args[0], FactionCommand.getRegisteredCommands(), completions);
+        }
+        if (args.length == 2) {
+            FactionCommand command = FactionCommand.getCommand(args[0]);
+            if (command != null) {
+                StringUtil.copyPartialMatches(args[1], command.tabComplete(sender, c, alias, args), completions);
+            }
+        }
+        Collections.sort(completions);
+        return completions;
     }
 }

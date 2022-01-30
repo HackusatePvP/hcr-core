@@ -6,6 +6,12 @@ import dev.hcr.hcf.users.faction.ChatChannel;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class FactionChatCommand extends FactionCommand {
 
@@ -23,5 +29,16 @@ public class FactionChatCommand extends FactionCommand {
             String channel = args[1];
             user.setChannel(ChatChannel.getChannel(channel));
         }
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        String[] channels = new String[] {"toggled", "public", "faction", "captain", "ally"};
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], Arrays.asList(channels), completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 }

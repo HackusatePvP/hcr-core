@@ -4,10 +4,17 @@ import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class FactionInviteCommand extends FactionCommand {
 
@@ -41,5 +48,17 @@ public class FactionInviteCommand extends FactionCommand {
             }
             player.sendMessage(CC.translate((inviterFaction.sendInvite(player, user) ? "&aYou have successfully invited &b" + user.getName() + "&a." : "&cCould not invite &b" + user.getName() + "&c.")));
         }
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        List<String> players = new ArrayList<>();
+        Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], players, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 }

@@ -10,9 +10,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FactionShowCommand extends FactionCommand {
@@ -50,6 +52,18 @@ public class FactionShowCommand extends FactionCommand {
                 }
             }
         }
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        List<String> factions = new ArrayList<>();
+        Faction.getFactions().forEach(faction -> factions.add(faction.getName()));
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], factions, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 
     private void printSystemInfo(Faction faction, CommandSender sender) {

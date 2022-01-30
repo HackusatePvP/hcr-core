@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class FactionCreateCommand extends FactionCommand {
 
     public FactionCreateCommand() {
@@ -25,5 +27,10 @@ public class FactionCreateCommand extends FactionCommand {
             new PlayerFaction(factionName, player.getUniqueId());
             player.sendMessage(ChatColor.GREEN + "Faction created!");
         }
+    }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        return null;
     }
 }
