@@ -41,27 +41,27 @@ public class PropertiesConfiguration extends ConfigurationType {
 
     @Override
     public Boolean getBoolean(String path) {
-        return (Boolean) properties.get(path);
+        return Boolean.parseBoolean(properties.getProperty(path));
     }
 
     @Override
     public Integer getInteger(String path) {
-        return (Integer) properties.get(path);
+        return Integer.parseInt(properties.getProperty(path));
     }
 
     @Override
     public Double getDouble(String path) {
-        return (Double) properties.get(path);
+        return Double.parseDouble(properties.getProperty(path));
     }
 
     @Override
     public Float getFloat(String path) {
-        return (Float) properties.get(path);
+        return Float.parseFloat(properties.getProperty(path));
     }
 
     @Override
     public Long getLong(String path) {
-        return (Long) properties.get(path);
+        return Long.parseLong(properties.getProperty(path));
     }
 
     @Override
@@ -73,21 +73,7 @@ public class PropertiesConfiguration extends ConfigurationType {
     public void set(String path, Object value) {
         try {
             OutputStream outputStream = new FileOutputStream(file);
-            if (value instanceof String) {
-                properties.setProperty(path, (String) value);
-            } else if (value instanceof Boolean) {
-                properties.setProperty(path, ((Boolean) value).toString());
-            } else if (value instanceof Integer) {
-                properties.setProperty(path, ((Integer) value).toString());
-            } else if (value instanceof Double) {
-                properties.setProperty(path, ((Double) value).toString());
-            } else if (value instanceof Float) {
-                properties.setProperty(path, ((Float) value).toString());
-            } else if (value instanceof Long) {
-                properties.setProperty(path, ((Long) value).toString());
-            } else {
-                properties.setProperty(path, value.toString());
-            }
+            properties.setProperty(path, value.toString());
             properties.store(outputStream, null);
         } catch (IOException e) {
             e.printStackTrace();
