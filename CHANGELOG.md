@@ -1,22 +1,22 @@
 # Change log 2022.02.a2 (2/2/2022)
 - Added more faction functionality.
-  - Added more system factions; [Warzone](https://),[Wilderness](https://)
+  - Added more system factions; [Warzone](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WarzoneFaction.java), [Wilderness](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WildernessFaction.java)
   - Added more events to handle territory protection.
   - Added logic to get faction by a location.  
   - Claims have been implemented (Not finished).
 - Added more commands.
   - Factions
-    - [FactionClaimCommand](https://)
-    - [FactionPromoteCommand](https://)
+    - [FactionClaimCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionClaimCommand.java)
+    - [FactionPromoteCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionPromoteCommand.java)
 - Implemented databases (Not finished).
   - Added MongoDB support.
   - All current faction data now saves to the database.
 - Added logic to load users' factions.
 - Started adding saving implementations (Not finished).  
 - Added more utils.
-  - Added [Cuboid](https://) utility. All credit goes to the original [creator](https://https://www.spigotmc.org/threads/region-cuboid.329859/).
-  - Added [TaskUtils](https://).
-  - Added [LocationUtils](https://).
+  - Added [Cuboid](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/claims/cuboid/Cuboid.java) utility. All credit goes to the original [creator](https://https://www.spigotmc.org/threads/region-cuboid.329859/).
+  - Added [TaskUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/TaskUtils.java).
+  - Added [LocationUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/LocationUtils.java).
 - Properties configuration will now create a file with preset values.
 
 # Change log 2022.01.a1 (1/30/2022)
