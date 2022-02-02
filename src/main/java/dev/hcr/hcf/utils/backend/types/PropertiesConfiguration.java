@@ -28,10 +28,26 @@ public class PropertiesConfiguration extends ConfigurationType {
                 }
             }
         }
+
+        if (!properties.containsKey("max-team-size")) {
+            // If the file does not exist (aka entry keys are null
+            // Create the file with preset values
+            setup();
+        }
     }
 
     public Properties getProperties() {
         return properties;
+    }
+
+    private void setup() {
+        set("max-team-size", 6);
+        set("max-allies", 0);
+        set("max-dtr", 5.5);
+        set("dtr-multiplier", 1.1);
+        set("dtr-increment-per-second", 0.0005);
+        set("dtr-loss-per-death", 1.0);
+        set("team-damage", false);
     }
 
     @Override

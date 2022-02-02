@@ -2,12 +2,14 @@ package dev.hcr.hcf.factions.types;
 
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
+import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
 import dev.hcr.hcf.factions.structure.regen.RegenStatus;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -27,7 +29,7 @@ public class PlayerFaction extends Faction {
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     public PlayerFaction(String name, UUID leader) {
-        super(UUID.randomUUID(), name);
+        super(UUID.randomUUID(), name, new Claim(name));
         this.leader = leader;
         this.currentDTR = 1.1;
         this.maxDTR = 1.1;
@@ -35,6 +37,116 @@ public class PlayerFaction extends Faction {
         factionMembers.add(leader);
         user.setFaction(this);
         roleMap.put(leader, Role.LEADER);
+    }
+
+    public PlayerFaction(Document document) {
+        super(document);
+        this.leader = UUID.fromString(document.getString("leader"));
+        load(document);
+    }
+
+    @Override
+    public void load(Document document) {
+        if (document.containsKey("balance")) {
+            this.balance = document.getDouble("balance");
+        }
+        if (document.containsKey("points")) {
+            this.points = document.getInteger("points");
+        }
+        if (document.containsKey("currentDTR")) {
+            this.maxDTR = getMaxDTR();
+            this.currentDTR = document.getDouble("currentDTR");
+            // Check if the faction is suppose to be on regen.
+            if (currentDTR < maxDTR) {
+                loadRegenTask();
+            }
+        }
+        if (document.containsKey("members")) {
+            List<UUID> members = document.get("members", ArrayList.class);
+            factionMembers.addAll(members);
+        }
+        if (document.containsKey("roles")) {
+            List<String> roles = document.get("roles", ArrayList.class);
+            for (String s : roles) {
+                // Some crackhead loading
+                // Roles are appended as String that contains both uuid and role
+                // We separate the uuid and role with a single character "-"
+                for (int i = 0; i < s.length(); i++) {
+                    // Setup a counter that finds the "-" in the string
+                    if (s.charAt(i) == '-') {
+                        // Once found lets create a substring at the - which cuts off the beginning of the string
+                        // Original: "uuid-role"
+                        // Substring: -role
+
+                        // Remove the - character
+                        String sub = s.substring(i).replace("-", "");
+                        System.out.println("Loading MEMBER: " + sub);
+                        // Now we are left with just the role which we can get the Enum Role from the string using value of.
+
+                        // Since the uuid isn't saved in hexadecimal format (no dashes) we must add them before we can get the UUID object.
+                        String uuidToHexString = sub.replaceAll(
+                                "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
+                                "$1-$2-$3-$4-$5");
+                        UUID uuid = UUID.fromString(uuidToHexString);
+                        s = s.replace("-", "");
+                        // Now we have to get the uuid.
+                        // To do this we will take everything after the - and remove it. Since we already have everything as a string "sub"
+                        // its a simple replace statement.
+                        s = s.replace(sub, "");
+                        // Get the UUID object from the string
+                        System.out.println("Loading role: " + s);
+                        Role role = Role.valueOf(s);
+                        // Insert data into map.
+                        roleMap.put(uuid, role);
+                    }
+                }
+            }
+        }
+        if (document.containsKey("invites")) {
+            List<String> invites = document.get("invites", ArrayList.class);
+            for (String s : invites) {
+                for (int i = 0; i < s.length(); i++) {
+                    if (s.charAt(i) == '-') {
+                        String sub = s.substring(i).replace("-", "");
+                        UUID inviter = UUID.fromString(sub);
+                        s = s.replace(sub, "");
+                        String invited = s;
+                        factionInviteMap.put(s, inviter);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public Document save() {
+        Document document = new Document("uuid", getUniqueID().toString());
+        document.append("name", this.getName());
+        document.append("leader", this.leader.toString());
+        document.append("balance", this.balance);
+        document.append("points", this.points);
+        document.append("currentDTR", this.currentDTR);
+        document.append("members", new ArrayList<UUID>(factionMembers));
+        ArrayList<String> roles = new ArrayList<>();
+        roleMap.forEach((uuid, role) -> {
+            System.out.println("Adding " + uuid.toString() + ": " + role.name() + " To Document!");
+            roles.add(role.name() + "-" + uuid.toString());
+        });
+        document.append("roles", roles);
+        ArrayList<String> invites = new ArrayList<>();
+        factionInviteMap.forEach((s, uuid) -> invites.add(s + "-" + uuid.toString()));
+        document.append("invites", invites);
+        if (hasClaims()) {
+            List<String> c = new ArrayList<>();
+            System.out.println("Claims detected!");
+            for (Claim claim : getClaims()) {
+                System.out.println("Found claim: " + claim.getName());
+                c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());                System.out.println("Added claim!");
+            }
+            document.append("claims", c);
+            System.out.println("Appended all claims!");
+        }
+        return document;
     }
 
     public UUID getLeader() {
@@ -64,6 +176,11 @@ public class PlayerFaction extends Faction {
         HCF.getPlugin().getRegenTask().setupFactionRegen(this);
     }
 
+    private void loadRegenTask() {
+        this.regenStatus = RegenStatus.REGENERATING;
+        HCF.getPlugin().getRegenTask().instantRegen(this);
+    }
+
     public void increaseDTR(double amount) {
         this.currentDTR += amount;
     }
@@ -74,6 +191,10 @@ public class PlayerFaction extends Faction {
 
     public String getFormattedCurrentDTR() {
         return regenStatus.getColor() + regenStatus.getUnicode() + " " + decimalFormat.format(currentDTR);
+    }
+
+    public boolean isRaidable() {
+        return getCurrentDTR() > 0;
     }
 
     public double getBalance() {
@@ -132,6 +253,10 @@ public class PlayerFaction extends Faction {
         roleMap.put(user.getUuid(), Role.MEMBER);
         user.setFaction(this);
         return true;
+    }
+
+    public boolean hasMember(UUID uuid) {
+        return factionMembers.contains(uuid);
     }
 
     public User getMember(UUID uuid) {

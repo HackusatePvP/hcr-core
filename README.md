@@ -7,7 +7,7 @@ This core is not the core used for our server, however it was the work in progre
 ## Goals
 To actually finish this project unlike others I have done.
 
-Most hcf cores use every java util on maven central, I plan on minimising the use of java libraries such as Trove, Apache, Lombokm ect.
+Most hcf cores use every java util on maven central, I plan on minimising the use of java libraries such as Trove, Apache, Lombok, ect.
 
 ## TODOS
 - Implement saving

@@ -1,0 +1,16 @@
+# The main database handler you wish to use. In time there will be more options but for now its just "mongo"
+handler: "mongo"
+
+# Database configurations. This is where you configure each handler
+mongo:
+  host: "127.0.0.1" # It is recommended that you do not have mongo running on an outside network due to security vulnerabilities.
+  port: 27017 # It is recommended to change the default mongo port for better security.
+  database: "HCF"
+  user: "admin" # Only applies if authentication is enabled on you mongodb host.
+  password: '' # Leave blank for no authentication. By default mongodb authentication is disabled.
+  admin-db: "admin" # Mongo authentication database. By default its "admin"
+
+mysql: "Not yet implemented"
+mariadb: "Not yet implemented"
+redis: "Not yet implemented"
+flatfile: "Why?"

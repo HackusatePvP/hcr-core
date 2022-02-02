@@ -52,4 +52,8 @@ public class FactionRegenTask extends BukkitRunnable {
         factionPausedRegenCooldown.put(playerFaction, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10L));
         factionRegenTime.remove(playerFaction);
     }
+
+    public void instantRegen(PlayerFaction playerFaction) {
+        factionRegenTime.put(playerFaction, TimeUnit.MINUTES.toMillis(30));
+    }
 }

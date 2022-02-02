@@ -1,7 +1,9 @@
 package dev.hcr.hcf.users;
 
 import dev.hcr.hcf.factions.Faction;
+import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.faction.ChatChannel;
+import dev.hcr.hcf.utils.TaskUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -20,8 +22,19 @@ public class User {
     public User(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
-        this.faction = null;
+        loadFaction();
         users.put(uuid, this);
+    }
+
+    private void loadFaction() {
+        TaskUtils.runAsync(() -> {
+            for (Faction faction : Faction.getFactions()) {
+                if (!(faction instanceof PlayerFaction)) continue;
+                if (((PlayerFaction) faction).hasMember(uuid)) {
+                    this.faction = faction;
+                }
+            }
+        });
     }
 
     public ChatChannel getChannel() {

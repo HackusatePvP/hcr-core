@@ -1,5 +1,26 @@
+# Change log 2022.02.a2 (2/2/2022)
+- Added more faction functionality.
+  - Added more system factions; [Warzone](https://),[Wilderness](https://)
+  - Added more events to handle territory protection.
+  - Added logic to get faction by a location.  
+  - Claims have been implemented (Not finished).
+- Added more commands.
+  - Factions
+    - [FactionClaimCommand](https://)
+    - [FactionPromoteCommand](https://)
+- Implemented databases (Not finished).
+  - Added MongoDB support.
+  - All current faction data now saves to the database.
+- Added logic to load users' factions.
+- Started adding saving implementations (Not finished).  
+- Added more utils.
+  - Added [Cuboid](https://) utility. All credit goes to the original [creator](https://https://www.spigotmc.org/threads/region-cuboid.329859/).
+  - Added [TaskUtils](https://).
+  - Added [LocationUtils](https://).
+- Properties configuration will now create a file with preset values.
+
 # Change log 2022.01.a1 (1/30/2022)
-- Improved faction command framework; Alases are now mapped separately from the main command map. 
+- Improved faction command framework; Aliases are now mapped separately from the main command map. 
 - Added more commands.
   - Core
     - [BalanceCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/BalanceCommand.java)
