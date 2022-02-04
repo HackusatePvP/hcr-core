@@ -14,7 +14,7 @@
 - Added logic to load users' factions.
 - Started adding saving implementations (Not finished).  
 - Added more utils.
-  - Added [Cuboid](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/claims/cuboid/Cuboid.java) utility. All credit goes to the original [creator](https://https://www.spigotmc.org/threads/region-cuboid.329859/).
+  - Added [Cuboid](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/claims/cuboid/Cuboid.java) utility. All credit goes to the original [creator](https://www.spigotmc.org/threads/region-cuboid.329859/).
   - Added [TaskUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/TaskUtils.java).
   - Added [LocationUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/LocationUtils.java).
 - Properties configuration will now create a file with preset values.
