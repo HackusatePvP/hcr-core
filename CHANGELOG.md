@@ -2,7 +2,7 @@
 - Added more faction functionality.
   - Added more system factions; [Warzone](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WarzoneFaction.java), [Wilderness](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WildernessFaction.java)
   - Added more events to handle territory protection.
-  - Added logic to get faction by a location.  
+  - Added logic to get faction by a location.
   - Claims have been implemented (Not finished).
 - Added more commands.
   - Factions
@@ -12,26 +12,26 @@
   - Added MongoDB support.
   - All current faction data now saves to the database.
 - Added logic to load users' factions.
-- Started adding saving implementations (Not finished).  
+- Started adding saving implementations (Not finished).
 - Added more utils.
-  - Added [Cuboid](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/claims/cuboid/Cuboid.java) utility. All credit goes to the original [creator](https://https://www.spigotmc.org/threads/region-cuboid.329859/).
+  - Added [Cuboid](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/claims/cuboid/Cuboid.java) utility. All credit goes to the original [creator](https://www.spigotmc.org/threads/region-cuboid.329859/).
   - Added [TaskUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/TaskUtils.java).
   - Added [LocationUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/LocationUtils.java).
 - Properties configuration will now create a file with preset values.
 
 # Change log 2022.01.a1 (1/30/2022)
-- Improved faction command framework; Aliases are now mapped separately from the main command map. 
+- Improved faction command framework; Aliases are now mapped separately from the main command map.
 - Added more commands.
   - Core
     - [BalanceCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/BalanceCommand.java)
     - [Economy](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/admin/EconomyCommand.java)
-  - Factions    
+  - Factions
     - [FactionDepositCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionDepositCommand.java)
     - [FactionLeaveCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionLeaveCommand.java)
     - [FactionWithdrawCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/captain/FactionWithdrawCommand.java)
-- Improved Faction functionality. 
+- Improved Faction functionality.
   - Added regen task and status.
-  - Added faction balance.  
+  - Added faction balance.
   - Added faction relations.
   - Added faction events to improve api and implementations.
     - [PlayerFactionJoinEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/events/members/PlayerJoinFactionEvent.java)

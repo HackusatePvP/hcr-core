@@ -4,15 +4,16 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
+import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class MongoImplementation {
@@ -49,21 +50,18 @@ public class MongoImplementation {
             System.out.println("Document returning null!");
             return;
         }
-        if (factions.find(Filters.eq("uuid", document.getString("uud"))).first()== null) {
-            System.out.println("Inserting faction: " + document.getString("name"));
-            // If a current entry does not exist inert it
-            factions.insertOne(document);
-        } else {
-            // Update the found entry
-            BasicDBObject query = new BasicDBObject("uuid", document.getString("uuid"));
-            System.out.println("Updating faction: " + document.getString("name"));
-            factions.updateOne(query, document);
-        }
+        // Update the found entry
+        // BasicDBObject query = new BasicDBObject("uuid", document.getString("uuid"));
+        // System.out.println("Updating faction: " + document.getString("name"));
+        // factions.updateOne(query, document, new UpdateOptions().upsert(true));
 
+        Bson filter = Filters.eq("uuid", document.getString("uuid"));
+        Bson update = new Document("$set", document);
+        UpdateOptions options = new UpdateOptions().upsert(true);
+        factions.updateOne(filter, update, options);
     }
 
-    public List<PlayerFaction> loadFactions() {
-        List<PlayerFaction> playerFactions = new ArrayList<>();
+    public void loadFactions() {
         for (Document document : factions.find()) {
             if (document == null) continue;
             System.out.println("Loading: " + document.getString("name"));
@@ -75,7 +73,12 @@ public class MongoImplementation {
             if (name.toLowerCase().contains("safe") || name.toLowerCase().contains("spawn")) {
                 new SafeZoneFaction(document);
             }
+            if (name.toLowerCase().contains("wilderness")) {
+                new WildernessFaction(document);
+            }
+            if (name.toLowerCase().contains("warzone")) {
+                new WarzoneFaction(document);
+            }
         }
-        return playerFactions;
     }
 }

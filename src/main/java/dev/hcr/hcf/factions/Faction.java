@@ -1,7 +1,5 @@
 package dev.hcr.hcf.factions;
 
-
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
 import dev.hcr.hcf.factions.types.PlayerFaction;
@@ -11,6 +9,7 @@ import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.utils.LocationUtils;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class Faction extends Claim {
     private final UUID uniqueID;
     private final String name;
+    private ChatColor color = ChatColor.WHITE;
     private final Collection<Claim> claims = new ArrayList<>();
     private static WildernessFaction wilderness;
     private static WarzoneFaction warzone;
@@ -79,7 +79,24 @@ public abstract class Faction extends Claim {
         }
     }
 
-    public abstract Document save();
+    public Document save() {
+        System.out.println("Attempting to create document!");
+        Document document = new Document("uuid", getUniqueID().toString());
+        System.out.println("Created faction document!");
+        document.append("name", getName());
+        System.out.println("Appended name!");
+        if (hasClaims()) {
+            List<String> c = new ArrayList<>();
+            System.out.println("Claims detected!");
+            for (Claim claim : getClaims()) {
+                System.out.println("Found claim: " + claim.getName());
+                c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());                System.out.println("Added claim!");
+            }
+            document.append("claims", c);
+            System.out.println("Appended all claims!");
+        }
+        return document;
+    }
 
     public void load(Document document) {
         if (document.containsKey("claims")) {
@@ -87,6 +104,9 @@ public abstract class Faction extends Claim {
             for (String s : claims) {
                 this.claims.add(new Claim(name, LocationUtils.parseCuboid(s)));
             }
+        }
+        if (document.containsKey("color")) {
+            this.color = ChatColor.valueOf(document.getString("color"));
         }
     }
 
@@ -121,6 +141,14 @@ public abstract class Faction extends Claim {
             total += block * 3;
         }
         return total;
+    }
+
+    public void setFactionColor(ChatColor color) {
+        this.color = color;
+    }
+
+    public ChatColor getFactionColor() {
+        return color;
     }
 
     public Collection<Claim> getClaims() {

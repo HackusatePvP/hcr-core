@@ -116,6 +116,8 @@ public class PlayerFaction extends Faction {
                 }
             }
         }
+        // Call the super method for loading claims and other basic faction data.
+        super.load(document);
     }
 
     @Override
@@ -136,6 +138,8 @@ public class PlayerFaction extends Faction {
         ArrayList<String> invites = new ArrayList<>();
         factionInviteMap.forEach((s, uuid) -> invites.add(s + "-" + uuid.toString()));
         document.append("invites", invites);
+
+        //FIXME Duplicate code, I need to improve the faction system in order to call the super method "save".
         if (hasClaims()) {
             List<String> c = new ArrayList<>();
             System.out.println("Claims detected!");
