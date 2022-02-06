@@ -3,6 +3,7 @@ package dev.hcr.hcf.databases;
 import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.DeleteOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import dev.hcr.hcf.HCF;
@@ -10,6 +11,8 @@ import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.utils.TaskUtils;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -20,6 +23,7 @@ public class MongoImplementation {
     private final MongoClient client;
     private final MongoDatabase database;
     private final MongoCollection<Document> factions;
+    private final MongoCollection<Document> users;
     private final HCF plugin;
 
     public MongoImplementation(HCF plugin) {
@@ -35,6 +39,7 @@ public class MongoImplementation {
         }
         this.database = client.getDatabase(config.getString("mongo.database"));
         this.factions = database.getCollection("factions");
+        this.users = database.getCollection("users");
     }
 
     public Document findFactionEntry(String factionName) {
@@ -45,20 +50,58 @@ public class MongoImplementation {
         return factions.find(Filters.eq("uuid", uuid.toString())).first();
     }
 
-    public void appendFactionData(Document document) {
-        if (document == null) {
-            System.out.println("Document returning null!");
-            return;
-        }
-        // Update the found entry
-        // BasicDBObject query = new BasicDBObject("uuid", document.getString("uuid"));
-        // System.out.println("Updating faction: " + document.getString("name"));
-        // factions.updateOne(query, document, new UpdateOptions().upsert(true));
+    public void findFactionAndDelete(UUID uuid) {
+        Bson filter = Filters.eq("uuid", uuid.toString());
+        factions.deleteOne(filter);
+    }
 
+    public void appendFactionDataSync(Document document) {
+        TaskUtils.runSync(() -> {
+           appendFactionData(document);
+        });
+    }
+
+    public void appendFactionData(Document document) {
         Bson filter = Filters.eq("uuid", document.getString("uuid"));
         Bson update = new Document("$set", document);
         UpdateOptions options = new UpdateOptions().upsert(true);
         factions.updateOne(filter, update, options);
+    }
+
+    public void appendFactionDataAsync(Document document) {
+        TaskUtils.runAsync(() -> {
+            appendFactionData(document);
+        });
+    }
+
+    public void appendUserDataSync(Document document) {
+        appendData(document);
+    }
+
+    private void appendData(Document document) {
+        if (document == null) return;
+        Bson filter = Filters.eq("uuid", document.getString("uuid"));
+        Bson update = new Document("$set", document);
+        UpdateOptions options = new UpdateOptions().upsert(true);
+        users.updateOne(filter, update, options);
+    }
+
+    public void appendUserDataAsync(Document document) {
+        TaskUtils.runAsync(() -> {
+            appendData(document);
+        });
+    }
+
+    public void loadUserAsync(UUID uuid, String name) {
+        TaskUtils.runAsync(() -> {
+            // Create a new instance of user.
+            User user = new User(uuid, name);
+            Document document = users.find(Filters.eq("uuid", uuid.toString())).first();
+            if (document == null) {
+                return;
+            }
+            user.load(document);
+        });
     }
 
     public void loadFactions() {

@@ -16,6 +16,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
@@ -82,7 +83,16 @@ public class FactionClaimingListener implements Listener {
         claiming.remove(user);
         position1ClaimingMap.remove(user);
         position2ClaimingMap.remove(user);
-        player.getInventory().remove(getClaimingWand());
+        removeWand(player.getInventory());
+     }
+
+     private void removeWand(PlayerInventory inventory) {
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (!itemStack.hasItemMeta()) continue;
+            if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase(getClaimingWand().getItemMeta().getDisplayName())) {
+                itemStack.setType(Material.AIR);
+            }
+        }
      }
 
     // Why not static abuse

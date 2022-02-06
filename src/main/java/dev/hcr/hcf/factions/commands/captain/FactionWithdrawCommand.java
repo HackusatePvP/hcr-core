@@ -19,7 +19,7 @@ import java.util.List;
 public class FactionWithdrawCommand extends FactionCommand {
 
     public FactionWithdrawCommand() {
-        super("withdraw", "Withdraw money from the faction balance.", "withdraw", new String[]{"w"});
+        super("withdraw", "Withdraw money from the faction balance.", new String[]{"w"});
     }
 
     @Override

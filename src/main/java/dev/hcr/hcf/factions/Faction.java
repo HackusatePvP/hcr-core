@@ -1,5 +1,6 @@
 package dev.hcr.hcf.factions;
 
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
 import dev.hcr.hcf.factions.types.PlayerFaction;
@@ -108,6 +109,15 @@ public abstract class Faction extends Claim {
         if (document.containsKey("color")) {
             this.color = ChatColor.valueOf(document.getString("color"));
         }
+    }
+
+    public void disband() {
+        // Start termination process of this faction.
+        // First remove from db.
+        HCF.getPlugin().getMongoImplementation().findFactionAndDelete(uniqueID);
+        // Now lets remove the faction from all mappings
+        factionNameMap.remove(name);
+        factionUUIDMap.remove(uniqueID);
     }
 
     public boolean hasClaims() {

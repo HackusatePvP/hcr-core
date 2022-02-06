@@ -9,7 +9,7 @@ import java.util.List;
 public class FactionPromoteCommand extends FactionCommand {
 
     public FactionPromoteCommand() {
-        super("promote", "promote", "Promote a member in the faction to captain.");
+        super("promote", "Promote a member in the faction to captain.");
     }
 
     @Override

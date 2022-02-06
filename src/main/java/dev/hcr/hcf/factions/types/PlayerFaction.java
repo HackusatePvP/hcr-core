@@ -9,6 +9,11 @@ import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,6 +32,7 @@ public class PlayerFaction extends Faction {
     private final Map<UUID, Role> roleMap = new HashMap<>();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private final HCF plugin = HCF.getPlugin();
 
     public PlayerFaction(String name, UUID leader) {
         super(UUID.randomUUID(), name, new Claim(name));
@@ -107,7 +113,7 @@ public class PlayerFaction extends Faction {
             for (String s : invites) {
                 for (int i = 0; i < s.length(); i++) {
                     if (s.charAt(i) == '-') {
-                        String sub = s.substring(i).replace("-", "");
+                        String sub = s.substring(i).replace("*", "");
                         UUID inviter = UUID.fromString(sub);
                         s = s.replace(sub, "");
                         String invited = s;
@@ -136,7 +142,7 @@ public class PlayerFaction extends Faction {
         });
         document.append("roles", roles);
         ArrayList<String> invites = new ArrayList<>();
-        factionInviteMap.forEach((s, uuid) -> invites.add(s + "-" + uuid.toString()));
+        factionInviteMap.forEach((s, uuid) -> invites.add(s + "*" + uuid.toString()));
         document.append("invites", invites);
 
         //FIXME Duplicate code, I need to improve the faction system in order to call the super method "save".
@@ -177,12 +183,12 @@ public class PlayerFaction extends Faction {
         this.currentDTR -= amount;
         // Setup regen task
         this.regenStatus = RegenStatus.PAUSED;
-        HCF.getPlugin().getRegenTask().setupFactionRegen(this);
+        plugin.getRegenTask().setupFactionRegen(this);
     }
 
     private void loadRegenTask() {
         this.regenStatus = RegenStatus.REGENERATING;
-        HCF.getPlugin().getRegenTask().instantRegen(this);
+        plugin.getRegenTask().instantRegen(this);
     }
 
     public void increaseDTR(double amount) {
@@ -259,6 +265,14 @@ public class PlayerFaction extends Faction {
         return true;
     }
 
+    public boolean removeUserFromFaction(User user) {
+        // TODO: 2/5/2022 Add custom event
+        factionMembers.remove(user.getUuid());
+        roleMap.remove(user.getUuid());
+        user.setFaction(null);
+        return true;
+    }
+
     public boolean hasMember(UUID uuid) {
         return factionMembers.contains(uuid);
     }
@@ -304,7 +318,16 @@ public class PlayerFaction extends Faction {
         if (user.toPlayer() != null) {
             Player player = user.toPlayer();
             // TODO: 1/30/2022 Make the message clickable to execute the join  command
-            player.sendMessage(CC.translate("&aYou have been invited to &b" + getName() + "&a. /f join <" + getName() + ">"));
+            // player.sendMessage(CC.translate("&aYou have been invited to &b" + getName() + "&a. /f join <" + getName() + ">"));
+            TextComponent part1 = new TextComponent("You have been invited to ");
+            part1.setColor(ChatColor.GREEN);
+            TextComponent part2 = new TextComponent(getName() + " ");
+            part2.setColor(ChatColor.AQUA);
+            TextComponent part3 = new TextComponent("(/f join <" + getName() + ">)");
+            part3.setColor(ChatColor.GRAY);
+            part3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Click to join faction").color(ChatColor.LIGHT_PURPLE).create()));
+            part3.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/f join " + getName()));
+            player.spigot().sendMessage(part1, part2, part3);
         }
         return true;
     }

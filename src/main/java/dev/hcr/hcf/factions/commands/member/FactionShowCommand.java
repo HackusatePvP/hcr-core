@@ -3,7 +3,7 @@ package dev.hcr.hcf.factions.commands.member;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
-import dev.hcr.hcf.factions.structure.SystemFaction;
+import dev.hcr.hcf.factions.types.SystemFaction;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
@@ -13,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

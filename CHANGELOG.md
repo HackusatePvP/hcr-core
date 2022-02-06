@@ -1,3 +1,18 @@
+# Change log 2022.02.a3
+- Fixed several database issues.
+  - Properly integrated MongoDB upsert operations.
+  - Properly called faction super loading functions for loading.
+- Added basic faction design.
+  - Started implementation of faction colors.
+  - Added spigots ChatComponentAPI.
+- Started implementation of user database.  
+  - Added [PvPStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/types/PvPStatistics) (Not finished).
+  - Added [OreStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/types/OreStatistics) (Not finished).
+- Fixed command permission logic.  
+- Fixed minor bugs.
+  - You can no longer invite a player to your faction whose already in your faction.
+  - You can no longer join multiple factions.
+
 # Change log 2022.02.a2 (2/2/2022)
 - Added more faction functionality.
   - Added more system factions; [Warzone](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WarzoneFaction.java), [Wilderness](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WildernessFaction.java)

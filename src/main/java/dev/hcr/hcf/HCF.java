@@ -13,6 +13,8 @@ import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.listeners.factions.FactionListener;
 import dev.hcr.hcf.listeners.UserListener;
+import dev.hcr.hcf.listeners.player.MiningListener;
+import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
@@ -29,7 +31,7 @@ public final class HCF extends JavaPlugin {
     private final NumberFormat format = NumberFormat.getCurrencyInstance();
     private MongoImplementation database;
     private FactionRegenTask regenTask;
-    private List<ConfigFile> files = new ArrayList<>();
+    private final List<ConfigFile> files = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -45,6 +47,9 @@ public final class HCF extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         saveFactions();
+        User.getUsers().forEach(user -> getMongoImplementation().appendUserDataSync(user.save()));
+
+        // TODO: 2/6/2022 Create mongodb database backup upon disable
     }
 
     private void loadConfigurationFiles() {
@@ -88,14 +93,14 @@ public final class HCF extends JavaPlugin {
 
     }
 
-    void saveFactions() {
+    private void saveFactions() {
         for (Faction faction : Faction.getFactions()) {
             database.appendFactionData(faction.save());
         }
     }
 
     private void registerEvents() {
-        Arrays.asList(new UserListener(), new FactionListener(), new FactionClaimingListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
+        Arrays.asList(new UserListener(), new FactionListener(), new FactionClaimingListener(), new MiningListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 
     public MongoImplementation getMongoImplementation() {

@@ -1,7 +1,9 @@
 package dev.hcr.hcf.factions.commands.leader;
 
+import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,8 +25,17 @@ public class FactionCreateCommand extends FactionCommand {
         }
         if (!args[0].equalsIgnoreCase("create")) return;
         Player player = (Player) sender;
+        User user = User.getUser(player.getUniqueId());
+        if (user.getFaction() != null) {
+            player.sendMessage(ChatColor.RED + "You are already in a faction.");
+            return;
+        }
         if (args.length == 2) {
             String factionName = args[1];
+            if (Faction.getFactionByName(args[1]) != null) {
+                player.sendMessage(ChatColor.RED + "Faction \"" + args[1] + "\" already exists.");
+                return;
+            }
             new PlayerFaction(factionName, player.getUniqueId());
             player.sendMessage(ChatColor.GREEN + "Faction created!");
         }

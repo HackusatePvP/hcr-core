@@ -23,6 +23,10 @@ public class FactionJoinCommand extends FactionCommand {
         if (!(sender instanceof Player)) return;
         Player player = (Player) sender;
         User user = User.getUser(player.getUniqueId());
+        if (user.getFaction() != null) {
+            player.sendMessage(ChatColor.RED + "You must leave your current faction before you can join a different one.");
+            return;
+        }
         if (args.length == 2) {
             String factionName = args[1];
             PlayerFaction faction = (PlayerFaction) Faction.getFactionByName(factionName);

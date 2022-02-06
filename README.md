@@ -9,15 +9,19 @@ To actually finish this project unlike others I have done.
 
 Most hcf cores use every java util on maven central, I plan on minimising the use of java libraries such as Trove, Apache, Lombok, ect.
 
+## UPDATE
+When this core can be setup in a working environment with every basic feature implemented and tested.
+I will then re-do the readme file. 
+
 ## TODOS
-- Implement saving
+- ~~Implement saving~~
 - ~~Create logic for joining factions.~~
-- Create basic faction commands (Balance, Deposit, Withdraw, Join, Chat).
+- ~~Create basic faction commands (Balance, Deposit, Withdraw, Join, Chat).~~
 - ~~Setup custom faction events to offer an extensive api implementations.~~
 - Improve existing frameworks such as command and faction systems.
 - Create basic faction functions; Regen task, Deathbans, DTR, Raidable.
 - Set up a simulated faction environment (Warzone, Wilderness, Spawn).
-- Setup claiming logic.  
+- ~~Setup claiming logic.~~  
 - There's way more to add, but let us just keep it "simple" for now.
 
 ## What does this have currently

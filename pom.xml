@@ -6,7 +6,7 @@
 
     <groupId>dev.hcr</groupId>
     <artifactId>HCF</artifactId>
-    <version>2022.02.a2-SNAPSHOT</version>
+    <version>2022.02.a3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HCF</name>

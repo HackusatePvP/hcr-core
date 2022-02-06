@@ -2,7 +2,7 @@ package dev.hcr.hcf.listeners.factions;
 
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.structure.Relation;
-import dev.hcr.hcf.factions.structure.SystemFaction;
+import dev.hcr.hcf.factions.types.SystemFaction;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.users.User;
@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -84,12 +83,10 @@ public class FactionListener implements Listener {
         if (to.getBlockX() != from.getBlockX() || to.getBlockZ() != from.getBlockZ()) {
             // TODO: 1/30/2022 create custom events for entering and leaving territory
             Faction factionTo = Faction.getByLocation(player.getLocation());
-            if (factionTo != null) {
-                player.sendMessage("Entered: " + factionTo.getName());
-            }
             Faction factionFrom = Faction.getByLocation(player.getLocation());
-            if (factionFrom != null) {
-                player.sendMessage("Left: " + factionFrom.getName());
+            if (factionTo != null && factionTo != factionFrom) {
+                player.sendMessage(CC.translate("&cLeaving: " + Relation.getFactionRelationship(factionFrom, player).getColor() + factionFrom.getName()));
+                player.sendMessage(CC.translate("&aEntering: " + Relation.getFactionRelationship(factionTo, player).getColor() + factionTo.getName()));
             }
         }
     }
@@ -98,14 +95,14 @@ public class FactionListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Location location = event.getBlock().getLocation();;
-        event.setCancelled(!canDamageTerritory(player, location));
+        //event.setCancelled(!canDamageTerritory(player, location));
     }
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Player player = event.getPlayer();
         Location location = event.getBlock().getLocation();
-        event.setCancelled(!canDamageTerritory(player, location));
+       // event.setCancelled(!canDamageTerritory(player, location));
     }
 
     private boolean canDamageTerritory(Entity entity, Location location) {

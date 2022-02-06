@@ -16,7 +16,7 @@ import java.util.List;
 public class FactionClaimCommand extends FactionCommand {
 
     public FactionClaimCommand() {
-        super("claim", "claim", "Claim land for your faction.");
+        super("claim", "Claim land for your faction.");
     }
 
     @Override
