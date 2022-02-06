@@ -6,8 +6,8 @@
   - Started implementation of faction colors.
   - Added spigots ChatComponentAPI.
 - Started implementation of user database.  
-  - Added [PvPStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/types/PvPStatistics) (Not finished).
-  - Added [OreStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/types/OreStatistics) (Not finished).
+  - Added [PvPStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/statistics/types/PvPStatistics.java) (Not finished).
+  - Added [OreStatistics](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/statistics/types/OreStatistics.java) (Not finished).
 - Fixed command permission logic.  
 - Fixed minor bugs.
   - You can no longer invite a player to your faction whose already in your faction.
