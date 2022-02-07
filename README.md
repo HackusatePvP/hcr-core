@@ -22,6 +22,9 @@ Q: Can I use this for my server?
 
 A: Not recommended as it's not finished. If you do end up using this for your server, understand the rights section of this file.
 
+# Rights
+You have exclusive permission to modify use and redistribute the jar with restrictions. You are not allowed to re-sell this core whether it be modified or a fork. You are not allowed to claim any work that you did not do or create as your own.
+
 # Compile a JAR
 Run the command `mvn clean install` in the project directory. The jar will be outputted to the "target" directory.
 
