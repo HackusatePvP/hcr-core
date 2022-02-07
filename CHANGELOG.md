@@ -1,4 +1,4 @@
-# Change log 2022.02.a3
+# Change log 2022.02.a3 (2/6/2022)
 - Fixed several database issues.
   - Properly integrated MongoDB upsert operations.
   - Properly called faction super loading functions for loading.
