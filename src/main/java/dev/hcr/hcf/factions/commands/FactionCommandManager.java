@@ -4,6 +4,7 @@ import dev.hcr.hcf.factions.commands.captain.FactionInviteCommand;
 import dev.hcr.hcf.factions.commands.captain.FactionKickCommand;
 import dev.hcr.hcf.factions.commands.captain.FactionWithdrawCommand;
 import dev.hcr.hcf.factions.commands.coleader.FactionClaimCommand;
+import dev.hcr.hcf.factions.commands.coleader.FactionPromoteCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionCreateCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionDisbandCommand;
 import dev.hcr.hcf.factions.commands.member.*;
@@ -16,6 +17,8 @@ public class FactionCommandManager {
         new FactionChatCommand();
         new FactionDepositCommand();
         new FactionJoinCommand();
+        new FactionLeaveCommand();
+        new FactionMapCommand();
         new FactionShowCommand();
 
         // CAPTAIN COMMANDS
@@ -25,6 +28,7 @@ public class FactionCommandManager {
 
         // COLEADER COMMANDS
         new FactionClaimCommand();
+        new FactionPromoteCommand();
 
         // LEADER COMMANDS
         new FactionCreateCommand();

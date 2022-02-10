@@ -1,3 +1,28 @@
+# Change log 2022.02.a4 (2/10/2022)
+- Added packet handlers and implemented [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) packet library (version 4.6).
+  - Started [PacketController](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/packets/PacketController.java) api implementation.
+- Added more faction functionality.
+  - Added client side pillars when claiming.
+  - Added [FactionMapCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionMapCommand.java)
+  - Started [FactionClaimForCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionClaimForCommand.java)
+  - Added several new faction events. Each event is fired asynchronously.
+    - [PlayerPacketEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/packets/PlayerPacketEvent.java)
+    - [RemoveClaimingPillarPacketsEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/packets/RemoveClaimingPillarPacketsEvent.java)
+    - [SendClaimingPillarPacketsEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/packets/SendClaimingPillarPacketsEvent.java)
+    - [SendFactionMapPacketsEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/packets/SendFactionMapPacketsEvent.java)
+  - Fully implemented faction colors.
+- Improved faction design.
+  - Changed RegenStatus coloring and Unicode's.
+  - Changed [Role](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/users/faction/Role.java) astrix design to unicode stars.
+  - Fixed improper relation display.
+- Added more functionality to users.
+  - Added reclaim variable (Used to check if the user has reclaimed for the map).
+  - Added factionMap variable (Used to check if the user has faction map enabled).
+- Added logic to retrieve specific corners of a cuboid.
+- Started to add logic to claim for different factions.
+- Implemented precise calculations for warzone radius. 
+- Added unique donor reclaim system [ClaimBonusChest](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/donor/ClaimBonusChestCommand.java).
+
 # Change log 2022.02.a3 (2/6/2022)
 - Fixed several database issues.
   - Properly integrated MongoDB upsert operations.

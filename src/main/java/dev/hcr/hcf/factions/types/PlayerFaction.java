@@ -200,6 +200,7 @@ public class PlayerFaction extends Faction {
     }
 
     public String getFormattedCurrentDTR() {
+        // TODO: 2/6/2022 If the faction is raidable set dtr string color to red
         return regenStatus.getColor() + regenStatus.getUnicode() + " " + decimalFormat.format(currentDTR);
     }
 

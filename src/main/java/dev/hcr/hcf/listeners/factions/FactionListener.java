@@ -42,7 +42,7 @@ public class FactionListener implements Listener {
                     if (playerFaction == null) {
                         recipient.sendMessage(player.getName() + ": " + event.getMessage());
                     } else {
-                        recipient.sendMessage(CC.translate("&7[" + Relation.getFactionRelationship(playerFaction, recipient).getColor() + playerFaction.getName() + "&7] " + player.getName() + ": ") + event.getMessage());
+                        recipient.sendMessage(CC.translate("&7[" + Relation.getFactionRelationship(playerFaction, recipient).getColor() + playerFaction.getName() + "&7] ✭ " + player.getName() + ": ") + event.getMessage());
                     }
                 }
                 break;
@@ -72,7 +72,7 @@ public class FactionListener implements Listener {
         if (user.getFaction() == null) return;
         PlayerFaction faction = (PlayerFaction) user.getFaction();
         // TODO: 1/30/2022 Get the current location of the players death, see if this location is a faction and check to see if it has dtr multipliers
-        faction.decreaseDTR(ConfigurationType.getConfiguration("faction.properties").getDouble("dtr-multiplier"));
+        faction.decreaseDTR(ConfigurationType.getConfiguration("faction.properties").getDouble("dtr-loss-per-death"));
     }
 
     @EventHandler
@@ -82,11 +82,19 @@ public class FactionListener implements Listener {
         Location from = event.getFrom();
         if (to.getBlockX() != from.getBlockX() || to.getBlockZ() != from.getBlockZ()) {
             // TODO: 1/30/2022 create custom events for entering and leaving territory
-            Faction factionTo = Faction.getByLocation(player.getLocation());
-            Faction factionFrom = Faction.getByLocation(player.getLocation());
+            Faction factionTo = Faction.getByLocation(to);
+            Faction factionFrom = Faction.getByLocation(from);
             if (factionTo != null && factionTo != factionFrom) {
-                player.sendMessage(CC.translate("&cLeaving: " + Relation.getFactionRelationship(factionFrom, player).getColor() + factionFrom.getName()));
-                player.sendMessage(CC.translate("&aEntering: " + Relation.getFactionRelationship(factionTo, player).getColor() + factionTo.getName()));
+                if (factionFrom instanceof SystemFaction) {
+                    player.sendMessage(CC.translate("&7Leaving: " + factionFrom.getColor() + factionFrom.getName()));
+                } else {
+                    player.sendMessage(CC.translate("&7Leaving: " + Relation.getFactionRelationship(factionFrom, player).getColor() + factionFrom.getName()));
+                }
+                if (factionTo instanceof SystemFaction) {
+                    player.sendMessage(CC.translate("&7Entering: " + factionTo.getColor() + factionTo.getName()));
+                } else {
+                    player.sendMessage(CC.translate("&7Entering: " + Relation.getFactionRelationship(factionTo, player).getColor() + factionTo.getName()));
+                }
             }
         }
     }

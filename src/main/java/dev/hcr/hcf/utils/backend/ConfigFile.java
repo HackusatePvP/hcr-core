@@ -17,9 +17,9 @@ public class ConfigFile {
     public static ConfigFile instance;
     private final JavaPlugin plugin;
     private YamlConfiguration configuration;
-    private String name;
+    private final String name;
     private File file;
-    private FileConfiguration newConfig = null;
+    private  FileConfiguration newConfig = null;
 
     public ConfigFile(String name, JavaPlugin plugin) {
         this.name = name;

@@ -1,10 +1,14 @@
 name: HCF
 version: '${project.version}'
 main: dev.hcr.hcf.HCF
+depend: [ProtocolLib]
 commands:
   balance:
     aliases: [bal]
     description: View your current balance.
+  claimbonuschest:
+    description: Claim donator items.
+    permission: hcf.commands.donor.claimbonuschest
   economy:
     aliases: [eco]
     description: Economy management command.

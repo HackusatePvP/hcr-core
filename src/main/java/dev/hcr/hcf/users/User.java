@@ -2,6 +2,7 @@ package dev.hcr.hcf.users;
 
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.users.faction.ChatChannel;
 import dev.hcr.hcf.users.statistics.types.OreStatistics;
 import dev.hcr.hcf.users.statistics.types.PvPStatistics;
@@ -20,6 +21,8 @@ public class User {
     private OreStatistics oreStatistics;
     private PvPStatistics pvPStatistics;
     private double balance;
+    private boolean claimedChest;
+    private boolean factionMap = false;
     private ChatChannel channel = ChatChannel.PUBLIC;
     private Faction faction;
 
@@ -52,6 +55,9 @@ public class User {
         if (document.containsKey("balance")) {
             this.balance = document.getDouble("balance");
         }
+        if (document.containsKey("claimedChest")) {
+            this.claimedChest = document.getBoolean("claimedChest");
+        }
     }
 
     public Document save() {
@@ -59,6 +65,7 @@ public class User {
         document.append("name", this.name);
         oreStatistics.getStatisticKeyMapping().forEach(document::append);
         document.append("balance", balance);
+        document.append("claimedChest", claimedChest);
         return document;
     }
 
@@ -92,6 +99,22 @@ public class User {
 
     public void setFaction(Faction faction) {
         this.faction = faction;
+    }
+
+    public boolean hasFactionMap() {
+        return factionMap;
+    }
+
+    public void setFactionMap(boolean factionMap) {
+        this.factionMap = factionMap;
+    }
+
+    public boolean hasClaimedChest() {
+        return claimedChest;
+    }
+
+    public boolean isClaimingLand() {
+        return FactionClaimingListener.claiming.containsKey(this);
     }
 
     public UUID getUuid() {

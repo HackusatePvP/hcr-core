@@ -3,11 +3,13 @@ package dev.hcr.hcf.factions;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
+import dev.hcr.hcf.factions.commands.member.FactionMapCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.utils.LocationUtils;
+import dev.hcr.hcf.utils.backend.ConfigurationType;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -81,20 +83,16 @@ public abstract class Faction extends Claim {
     }
 
     public Document save() {
-        System.out.println("Attempting to create document!");
         Document document = new Document("uuid", getUniqueID().toString());
-        System.out.println("Created faction document!");
         document.append("name", getName());
-        System.out.println("Appended name!");
+        document.append("color", (getColor() == null ? ChatColor.WHITE.toString() : getColor().name()));
         if (hasClaims()) {
             List<String> c = new ArrayList<>();
-            System.out.println("Claims detected!");
             for (Claim claim : getClaims()) {
                 System.out.println("Found claim: " + claim.getName());
                 c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());                System.out.println("Added claim!");
             }
             document.append("claims", c);
-            System.out.println("Appended all claims!");
         }
         return document;
     }
@@ -118,6 +116,14 @@ public abstract class Faction extends Claim {
         // Now lets remove the faction from all mappings
         factionNameMap.remove(name);
         factionUUIDMap.remove(uniqueID);
+    }
+
+    public UUID getUniqueID() {
+        return uniqueID;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public boolean hasClaims() {
@@ -153,12 +159,20 @@ public abstract class Faction extends Claim {
         return total;
     }
 
-    public void setFactionColor(ChatColor color) {
+    public ChatColor getColor() {
+        return color;
+    }
+
+    public void setColor(ChatColor color) {
         this.color = color;
     }
 
-    public ChatColor getFactionColor() {
-        return color;
+    public String getDisplayName() {
+        if (this.color != null) {
+            return color + name;
+        } else {
+            return name;
+        }
     }
 
     public Collection<Claim> getClaims() {
@@ -181,6 +195,20 @@ public abstract class Faction extends Claim {
         return (SafeZoneFaction) factionUUIDMap.values().stream().filter(faction -> faction instanceof SafeZoneFaction).findAny().orElse(null);
     }
 
+    public static ArrayList<Faction> getNearByFactions(Location location) {
+        ArrayList<Faction> near = new ArrayList<>();
+        for (int x = -25; x <= 25; x++) {
+            for (int z = -25; z <= 25; z++) {
+                if (x == 0 || z == 0) continue;
+                Faction faction = Faction.getByLocation(new Location(location.getWorld(), location.getBlockX() + x, location.getBlockY(), location.getBlockZ() + z));
+                if (faction == null) continue;
+                if (near.contains(faction)) continue;
+                near.add(faction);
+            }
+        }
+        return near;
+    }
+
     public static WildernessFaction getWilderness() {
         return wilderness;
     }
@@ -190,32 +218,18 @@ public abstract class Faction extends Claim {
     }
 
     public static Faction getByLocation(Location location) {
-        // First check to see if the player is in WarZone.
-        Location spawn = new Location(Bukkit.getWorld("world"), 0, location.getY(), 0);
-        double distance = spawn.distance(location);
-        if (distance < 500) {
-            // TODO: 1/31/2022 Make the radius of warzone configurable, for now its just set to 500
-            return warzone;
-        }
-        for (Faction faction : factionUUIDMap.values()) {
+        for (Faction faction : getFactions()) {
+            if (!faction.hasClaims()) continue;
             for (Claim claim : faction.getClaims()) {
-                if (claim.getCuboid() == null) {
-                    continue;
-                }
                 if (claim.getCuboid().isIn(location)) {
                     return faction;
                 }
             }
         }
-        return wilderness; // Return warzone or Wilderness.
+        int radius = ConfigurationType.getConfiguration("faction.properties").getInteger("warzone-radius");
+        if (Math.abs(location.getBlockX()) <= radius && Math.abs(location.getBlockZ()) <= radius) {
+            return getWarzone();
+        }
+        return getWilderness();
     }
-
-    public UUID getUniqueID() {
-        return uniqueID;
-    }
-
-    public String getName() {
-        return name;
-    }
-
 }

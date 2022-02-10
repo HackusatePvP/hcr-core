@@ -16,7 +16,6 @@ public class FactionRegenTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        System.out.println("Task Running!");
         for (PlayerFaction faction : factionPausedRegenCooldown.keySet()) {
             long timeLeft = factionPausedRegenCooldown.get(faction) - System.currentTimeMillis();
             System.out.println(faction.getName() + ": " + DurationFormatUtils.formatDurationWords(timeLeft, true ,true));
@@ -33,13 +32,13 @@ public class FactionRegenTask extends BukkitRunnable {
             long timeLeft = factionRegenTime.get(faction);
             if (timeLeft <= 0L || faction.getCurrentDTR() >= faction.getMaxDTR()) {
                 // If the dtr is greater than the max lets correct it
-                if (faction.getCurrentDTR() > faction.getMaxDTR()) {
-                    faction.setCurrentDTR(faction.getMaxDTR());
-                }
+                faction.setCurrentDTR(faction.getMaxDTR());
                 factionRegenTime.remove(faction);
                 faction.setRegenStatus(RegenStatus.FULL);
                 continue;
             }
+            timeLeft -= System.currentTimeMillis();
+            factionRegenTime.put(faction, timeLeft);
             System.out.println("Increasing " + faction.getName() + " DTR by 0.0005");
             faction.increaseDTR(ConfigurationType.getConfiguration("faction.properties").getDouble("dtr-increment-per-second"));
             DecimalFormat format = new DecimalFormat("#.####");

@@ -38,7 +38,7 @@ public class FactionClaimCommand extends FactionCommand {
             return;
         }
         player.getInventory().addItem(FactionClaimingListener.getClaimingWand());
-        FactionClaimingListener.claiming.add(user);
+        FactionClaimingListener.startClaiming(player, playerFaction);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class FactionClaimCommand extends FactionCommand {
         return null;
     }
 
-    private boolean hasInventorySpace(Player player) {
+    public static boolean hasInventorySpace(Player player) {
         PlayerInventory inventory = player.getInventory();
         for (int slot = 0; slot < 9; slot++) {
             if (inventory.getItem(slot) != null && inventory.getItem(slot).getType() != Material.AIR) {

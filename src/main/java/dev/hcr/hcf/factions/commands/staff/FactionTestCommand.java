@@ -5,6 +5,7 @@ import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -35,6 +36,15 @@ public class FactionTestCommand extends FactionCommand {
             for (Claim claim : playerFaction.getClaims()) {
                 message.add("  &7Position 1: &c" + claim.getCuboid().getPoint1().getX() + "," + claim.getCuboid().getPoint1().getZ());
                 message.add("  &7Position 2: &c" + claim.getCuboid().getPoint2().getX() + "," + claim.getCuboid().getPoint2().getZ());
+                message.add("  &7Distance: &c" + claim.getCuboid().getDistance());
+                message.add("  &7Distance^: &c" + claim.getCuboid().getDistanceSquared());
+                // test mathematical shit that annun failed
+                Location point1 = claim.getCuboid().getPoint1();
+                Location point2 = claim.getCuboid().getPoint2();
+                double m1 = (point2.getZ() - point1.getZ()) / (point1.getX()-point2.getX());
+                double m2 = - 1 / m1;
+                message.add("  &7M1: &c" + m1);
+                message.add("  &7M2: &c" + m2);
             }
         } else {
             message.add("&7Claims: &cFALSE");

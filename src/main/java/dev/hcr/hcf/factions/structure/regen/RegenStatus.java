@@ -5,7 +5,7 @@ import org.bukkit.ChatColor;
 public enum RegenStatus {
     FULL("\u25B6", ChatColor.GREEN),
     REGENERATING("\u2191", ChatColor.YELLOW),
-    PAUSED("\u2193", ChatColor.RED);
+    PAUSED("\u2193", ChatColor.GOLD);
 
     private final String unicode;
     private final ChatColor color;

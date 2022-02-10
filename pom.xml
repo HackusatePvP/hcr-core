@@ -6,7 +6,7 @@
 
     <groupId>dev.hcr</groupId>
     <artifactId>HCF</artifactId>
-    <version>2022.02.a3-SNAPSHOT</version>
+    <version>2022.02.a4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HCF</name>
@@ -75,6 +75,13 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>LATEST</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>4.6.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/ProtocolLib-4.6.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

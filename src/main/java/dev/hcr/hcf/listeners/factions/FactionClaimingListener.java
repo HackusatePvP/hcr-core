@@ -1,10 +1,17 @@
 package dev.hcr.hcf.listeners.factions;
 
 import dev.hcr.hcf.HCF;
+import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
+import dev.hcr.hcf.factions.events.coleaders.FactionClaimLandEvent;
+import dev.hcr.hcf.factions.events.packets.RemoveClaimingPillarPacketsEvent;
+import dev.hcr.hcf.factions.events.packets.SendClaimingPillarPacketsEvent;
 import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
+import dev.hcr.hcf.utils.TaskUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,7 +29,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
 
 public class FactionClaimingListener implements Listener {
-    public static final Set<User> claiming = new HashSet<>();
+    public static final Map<User, Faction> claiming = new HashMap<>();
     private static final Map<User, Location> position1ClaimingMap = new HashMap<>();
     private static final Map<User, Location> position2ClaimingMap = new HashMap<>();
 
@@ -30,50 +37,91 @@ public class FactionClaimingListener implements Listener {
     public void onPlayerInteractWithWand(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         User user = User.getUser(player.getUniqueId());
-        PlayerFaction faction = (PlayerFaction) user.getFaction();
-        if (faction == null) return;
-        if (!claiming.contains(user)) return;
+        if (!claiming.containsKey(user)) return;
+        Faction faction = claiming.get(user);
         ItemStack hand = player.getItemInHand();
         if (hand == null) return;
         if (hand.getType() == Material.GOLD_HOE && hand.hasItemMeta() && hand.getItemMeta().getDisplayName().equals(getClaimingWand().getItemMeta().getDisplayName())) {
+            event.setUseItemInHand(Event.Result.DENY);
             if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
                 position1ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 1 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
-                event.setUseInteractedBlock(Event.Result.DENY);
-
-                if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
-                    player.sendMessage(CC.translate("&7The land will cost you &c" + HCF.getPlugin().getFormat().format(faction.getClaimingLandPrice(position1ClaimingMap.get(user), position2ClaimingMap.get(user)))));
-                }
+                handlePacketEvents(event, player, user, faction, true);
             }
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
                 position2ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 2 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
-                event.setUseInteractedBlock(Event.Result.DENY);
-
-                // If the player has both positions set, lets generate a price for the claim
-                if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
-                    player.sendMessage(CC.translate("&7The land will cost you &c" + HCF.getPlugin().getFormat().format(faction.getClaimingLandPrice(position1ClaimingMap.get(user), position2ClaimingMap.get(user)))));
-                }
+                handlePacketEvents(event, player, user, faction, true);
             }
             if (player.isSneaking()) {
                 if (event.getAction() == Action.LEFT_CLICK_AIR) {
+                    player.sendMessage(ChatColor.YELLOW + "Attempting to claim land...");
+                    FactionClaimLandEvent claimLandEvent = new FactionClaimLandEvent(faction, player, position1ClaimingMap.get(user), position2ClaimingMap.get(user));
+                    Bukkit.getPluginManager().callEvent(claimLandEvent);
+                    if (claimLandEvent.isCancelled()) {
+                        return;
+                    }
                     faction.addClaim(new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
                     player.sendMessage(ChatColor.GREEN + "Successfully claimed land!");
-                    player.getInventory().remove(getClaimingWand());
+                    handlePacketEvents(event, player, user, faction, false);
+                    player.getInventory().remove(player.getItemInHand());
                     claiming.remove(user);
                     position1ClaimingMap.remove(user);
                     position2ClaimingMap.remove(user);
-                    event.setUseInteractedBlock(Event.Result.DENY);
                 }
                 if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+                    player.sendMessage(ChatColor.RED + "Removing claiming selection...");
+                    handlePacketEvents(event, player, user, faction, false);
                     position1ClaimingMap.remove(user);
                     position2ClaimingMap.remove(user);
-                    event.setUseInteractedBlock(Event.Result.DENY);
+                    claiming.remove(user);
+                    position1ClaimingMap.remove(user);
+                    position2ClaimingMap.remove(user);
+                    player.setItemInHand(new ItemStack(Material.AIR));
                 }
             }
         }
+     }
+
+    private void handlePacketEvents(PlayerInteractEvent event, Player player, User user, Faction faction, boolean add) {
+        event.setUseInteractedBlock(Event.Result.DENY);
+        if (add) {
+            if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
+                SendClaimingPillarPacketsEvent pillarPacketsEvent = new SendClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
+                TaskUtils.runAsync(() -> {
+                    Bukkit.getPluginManager().callEvent(pillarPacketsEvent);
+                });
+                player.sendMessage(CC.translate("&7The land will cost you &c" + HCF.getPlugin().getFormat().format(faction.getClaimingLandPrice(position1ClaimingMap.get(user), position2ClaimingMap.get(user)))));
+            }
+        } else {
+                RemoveClaimingPillarPacketsEvent pillarPacketsEvent = new RemoveClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
+                TaskUtils.runAsync(() -> {
+                    Bukkit.getPluginManager().callEvent(pillarPacketsEvent);
+                });
+        }
+    }
+
+    @EventHandler
+     public void onClaimLand(FactionClaimLandEvent event) {
+         Player player = event.getPlayer();
+         Faction faction = event.getFaction();
+         if (faction instanceof PlayerFaction) {
+            PlayerFaction playerFaction = (PlayerFaction) faction;
+            Faction factionLocation1 = Faction.getByLocation(event.getLocation1());
+            Faction factionLocation2 = Faction.getByLocation(event.getLocation2());
+             if (!(factionLocation1 instanceof WildernessFaction || factionLocation2 instanceof WildernessFaction)) {
+                 player.sendMessage(ChatColor.RED + "You can only claim in wilderness.");
+                 event.setCancelled(true);
+                 return;
+             }
+            double cost = event.getCost();
+            if (cost > playerFaction.getBalance()) {
+                player.sendMessage(CC.translate("&cYour faction cannot afford this land. &7(/f deposit all)"));
+                event.setCancelled(true);
+            }
+         }
      }
 
      @EventHandler
@@ -93,6 +141,11 @@ public class FactionClaimingListener implements Listener {
                 itemStack.setType(Material.AIR);
             }
         }
+     }
+
+     public static void startClaiming(Player player, Faction faction) {
+        User user = User.getUser(player.getUniqueId());
+        claiming.put(user, faction);
      }
 
     // Why not static abuse

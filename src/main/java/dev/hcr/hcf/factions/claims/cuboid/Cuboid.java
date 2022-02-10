@@ -109,6 +109,24 @@ public class Cuboid {
         return new Location(this.world, x, y, z);
     }
 
+    public Location getCorner(int corner) {
+        switch (corner) {
+            case 1:
+                Location point1Low = getPoint1();
+                point1Low.setY(0);
+                return point1Low;
+            case 2:
+                Location point2Low = getPoint2();
+                point2Low.setY(0);
+                return point2Low;
+            case 3:
+                return new Location(world, xMin, yMin, zMax);
+            default:
+            case 4:
+                return new Location(world, xMax, yMin, zMin);
+        }
+    }
+
     public int getTotalBlockSize() {
         return this.getHeight() * this.getXWidth() * this.getZWidth();
     }
