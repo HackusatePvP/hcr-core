@@ -1,8 +1,8 @@
 # Change log 2022.02.a5 (2/17/2022)
 - Started implementation of [timers](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/Timer.java).
   - Added [SOTWTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/server/SOTWTimer.java)
-  - Added [CombatTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/players/CombatTimer.java)
-  - Added [EnderPearlTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/players/EnderPearlTimer.java)
+  - Added [CombatTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/player/CombatTimer.java)
+  - Added [EnderPearlTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/player/EnderPearlTimer.java)
   - Added custom events which can be used to modify timers.
     - [TimerEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerEvent.java)
     - [TimerExpireEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerExpireEvent.java)
