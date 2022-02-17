@@ -6,7 +6,7 @@
 
     <groupId>dev.hcr</groupId>
     <artifactId>HCF</artifactId>
-    <version>2022.02.a4-SNAPSHOT</version>
+    <version>2022.02.a5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HCF</name>
@@ -82,6 +82,19 @@
             <version>4.6.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/ProtocolLib-4.6.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>me.activated</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/AquaCoreAPI.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>dev.hcr</groupId>
+            <artifactId>Cove</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

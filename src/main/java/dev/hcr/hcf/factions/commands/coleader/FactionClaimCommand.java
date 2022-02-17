@@ -5,10 +5,10 @@ import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.List;
@@ -33,6 +33,14 @@ public class FactionClaimCommand extends FactionCommand {
             player.sendMessage(ChatColor.RED + "Only Co-Leaders and above can claim land.");
             return;
         }
+        if (playerFaction.hasClaims()) {
+            player.sendMessage(ChatColor.RED + "Your faction already has territory claimed. To expand claims you must unclaim all and reclaim the land.");
+            return;
+        }
+        if (FactionClaimingListener.claiming.containsKey(user)) {
+            player.sendMessage(ChatColor.RED + "You are already claiming for a faction.");
+            return;
+        }
         if (!hasInventorySpace(player)) {
             player.sendMessage(ChatColor.RED + "You need to empty one slot in your hotbar.");
             return;
@@ -48,8 +56,8 @@ public class FactionClaimCommand extends FactionCommand {
 
     public static boolean hasInventorySpace(Player player) {
         PlayerInventory inventory = player.getInventory();
-        for (int slot = 0; slot < 9; slot++) {
-            if (inventory.getItem(slot) != null && inventory.getItem(slot).getType() != Material.AIR) {
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null) {
                 return true;
             }
         }

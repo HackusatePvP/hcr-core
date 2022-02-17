@@ -1,0 +1,17 @@
+package dev.hcr.hcf.factions.types.roads;
+
+import org.bson.Document;
+import org.bukkit.ChatColor;
+
+public class NorthRoad extends RoadFaction {
+
+    public NorthRoad() {
+        super("North_Road");
+        setColor(ChatColor.GOLD);
+    }
+
+    public NorthRoad(Document document) {
+        super(document);
+        load(document);
+    }
+}

@@ -5,6 +5,7 @@ import dev.hcr.hcf.utils.CC;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.util.StringUtil;
 
 import java.util.*;
 public class FactionHelpCommand extends FactionCommand {
@@ -48,10 +49,11 @@ public class FactionHelpCommand extends FactionCommand {
             for (String s : pageMap.keySet()) {
                 if (pageMap.get(s) == 1) {
                     FactionCommand command = FactionCommand.getCommand(s);
-                    message.add("  &c" + command.getName() + ": &7" + command.getDescription());
+                    message.add("&6* &c" + command.getName() + ": &7" + command.getDescription());
                 }
             }
             message.add("");
+            message.add("&7You are on page (" + 1 + "/" + getMaxPage() + ") To view the next page use the command \"" + label + " " + this.getName() + " <page>.");
             message.add("&7&m-----------------------------------------------------");
         }
         if (args.length == 2) {
@@ -65,10 +67,11 @@ public class FactionHelpCommand extends FactionCommand {
                 for (String s : pageMap.keySet()) {
                     if (pageMap.get(s) == page) {
                         FactionCommand command = FactionCommand.getCommand(s);
-                        message.add("  &c" + command.getName() + ": &7" + command.getDescription());
+                        message.add("&6* &c" + command.getName() + ": &7" + command.getDescription());
                     }
                 }
                 message.add("");
+                message.add("&7You are on page (" + page + "/" + getMaxPage() + ") To view the next page use the command \"" + label + " " + this.getName() + " <page>.");
             }
             message.add("&7&m-----------------------------------------------------");
         }
@@ -77,7 +80,16 @@ public class FactionHelpCommand extends FactionCommand {
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        List<String> completions = new ArrayList<>();
+        List<String> pages = new ArrayList<>();
+        for (int page = 1; page < getMaxPage(); page++) {
+            pages.add(page + "");
+        }
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], pages, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 
     private int getMaxPage() {

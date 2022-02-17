@@ -7,6 +7,7 @@ import dev.hcr.hcf.factions.events.coleaders.FactionClaimLandEvent;
 import dev.hcr.hcf.factions.events.packets.RemoveClaimingPillarPacketsEvent;
 import dev.hcr.hcf.factions.events.packets.SendClaimingPillarPacketsEvent;
 import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.SystemFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
@@ -20,7 +21,11 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -29,9 +34,27 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
 
 public class FactionClaimingListener implements Listener {
+    private static ItemStack claimingWand;
     public static final Map<User, Faction> claiming = new HashMap<>();
     private static final Map<User, Location> position1ClaimingMap = new HashMap<>();
     private static final Map<User, Location> position2ClaimingMap = new HashMap<>();
+
+    public FactionClaimingListener() {
+        claimingWand = new ItemStack(Material.GOLD_HOE);
+        ItemMeta meta = claimingWand.getItemMeta();
+        meta.setDisplayName(CC.translate("&6&lClaiming Wand"));
+        List<String> lore = new ArrayList<>();
+        lore.add("&7&m-----------------------------------------");
+        lore.add("&7Right-Click - &eTo set position 1.");
+        lore.add("&7Left-Click: - &eTo set position 2.");
+        lore.add("");
+        lore.add("&6While Sneaking: ");
+        lore.add("&7Right-Click-Air - &eTo clear claiming selection.");
+        lore.add("&7Left-Click-Air: - &eTo finalize claiming.");
+        lore.add("&7&m-----------------------------------------");
+        meta.setLore(CC.translate(lore));
+        claimingWand.setItemMeta(meta);
+    }
 
     @EventHandler
     public void onPlayerInteractWithWand(PlayerInteractEvent event) {
@@ -73,7 +96,9 @@ public class FactionClaimingListener implements Listener {
                 }
                 if (event.getAction() == Action.RIGHT_CLICK_AIR) {
                     player.sendMessage(ChatColor.RED + "Removing claiming selection...");
-                    handlePacketEvents(event, player, user, faction, false);
+                    if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
+                        handlePacketEvents(event, player, user, faction, false);
+                    }
                     position1ClaimingMap.remove(user);
                     position2ClaimingMap.remove(user);
                     claiming.remove(user);
@@ -120,27 +145,77 @@ public class FactionClaimingListener implements Listener {
             if (cost > playerFaction.getBalance()) {
                 player.sendMessage(CC.translate("&cYour faction cannot afford this land. &7(/f deposit all)"));
                 event.setCancelled(true);
+                return;
             }
+            playerFaction.removeFromBalance(cost);
+         } else if (faction instanceof SystemFaction) {
+             faction.clearClaims();
          }
+     }
+
+     @EventHandler
+     public void onKick(PlayerKickEvent event) {
+         Player player = event.getPlayer();
+         User user = User.getUser(player.getUniqueId());
+         removeWand(player.getInventory());
+         claiming.remove(user);
+         position1ClaimingMap.remove(user);
+         position2ClaimingMap.remove(user);
      }
 
      @EventHandler
      public void onQuitWhileClaiming(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         User user = User.getUser(player.getUniqueId());
+        removeWand(player.getInventory());
         claiming.remove(user);
         position1ClaimingMap.remove(user);
         position2ClaimingMap.remove(user);
-        removeWand(player.getInventory());
      }
 
-     private void removeWand(PlayerInventory inventory) {
-        for (ItemStack itemStack : inventory.getContents()) {
-            if (!itemStack.hasItemMeta()) continue;
-            if (itemStack.getItemMeta().getDisplayName().equalsIgnoreCase(getClaimingWand().getItemMeta().getDisplayName())) {
-                itemStack.setType(Material.AIR);
-            }
+     @EventHandler
+     public void onItemClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack itemStack = event.getCurrentItem();
+        if (itemStack == null) return;
+        if (!itemStack.hasItemMeta()) return;
+        if (itemStack.getItemMeta().getDisplayName().toLowerCase().contains("claiming")) {
+            event.setCancelled(true);
         }
+     }
+
+     @EventHandler
+     public void onItemDrop(PlayerDropItemEvent event) {
+         ItemStack itemStack = event.getItemDrop().getItemStack();
+         if (itemStack == null) return;
+         if (!itemStack.hasItemMeta()) return;
+         if (itemStack.getItemMeta().getDisplayName().toLowerCase().contains("claiming")) {
+             event.setCancelled(true);
+         }
+     }
+
+     @EventHandler
+     public void onItemDropEvent(InventoryDragEvent event) {
+         if (!(event.getWhoClicked() instanceof Player)) return;
+         Player player = (Player) event.getWhoClicked();
+         ItemStack itemStack = event.getOldCursor();
+         if (itemStack == null) return;
+         if (!itemStack.hasItemMeta()) return;
+         if (itemStack.getItemMeta().getDisplayName().toLowerCase().contains("claiming")) {
+             event.setCancelled(true);
+         }
+     }
+
+     public static void removeWand(PlayerInventory inventory) {
+         for (int slot = 0; slot < 36; slot++) {
+             ItemStack itemStack = inventory.getItem(slot);
+             if (itemStack == null) continue;
+             if (!itemStack.hasItemMeta()) continue;
+             if (itemStack.getItemMeta().getDisplayName().toLowerCase().contains("claiming")) {
+                 inventory.setItem(slot, new ItemStack(Material.AIR));
+             }
+         }
      }
 
      public static void startClaiming(Player player, Faction faction) {
@@ -150,20 +225,6 @@ public class FactionClaimingListener implements Listener {
 
     // Why not static abuse
     public static ItemStack getClaimingWand() {
-        ItemStack itemStack = new ItemStack(Material.GOLD_HOE);
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(CC.translate("&6&lClaiming Wand"));
-        List<String> lore = new ArrayList<>();
-        lore.add("&7&m-----------------------------------------");
-        lore.add("&7Right-Click - &eTo set position 1.");
-        lore.add("&7Left-Click: - &eTo set position 2.");
-        lore.add("");
-        lore.add("&6While Sneaking: ");
-        lore.add("&7Right-Click-Air - &eTo clear claiming selection.");
-        lore.add("&7Left-Click-Air: - &eTo finalize claiming.");
-        lore.add("&7&m-----------------------------------------");
-        meta.setLore(CC.translate(lore));
-        itemStack.setItemMeta(meta);
-        return itemStack;
+        return claimingWand;
     }
 }

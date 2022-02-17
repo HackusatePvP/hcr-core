@@ -85,27 +85,22 @@ public class PlayerPacketListener implements Listener {
     }
 
     private void updateMapData(Player player, Location location, boolean remove) {
-        List<Faction> factionsNearby = Faction.getNearByFactions(location);
+        List<Faction> factionsNearby = Faction.getNearByFactions(location, (remove ? 50 : 25));
         if (factionsNearby.isEmpty()) {
             player.sendMessage(ChatColor.RED + "No claims found near you.");
             return;
         }
         for (Faction faction : factionsNearby) {
-            System.out.println("Faction found! " + faction.getName());
             Claim claim = faction.getClaims().stream().findFirst().orElse(faction.getClaims().stream().findFirst().orElse(null));
             if (claim == null) continue;
-            System.out.println("Claims found!");
             for (int corner = 0; corner < 4; corner++) {
-                System.out.println("Corner found: " + corner);
                 Location location1 = claim.getCuboid().getCorner(corner);
                 for (int y = 0; y < 256; y++) {
                     location1.setY(y);
                     if (remove) {
-                        System.out.println("Removing pillar at " + location1.toString());
                         player.sendBlockChange(location1, location1.getBlock().getType(), location1.getBlock().getData());
                         location1.add(0, 1, 0);
                     } else {
-                        System.out.println("Adding pillar at " + location1.toString());
                         player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
                     }
                 }
@@ -126,7 +121,10 @@ public class PlayerPacketListener implements Listener {
                 int xDifference = to.getBlockX() - playerXMoveTracker.get(player);
                 int zDifference = to.getBlockZ() - playerZMoveTracker.get(player);
                 if (xDifference > 25 || xDifference < -25 || zDifference > 25 || zDifference < -25) {
-                    TaskUtils.runAsync(() -> updateMapData(player, to, false));
+                    TaskUtils.runAsync(() -> {
+                        updateMapData(player, from, true);
+                        updateMapData(player, to, false);
+                    });
                 }
             }
         }

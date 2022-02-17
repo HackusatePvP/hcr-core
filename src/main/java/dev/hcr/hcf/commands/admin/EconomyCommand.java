@@ -54,7 +54,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                 } finally {
                     if (amount != -1D) {
                         user.addToBalance(amount);
-                        sender.sendMessage(ChatColor.GREEN + "Successfully added \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a.");
+                        sender.sendMessage(CC.translate("Successfully added \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a."));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Balance must be positive.");
                     }
@@ -76,8 +76,25 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                         sender.sendMessage(ChatColor.RED + "Balance must be positive.");
                     }
                 }
+            } else if (args[0].equalsIgnoreCase("set")) {
+                String name = args[1];
+                User user = User.getUser(name);
+                double amount = -1D;
+                try {
+                    amount = Double.parseDouble(args[2]);
+                } catch (NullPointerException ignored) {
+                    sender.sendMessage(ChatColor.RED + "Expected double, integer instead of \"" + args[2] + "\".");
+                    return true;
+                } finally {
+                    if (amount != -1D) {
+                        user.setBalance(amount);
+                        sender.sendMessage(ChatColor.GREEN + "Successfully set \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a.");
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Balance must be positive.");
+                    }
+                }
             } else {
-                sender.sendMessage(ChatColor.RED + "Unknown argument, did you mean add,remove?");
+                sender.sendMessage(ChatColor.RED + "Unknown argument, did you mean add,remove,set?");
             }
         }
         return false;
@@ -87,7 +104,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], Arrays.asList("add", "remove", "reset"), completions);
+            StringUtil.copyPartialMatches(args[0], Arrays.asList("add", "remove", "reset", "set"), completions);
         }
         if (args.length == 2) {
             Bukkit.getOnlinePlayers().forEach(player -> completions.add(player.getName()));

@@ -1,6 +1,7 @@
 package dev.hcr.hcf;
 
 import dev.hcr.hcf.commands.admin.EconomyCommand;
+import dev.hcr.hcf.commands.admin.SOTWCommand;
 import dev.hcr.hcf.commands.donor.ClaimBonusChestCommand;
 import dev.hcr.hcf.commands.players.BalanceCommand;
 import dev.hcr.hcf.databases.MongoImplementation;
@@ -11,14 +12,25 @@ import dev.hcr.hcf.factions.structure.regen.FactionRegenTask;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.factions.types.roads.EastRoad;
+import dev.hcr.hcf.factions.types.roads.NorthRoad;
+import dev.hcr.hcf.factions.types.roads.SouthRoad;
+import dev.hcr.hcf.factions.types.roads.WestRoad;
+import dev.hcr.hcf.hooks.AquaCoreHook;
+import dev.hcr.hcf.hooks.CoveHook;
+import dev.hcr.hcf.hooks.PluginHook;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.listeners.factions.FactionListener;
 import dev.hcr.hcf.listeners.UserListener;
 import dev.hcr.hcf.listeners.player.MiningListener;
 import dev.hcr.hcf.listeners.player.PlayerPacketListener;
 import dev.hcr.hcf.packets.PacketHandler;
+import dev.hcr.hcf.listeners.player.TimerListener;
+import dev.hcr.hcf.pvpclass.KitDetectionTask;
+import dev.hcr.hcf.pvpclass.types.ArcherClass;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.ConfigFile;
+import dev.hcr.hcf.utils.backend.ConfigurationType;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,7 +47,9 @@ public final class HCF extends JavaPlugin {
     private final NumberFormat format = NumberFormat.getCurrencyInstance();
     private MongoImplementation database;
     private FactionRegenTask regenTask;
+    private KitDetectionTask detectionTask;
     private PacketHandler packetHandler;
+    private PluginHook core;
     private final List<ConfigFile> files = new ArrayList<>();
 
     @Override
@@ -44,7 +58,9 @@ public final class HCF extends JavaPlugin {
         loadConfigurationFiles();
         registerCommands();
         implementDatabases();
+        loadHooks();
         loadFactions();
+        loadPvPClasses();
         registerEvents();
     }
 
@@ -53,7 +69,7 @@ public final class HCF extends JavaPlugin {
         // Plugin shutdown logic
         saveFactions();
         User.getUsers().forEach(user -> getMongoImplementation().appendUserDataSync(user.save()));
-
+        Bukkit.getOnlinePlayers().forEach(player -> FactionClaimingListener.removeWand(player.getInventory()));
         // TODO: 2/6/2022 Create mongodb database backup upon disable
         List<String> command = Arrays.asList(
                 "mongodump",
@@ -88,15 +104,26 @@ public final class HCF extends JavaPlugin {
         getCommand("claimbonuschest").setExecutor(new ClaimBonusChestCommand());
         getCommand("economy").setExecutor(new EconomyCommand());
         getCommand("faction").setExecutor(new DefaultFactionCommand());
+        getCommand("sotw").setExecutor(new SOTWCommand());
     }
 
     private void implementDatabases() {
         database = new MongoImplementation(this);
     }
 
+    private void loadHooks() {
+        if (new AquaCoreHook().isHooked()) {
+            core = new AquaCoreHook();
+        } else if (new CoveHook().isHooked()) {
+            core = new CoveHook();
+        } else {
+            HCF.getPlugin().getLogger().severe("Could not find core hook. Please add support to a plugin or use a plugin that already has support.");
+        }
+    }
+
     private void loadFactions() {
         regenTask = new FactionRegenTask();
-        regenTask.runTaskTimerAsynchronously(this, 20L, 20L);
+        regenTask.runTaskTimerAsynchronously(this, 20L, 20L * ConfigurationType.getConfiguration("faction.properties").getInteger("regen-delay-time"));
         database.loadFactions();
         if (Faction.getWilderness() == null) {
             new WildernessFaction();
@@ -107,18 +134,36 @@ public final class HCF extends JavaPlugin {
         if (Faction.getSafeZone() == null) {
             new SafeZoneFaction();
         }
+        if (Faction.getRoadFaction("north") == null) {
+            new NorthRoad();
+        }
+        if (Faction.getRoadFaction("east") == null) {
+            new EastRoad();
+        }
+        if (Faction.getRoadFaction("south") == null) {
+            new SouthRoad();
+        }
+        if (Faction.getRoadFaction("west") == null) {
+            new WestRoad();
+        }
+    }
+
+    private void loadPvPClasses() {
+        detectionTask = new KitDetectionTask();
+        detectionTask.runTaskTimerAsynchronously(this, 20L, 20L);
+        new ArcherClass();
     }
 
     private void saveFactions() {
         for (Faction faction : Faction.getFactions()) {
-            database.appendFactionData(faction.save());
+            faction.save();
         }
     }
 
     private void registerEvents() {
         // Handle packet managers
         packetHandler = new PacketHandler();
-        Arrays.asList(new UserListener(), new FactionListener(), new FactionClaimingListener(), new MiningListener(), new PlayerPacketListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
+        Arrays.asList(new UserListener(), new FactionListener(plugin), new FactionClaimingListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 
     public PacketHandler getPacketHandler() {
@@ -135,6 +180,10 @@ public final class HCF extends JavaPlugin {
 
     public NumberFormat getFormat() {
         return format;
+    }
+
+    public PluginHook getCore() {
+        return core;
     }
 
     public static HCF getPlugin() {

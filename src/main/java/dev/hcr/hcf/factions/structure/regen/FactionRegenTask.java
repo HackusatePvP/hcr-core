@@ -2,10 +2,10 @@ package dev.hcr.hcf.factions.structure.regen;
 
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class FactionRegenTask extends BukkitRunnable {
     private final Map<PlayerFaction, Long> factionPausedRegenCooldown = new HashMap<>();
     private final Map<PlayerFaction, Long> factionRegenTime = new HashMap<>();
+    private final PropertiesConfiguration configuration = (PropertiesConfiguration) ConfigurationType.getConfiguration("faction.properties");
 
     @Override
     public void run() {
@@ -20,8 +21,7 @@ public class FactionRegenTask extends BukkitRunnable {
             long timeLeft = factionPausedRegenCooldown.get(faction) - System.currentTimeMillis();
             System.out.println(faction.getName() + ": " + DurationFormatUtils.formatDurationWords(timeLeft, true ,true));
             if (timeLeft <= 0L) {
-                // set the faction to be no longer paused and setup reginning
-                System.out.println(faction.getName() + " Completed Pause Cooldown");
+                // set the faction to be no longer paused and setup regen
                 factionPausedRegenCooldown.remove(faction);
                 factionRegenTime.put(faction, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(30L));
                 faction.setRegenStatus(RegenStatus.REGENERATING);
@@ -37,22 +37,18 @@ public class FactionRegenTask extends BukkitRunnable {
                 faction.setRegenStatus(RegenStatus.FULL);
                 continue;
             }
-            timeLeft -= System.currentTimeMillis();
             factionRegenTime.put(faction, timeLeft);
-            System.out.println("Increasing " + faction.getName() + " DTR by 0.0005");
-            faction.increaseDTR(ConfigurationType.getConfiguration("faction.properties").getDouble("dtr-increment-per-second"));
-            DecimalFormat format = new DecimalFormat("#.####");
-            System.out.println("Current DTR: " + format.format(faction.getCurrentDTR()));
+            faction.increaseDTR(configuration.getDouble("regen-increment"));
         }
     }
 
     public void setupFactionRegen(PlayerFaction playerFaction) {
         // TODO: 1/30/2022 Change 1 min to 30min
-        factionPausedRegenCooldown.put(playerFaction, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10L));
+        factionPausedRegenCooldown.put(playerFaction, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(configuration.getInteger("regen-start-delay")));
         factionRegenTime.remove(playerFaction);
     }
 
     public void instantRegen(PlayerFaction playerFaction) {
-        factionRegenTime.put(playerFaction, TimeUnit.MINUTES.toMillis(30));
+        factionRegenTime.put(playerFaction, TimeUnit.MINUTES.toMillis(configuration.getInteger("regen-start-delay")));
     }
 }

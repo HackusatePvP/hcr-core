@@ -11,12 +11,17 @@ import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.factions.types.roads.EastRoad;
+import dev.hcr.hcf.factions.types.roads.NorthRoad;
+import dev.hcr.hcf.factions.types.roads.SouthRoad;
+import dev.hcr.hcf.factions.types.roads.WestRoad;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.TaskUtils;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import java.util.Locale;
 import java.util.UUID;
 
 public class MongoImplementation {
@@ -122,6 +127,26 @@ public class MongoImplementation {
             if (name.toLowerCase().contains("warzone")) {
                 new WarzoneFaction(document);
             }
+            if (name.toLowerCase().contains("road")) {
+                String[] split = name.toLowerCase().split("road");
+                if (split[0].contains("_")) {
+                    split[0] = split[0].replace("_", "");
+                }
+                loadRoadFaction(split[0], document);
+            }
+        }
+    }
+
+    private void loadRoadFaction(String road, Document document) {
+        switch (road.toLowerCase()) {
+            case "north":
+                new NorthRoad(document);
+            case "east":
+                new EastRoad(document);
+            case "south":
+                new SouthRoad(document);
+            case "west":
+                new WestRoad(document);
         }
     }
 }

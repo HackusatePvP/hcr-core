@@ -1,8 +1,13 @@
 package dev.hcr.hcf.users;
 
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
+import dev.hcr.hcf.pvpclass.PvPClass;
+import dev.hcr.hcf.timers.Timer;
+import dev.hcr.hcf.timers.types.player.CombatTimer;
+import dev.hcr.hcf.timers.types.player.EnderPearlTimer;
 import dev.hcr.hcf.users.faction.ChatChannel;
 import dev.hcr.hcf.users.statistics.types.OreStatistics;
 import dev.hcr.hcf.users.statistics.types.PvPStatistics;
@@ -12,6 +17,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,8 +30,11 @@ public class User {
     private double balance;
     private boolean claimedChest;
     private boolean factionMap = false;
+    private boolean bypass = false;
+    private PvPClass currentClass = null;
     private ChatChannel channel = ChatChannel.PUBLIC;
     private Faction faction;
+    private final Set<Timer> activeTimers = new HashSet<>();
 
     private final static ConcurrentHashMap<UUID, User> users = new ConcurrentHashMap<>();
 
@@ -115,6 +125,82 @@ public class User {
 
     public boolean isClaimingLand() {
         return FactionClaimingListener.claiming.containsKey(this);
+    }
+
+    public boolean hasBypass() {
+        return bypass;
+    }
+
+    public void setBypass(boolean bypass) {
+        this.bypass = bypass;
+    }
+
+    public boolean inCombat() {
+        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase("combat")).findAny().orElse(null) == null;
+    }
+
+    public void setCombat(boolean combat) {
+        Player player = toPlayer();
+        CombatTimer timer = (CombatTimer) activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase("combat")).findAny().orElse(null);
+        if (combat) {
+            if (timer == null) {
+                timer = new CombatTimer(player);
+            } else {
+                timer.setDelay(30L);
+                timer.setActive(true);
+                try {
+                    timer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
+                } catch (IllegalStateException ignored) {
+
+                }
+            }
+        } else {
+           if (timer == null) return;
+           timer.end(true);
+           activeTimers.remove(timer);
+        }
+    }
+
+    public boolean canEnderPearl() {
+        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase("enderpearl")).findAny().orElse(null) == null;
+    }
+
+    public void setEnderPearl(boolean enderpearl) {
+        Player player = toPlayer();
+        EnderPearlTimer timer = (EnderPearlTimer) getActiveTimer("enderpearl");
+        if (enderpearl) {
+            if (timer == null) {
+                new EnderPearlTimer(player);
+            } else {
+                timer.setDelay(30L);
+                timer.setActive(true);
+                try {
+                    timer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
+                } catch (IllegalStateException ignored) {
+
+                }
+            }
+        } else {
+            if (timer == null) return;
+            timer.end(true);
+            activeTimers.remove(timer);
+        }
+    }
+
+    public PvPClass getCurrentClass() {
+        return currentClass;
+    }
+
+    public void setCurrentClass(PvPClass currentClass) {
+        this.currentClass = currentClass;
+    }
+
+    public Timer getActiveTimer(String name) {
+        return activeTimers.stream().filter(timer -> timer != null && timer.getName().equalsIgnoreCase(name)).findAny().orElse(null);
+    }
+
+    public Set<Timer> getActiveTimers() {
+        return activeTimers;
     }
 
     public UUID getUuid() {

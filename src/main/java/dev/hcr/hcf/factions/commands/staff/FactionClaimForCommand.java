@@ -8,7 +8,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FactionClaimForCommand extends FactionCommand {
@@ -42,6 +44,12 @@ public class FactionClaimForCommand extends FactionCommand {
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        ArrayList<String> completions = new ArrayList<>();
+        ArrayList<String> factionNames = new ArrayList<>();
+        Faction.getFactions().forEach(faction -> factionNames.add(faction.getName()));
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], factionNames, completions);
+        }
+        return completions;
     }
 }

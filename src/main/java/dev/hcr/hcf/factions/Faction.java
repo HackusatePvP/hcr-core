@@ -3,15 +3,14 @@ package dev.hcr.hcf.factions;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
-import dev.hcr.hcf.factions.commands.member.FactionMapCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.WarzoneFaction;
 import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.factions.types.roads.*;
 import dev.hcr.hcf.utils.LocationUtils;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
 import org.bson.Document;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
@@ -26,11 +25,12 @@ public abstract class Faction extends Claim {
     private final String name;
     private ChatColor color = ChatColor.WHITE;
     private final Collection<Claim> claims = new ArrayList<>();
+    private Location home;
     private static WildernessFaction wilderness;
     private static WarzoneFaction warzone;
+    private static RoadFaction northRoad, southRoad, eastRoad, westRoad;
     private static final ConcurrentHashMap<UUID, Faction> factionUUIDMap = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Faction> factionNameMap = new ConcurrentHashMap<>();
-
 
     public Faction(UUID uuid, String name, Claim claim) {
         super(name, claim.getCuboid());
@@ -80,9 +80,21 @@ public abstract class Faction extends Claim {
         if (this instanceof WarzoneFaction) {
             warzone = (WarzoneFaction) this;
         }
+        if (this instanceof NorthRoad) {
+            northRoad = (NorthRoad) this;
+        }
+        if (this instanceof EastRoad) {
+            eastRoad = (EastRoad) this;
+        }
+        if (this instanceof SouthRoad) {
+            southRoad = (SouthRoad) this;
+        }
+        if (this instanceof WestRoad) {
+            westRoad = (WestRoad) this;
+        }
     }
 
-    public Document save() {
+    public void save() {
         Document document = new Document("uuid", getUniqueID().toString());
         document.append("name", getName());
         document.append("color", (getColor() == null ? ChatColor.WHITE.toString() : getColor().name()));
@@ -94,18 +106,26 @@ public abstract class Faction extends Claim {
             }
             document.append("claims", c);
         }
-        return document;
+        if (home != null) {
+            String parse = home.getX() + "%" + home.getY() + "%" + home.getZ();
+            document.append("home", parse);
+        }
+        HCF.getPlugin().getMongoImplementation().appendFactionData(document);
     }
 
     public void load(Document document) {
         if (document.containsKey("claims")) {
             List<String> claims = document.get("claims", ArrayList.class);
             for (String s : claims) {
+                if (claims.contains(s)) continue;
                 this.claims.add(new Claim(name, LocationUtils.parseCuboid(s)));
             }
         }
         if (document.containsKey("color")) {
             this.color = ChatColor.valueOf(document.getString("color"));
+        }
+        if (document.containsKey("home")) {
+            this.home = LocationUtils.parseLocation(document.getString("home"));
         }
     }
 
@@ -114,7 +134,7 @@ public abstract class Faction extends Claim {
         // First remove from db.
         HCF.getPlugin().getMongoImplementation().findFactionAndDelete(uniqueID);
         // Now lets remove the faction from all mappings
-        factionNameMap.remove(name);
+        factionNameMap.remove(name.toLowerCase());
         factionUUIDMap.remove(uniqueID);
     }
 
@@ -123,7 +143,7 @@ public abstract class Faction extends Claim {
     }
 
     public String getName() {
-        return name;
+        return name.replace("_", " ");
     }
 
     public boolean hasClaims() {
@@ -132,6 +152,15 @@ public abstract class Faction extends Claim {
 
     public boolean hasClaim(Claim claim) {
         return claims.contains(claim);
+    }
+
+    public boolean inClaim(Location location) {
+        for (Claim claim : claims) {
+            if (claim.getCuboid().isIn(location)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean addClaim(Cuboid cuboid) {
@@ -147,6 +176,10 @@ public abstract class Faction extends Claim {
         }
         claims.add(new Claim(getName(), cuboid));
         return true;
+    }
+
+    public void clearClaims() {
+        claims.clear();
     }
 
     public double getClaimingLandPrice(Location location, Location location2) {
@@ -179,6 +212,14 @@ public abstract class Faction extends Claim {
         return claims;
     }
 
+    public Location getHome() {
+        return home;
+    }
+
+    public void setHome(Location home) {
+        this.home = home;
+    }
+
     public static Collection<Faction> getFactions() {
         return factionUUIDMap.values();
     }
@@ -195,10 +236,10 @@ public abstract class Faction extends Claim {
         return (SafeZoneFaction) factionUUIDMap.values().stream().filter(faction -> faction instanceof SafeZoneFaction).findAny().orElse(null);
     }
 
-    public static ArrayList<Faction> getNearByFactions(Location location) {
+    public static ArrayList<Faction> getNearByFactions(Location location, int buffer) {
         ArrayList<Faction> near = new ArrayList<>();
-        for (int x = -25; x <= 25; x++) {
-            for (int z = -25; z <= 25; z++) {
+        for (int x = -buffer; x <= buffer; x++) {
+            for (int z = -buffer; z <= buffer; z++) {
                 if (x == 0 || z == 0) continue;
                 Faction faction = Faction.getByLocation(new Location(location.getWorld(), location.getBlockX() + x, location.getBlockY(), location.getBlockZ() + z));
                 if (faction == null) continue;
@@ -231,5 +272,20 @@ public abstract class Faction extends Claim {
             return getWarzone();
         }
         return getWilderness();
+    }
+
+    public static RoadFaction getRoadFaction(String road) {
+        switch (road.toLowerCase()) {
+            case "north":
+                return northRoad;
+            case "east":
+                return eastRoad;
+            case "south":
+                return southRoad;
+            case "west":
+                return westRoad;
+
+        }
+        return null;
     }
 }

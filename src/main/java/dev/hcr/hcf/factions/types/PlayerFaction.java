@@ -127,7 +127,7 @@ public class PlayerFaction extends Faction {
     }
 
     @Override
-    public Document save() {
+    public void save() {
         Document document = new Document("uuid", getUniqueID().toString());
         document.append("name", this.getName());
         document.append("leader", this.leader.toString());
@@ -146,17 +146,8 @@ public class PlayerFaction extends Faction {
         document.append("invites", invites);
 
         //FIXME Duplicate code, I need to improve the faction system in order to call the super method "save".
-        if (hasClaims()) {
-            List<String> c = new ArrayList<>();
-            System.out.println("Claims detected!");
-            for (Claim claim : getClaims()) {
-                System.out.println("Found claim: " + claim.getName());
-                c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());                System.out.println("Added claim!");
-            }
-            document.append("claims", c);
-            System.out.println("Appended all claims!");
-        }
-        return document;
+        plugin.getMongoImplementation().appendFactionData(document);
+        super.save();
     }
 
     public UUID getLeader() {

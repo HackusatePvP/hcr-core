@@ -1,3 +1,34 @@
+# Change log 2022.02.a5 (2/17/2022)
+- Started implementation of [timers](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/Timer.java).
+  - Added [SOTWTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/server/SOTWTimer.java)
+  - Added [CombatTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/players/CombatTimer.java)
+  - Added [EnderPearlTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/players/EnderPearlTimer.java)
+  - Added custom events which can be used to modify timers.
+    - [TimerEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerEvent.java)
+    - [TimerExpireEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerExpireEvent.java)
+    - [TimerStartEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerStartEvent.java)
+    - [TimerStopEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/structure/TimerStopEvent.java)
+- Added more faction functionality.
+  - Improved territory protection.
+    - Added build ranges to warzone. Configurations will be stored in the [faction.properties](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/factions/faction.properties) file.
+    - Added [FactionBypassCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionBypassCommand.java) to bypass territory protection listeners.
+  - Created all [road](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/types/roads/RoadFaction.java) factions.
+  - Added [FactionSetHomeCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/captain/FactionSetHomeCommand.java), not completed.
+  - Slightly improved faction designs and messages.
+  - Slightly fixed faction map pillars not disappearing.
+- Fixed duplication of claims when saving to mongodb.
+- Added more functionality to user.
+  - All timer functions will be stored in the [User](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/users/User.java) class. Such as adding, removing, and retrieving active timers.
+- Added the ability to hook other cores into the plugin. Currently, supports [Aqua](https://www.mc-market.org/resources/11118/) and Cove (not public).  
+- Started [PvPClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/PvPClass.java) implementations.
+  - Added [ArcherClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/types/ArcherClass.java), not finished.
+  - Added custom events to better handle class equipping and equipping.
+    - Added [PvPClassEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/PvPClassEvent.java)
+    - Added [ClassEquippedEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/ClassEquippedEvent.java)
+    - Added [ClassUnequippedEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/ClassUnequippedEvent.java)
+  - Classes do not need a special spigot which can handle armor equip and unequipped events.
+  - All classes are handled by the [KitDetectionClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/KitDetectionTask.java) and ran asynchronously up until potion effects are given.
+
 # Change log 2022.02.a4 (2/10/2022)
 - Added packet handlers and implemented [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) packet library (version 4.6).
   - Started [PacketController](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/packets/PacketController.java) api implementation.

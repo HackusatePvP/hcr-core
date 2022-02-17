@@ -80,7 +80,11 @@ public class FactionShowCommand extends FactionCommand {
         PlayerFaction playerFaction = (PlayerFaction) faction;
         message.add("&7&m-----------------------------------------------------");
         message.add("&c&l" + playerFaction.getName().toUpperCase() + ": &7[&6" + playerFaction.getOnlineMembers().size() + "&7/&6" + playerFaction.getFactionMembers().size() + "&7]");
-        message.add("  &7Home: &cNA"); //TODO implement faction home + claims
+        if (playerFaction.getHome() != null) {
+            message.add("  &7Home: &7[&c" + playerFaction.getHome().getBlockX() + "," + playerFaction.getHome().getBlockZ() + "&7]"); //TODO implement faction home + claims
+        } else {
+            message.add("  &7Home: &c[N/A]");
+        }
         message.add("  &7Balance: &c" + HCF.getPlugin().getFormat().format(playerFaction.getBalance()));
         message.add("  &7Leader: &c" + playerFaction.getLeader()); //TODO convert uuid to leader name
         message.add("  &7Current DTR: " + playerFaction.getFormattedCurrentDTR());
