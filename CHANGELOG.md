@@ -12,7 +12,7 @@
   - Improved territory protection.
     - Added build ranges to warzone. Configurations will be stored in the [faction.properties](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/factions/faction.properties) file.
     - Added [FactionBypassCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionBypassCommand.java) to bypass territory protection listeners.
-  - Created all [road](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/types/roads/RoadFaction.java) factions.
+  - Created all [RoadFaction](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/types/roads/RoadFaction.java) factions.
   - Added [FactionSetHomeCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/captain/FactionSetHomeCommand.java), not completed.
   - Slightly improved faction designs and messages.
   - Slightly fixed faction map pillars not disappearing.
