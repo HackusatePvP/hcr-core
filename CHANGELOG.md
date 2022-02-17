@@ -22,7 +22,7 @@
 - Added the ability to hook other cores into the plugin. Currently, supports [Aqua](https://www.mc-market.org/resources/11118/) and Cove (not public).  
 - Started [PvPClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/PvPClass.java) implementations.
   - Added [ArcherClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/types/ArcherClass.java), not finished.
-  - Added custom events to better handle class equipping and equipping.
+  - Added custom events to better handle class equipping and un-equipping.
     - Added [PvPClassEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/PvPClassEvent.java)
     - Added [ClassEquippedEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/ClassEquippedEvent.java)
     - Added [ClassUnequippedEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/ClassUnequippedEvent.java)
