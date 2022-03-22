@@ -6,12 +6,11 @@ import org.bukkit.ChatColor;
 public class EastRoad extends RoadFaction {
 
     public EastRoad() {
-        super("East_Road");
+        super("EastRoad");
         setColor(ChatColor.GOLD);
     }
 
     public EastRoad(Document document) {
         super(document);
-        load(document);
     }
 }

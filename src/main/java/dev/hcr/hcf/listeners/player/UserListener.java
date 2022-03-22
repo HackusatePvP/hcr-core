@@ -1,4 +1,4 @@
-package dev.hcr.hcf.listeners;
+package dev.hcr.hcf.listeners.player;
 
 import dev.hcr.hcf.HCF;
 

@@ -13,11 +13,10 @@ import dev.hcr.hcf.utils.backend.ConfigurationType;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class Faction extends Claim {
@@ -26,19 +25,21 @@ public abstract class Faction extends Claim {
     private ChatColor color = ChatColor.WHITE;
     private final Collection<Claim> claims = new ArrayList<>();
     private Location home;
+    private boolean deathban;
     private static WildernessFaction wilderness;
     private static WarzoneFaction warzone;
     private static RoadFaction northRoad, southRoad, eastRoad, westRoad;
     private static final ConcurrentHashMap<UUID, Faction> factionUUIDMap = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Faction> factionNameMap = new ConcurrentHashMap<>();
 
-    public Faction(UUID uuid, String name, Claim claim) {
+    public Faction(UUID uuid, String name, Claim claim, boolean deathban) {
         super(name, claim.getCuboid());
         if (claim.getCuboid() != null) {
             claims.add(new Claim(name, claim.getCuboid()));
         }
         this.uniqueID = uuid;
         this.name = name;
+        this.deathban = deathban;
         factionUUIDMap.put(uniqueID, this);
         factionNameMap.put(name.toLowerCase(), this);
 
@@ -50,10 +51,11 @@ public abstract class Faction extends Claim {
         }
     }
 
-    public Faction(UUID uuid, String name) {
+    public Faction(UUID uuid, String name, boolean deathban) {
         super(name);
         this.uniqueID = uuid;
         this.name = name;
+        this.deathban = deathban;
         factionUUIDMap.put(uniqueID, this);
         factionNameMap.put(name.toLowerCase(), this);
         if (this instanceof WildernessFaction) {
@@ -72,6 +74,7 @@ public abstract class Faction extends Claim {
         super(document.getString("name"));
         this.uniqueID = UUID.fromString(document.getString("uuid"));
         this.name = document.getString("name");
+        this.deathban = document.getBoolean("deathban");
         factionUUIDMap.put(uniqueID, this);
         factionNameMap.put(name.toLowerCase(), this);
         if (this instanceof WildernessFaction) {
@@ -97,6 +100,7 @@ public abstract class Faction extends Claim {
     public void save() {
         Document document = new Document("uuid", getUniqueID().toString());
         document.append("name", getName());
+        document.append("deathban", deathban);
         document.append("color", (getColor() == null ? ChatColor.WHITE.toString() : getColor().name()));
         if (hasClaims()) {
             List<String> c = new ArrayList<>();
@@ -107,7 +111,7 @@ public abstract class Faction extends Claim {
             document.append("claims", c);
         }
         if (home != null) {
-            String parse = home.getX() + "%" + home.getY() + "%" + home.getZ();
+            String parse = home.getX() + "%" + home.getY() + "%" + home.getZ() + "%" + home.getWorld().getName();
             document.append("home", parse);
         }
         HCF.getPlugin().getMongoImplementation().appendFactionData(document);
@@ -146,6 +150,10 @@ public abstract class Faction extends Claim {
         return name.replace("_", " ");
     }
 
+    public boolean isDeathBan() {
+        return deathban;
+    }
+
     public boolean hasClaims() {
         return !claims.isEmpty();
     }
@@ -176,6 +184,11 @@ public abstract class Faction extends Claim {
         }
         claims.add(new Claim(getName(), cuboid));
         return true;
+    }
+
+    public void unclaim() {
+        this.claims.clear();
+        this.home = null;
     }
 
     public void clearClaims() {
@@ -218,6 +231,17 @@ public abstract class Faction extends Claim {
 
     public void setHome(Location home) {
         this.home = home;
+    }
+
+    /* All static methods below */
+
+    public static Collection<Player> getNearbyPlayers(Player player, int range) {
+        Collection<Player> toReturn = new HashSet<>();
+        for (Entity entity : player.getNearbyEntities(range, range, range)) {
+            if (!(entity instanceof Player)) continue;
+            toReturn.add((Player) entity);
+        }
+        return toReturn;
     }
 
     public static Collection<Faction> getFactions() {

@@ -6,7 +6,7 @@
 
     <groupId>dev.hcr</groupId>
     <artifactId>HCF</artifactId>
-    <version>2022.02.a5-SNAPSHOT</version>
+    <version>2022.02.a6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HCF</name>
@@ -90,11 +90,24 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/AquaCoreAPI.jar</systemPath>
         </dependency>
+        <!--Cove is currently not public which may change in the near future. Delete this dependency and delete CoveHook.java file to resolve issues.-->
         <dependency>
             <groupId>dev.hcr</groupId>
             <artifactId>Cove</artifactId>
             <version>2.0-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <!--This is the spigot which I use to handle iHCF events. Delete this dependency and replace with your own (if you use iHCF events) to resolve the issue.-->
+        <dependency>
+            <groupId>org.imanity.imanityspigot</groupId>
+            <artifactId>server</artifactId>
+            <version>2021.11.1b1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.thatkawaiisam</groupId>
+            <artifactId>assemble</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

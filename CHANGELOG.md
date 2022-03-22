@@ -1,4 +1,57 @@
-# Change log 2022.02.a5 (2/17/2022)
+# Changelog 2022.03.a6 (3/22/2022)
+- Greatly improved the pvp class system
+  - Added the ability to hook iHCF events instead of using the class task detection system.
+  - Added archer abilities; Speed 5 and Resistance 5.
+  - Created task to handle default class effects.
+  - Added archer tags (untested).
+    - Added [ArcherTagPlayerEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/archer/ArcherTagPlayerEvent.java)
+  - Added [MinerClass]() (untested).
+  - Added [BardClass]()
+    - Bard class can only give out positive effects to teammates, negative effects will be added in the next update.
+  - Greatly improved applying class effects to the class holder and teammate effects.
+    - Passive effects will no longer override any clickable effects.
+    - Fixed infinite looping bug when a clickable effect had expired.
+  - Added [PassiveEffectApplyTask](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/tasks/PassiveEffectApplyTask.), this is only used if you are not using iHCF events.
+- Added improvements to [Timers](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/Timer.java)
+  - Improved timer designs and messages.
+  - Added new timers for pvp classes.
+    - Added [ArcherTagTimer](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/timers/types/player/ArcherTagTimer.java)
+    - Added [ClassWarmupTimer](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/timers/types/player/ClassWarmupTimer.java)
+    - Added [ArcherResistanceTimer](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/timers/types/player/effects/ArcherResistanceTimer.java)
+    - Added [ArcherSpeedTimer](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/timers/types/player/effects/ArcherSpeedTimer.java)
+    - Added [FactionHomeTimer](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/timers/types/player/faction/FactionHomeTimer.java)
+  - Timers now work with system time to increase timer accuracy.
+- Added improvements to factions.
+  - Fixed bug which caused duplicate road saving.
+  - Each territory can define whether deathbans are enabled.   
+  - Improved [FactionShowCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionShowCommand.java) messages.
+    - Converts player uuids to string names.
+    - Added role sorting.
+    - Added different coloring to online and offline players.
+  - Added [FactionHomeCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionHomeCommand.java)  
+  - Improved faction chat design.
+  - Added more faction staff commands.
+    - [FactionForceJoinCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionForceJoinCommand,java)
+    - [FactionForceKickCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionForceKickCommand.java) (not finished).
+    - [FactionForceLeaderCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionForceLeaderCommand.java)
+    - [FactionForceSetHomeCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionForceSetHomeCommand.java)
+  - Improved the faction show messages and design.
+- Started implementation of [DeathBans](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/deathbans/DeathBan.java)
+  - Deathbans will be using a different saving method by serialization for simplicity.
+  - Deathbans can be configured in the [config.yml](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/resources/config.yml), please note you will need a proper hook setup.
+- User improvements:
+  - Started implementation of [UserEvents](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/UserEvent.java)
+- Added scoreboard which will require [Assemble](https://github.com/ThatKawaiiSam/Assemble).
+- Territory improvements:
+  - Improved territory protection, this not fully finished yet.
+  - Added illegal interaction messages.
+- Re-packaged listeners for better organization.  
+- Existing Bugs:
+  - Temporarily removed saving faction invites to the database. This will be fixed by the next update.
+  - Claims that are created with the [FactionClaimForCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionClaimForCommand.java) will not load properly from the database. This will be fixed in the next update.
+  - There maybe some issues with bard effects if you are not using the iHCF events. This will be addressed in the next update.
+
+# Changelog 2022.02.a5 (2/17/2022)
 - Started implementation of [timers](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/Timer.java).
   - Added [SOTWTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/server/SOTWTimer.java)
   - Added [CombatTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/player/CombatTimer.java)
@@ -29,7 +82,7 @@
   - Classes do not need a special spigot which can handle armor equip and unequipped events.
   - All classes are handled by the [KitDetectionClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/KitDetectionTask.java) and ran asynchronously up until potion effects are given.
 
-# Change log 2022.02.a4 (2/10/2022)
+# Changelog 2022.02.a4 (2/10/2022)
 - Added packet handlers and implemented [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) packet library (version 4.6).
   - Started [PacketController](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/packets/PacketController.java) api implementation.
 - Added more faction functionality.
@@ -54,7 +107,7 @@
 - Implemented precise calculations for warzone radius. 
 - Added unique donor reclaim system [ClaimBonusChest](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/donor/ClaimBonusChestCommand.java).
 
-# Change log 2022.02.a3 (2/6/2022)
+# Changelog 2022.02.a3 (2/6/2022)
 - Fixed several database issues.
   - Properly integrated MongoDB upsert operations.
   - Properly called faction super loading functions for loading.
@@ -69,7 +122,7 @@
   - You can no longer invite a player to your faction whose already in your faction.
   - You can no longer join multiple factions.
 
-# Change log 2022.02.a2 (2/2/2022)
+# Changelog 2022.02.a2 (2/2/2022)
 - Added more faction functionality.
   - Added more system factions; [Warzone](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WarzoneFaction.java), [Wilderness](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/WildernessFaction.java)
   - Added more events to handle territory protection.
@@ -90,7 +143,7 @@
   - Added [LocationUtils](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/LocationUtils.java).
 - Properties configuration will now create a file with preset values.
 
-# Change log 2022.01.a1 (1/30/2022)
+# Changelog 2022.01.a1 (1/30/2022)
 - Improved faction command framework; Aliases are now mapped separately from the main command map.
 - Added more commands.
   - Core

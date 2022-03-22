@@ -7,6 +7,13 @@ This core is unfinished and untested. This core is not meant to be put into prod
 Any and all issues you encounter will have to be fixed by you or another third party developer. Please do not create issues
 within GitHub as they will most likely be ignored. This may change as the core comes closer to completion.
 
+# Dependencies
+This project is made to minimize as many dependencies as possible. The only required dependency will be for design only like a scoreboard/tab library. 
+There are other dependency like core plugins to handle rank data, however these are completely optional.
+- [Assemble](https://github.com/ThatKawaiiSam/Assemble) This is a really nice scoreboard api and gets the job done. Full credit the original creator.
+- [AquaAPI](https://github.com/FaceSlap02/AquaCoreAPI) This is only needed if you plan on using AquaCore to handle rank data.
+- [ProtocolLib]() Currently, only being used in [PacketController]() which is not implemented yet.
+
 # Style of HCF
 This core is made for "hardcore" hcf servers. I never thought I would have to emphasize hardcore in a game-mode which is meant to be hardcore.
 This core will never have any soft-core features like partner items, partner packages, ability items, ect. 

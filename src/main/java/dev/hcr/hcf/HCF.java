@@ -4,7 +4,10 @@ import dev.hcr.hcf.commands.admin.EconomyCommand;
 import dev.hcr.hcf.commands.admin.SOTWCommand;
 import dev.hcr.hcf.commands.donor.ClaimBonusChestCommand;
 import dev.hcr.hcf.commands.players.BalanceCommand;
+import dev.hcr.hcf.commands.players.PayCommand;
 import dev.hcr.hcf.databases.MongoImplementation;
+import dev.hcr.hcf.deathbans.DeathBan;
+import dev.hcr.hcf.deathbans.DeathBanListener;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.member.DefaultFactionCommand;
 import dev.hcr.hcf.factions.commands.FactionCommandManager;
@@ -21,17 +24,21 @@ import dev.hcr.hcf.hooks.CoveHook;
 import dev.hcr.hcf.hooks.PluginHook;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.listeners.factions.FactionListener;
-import dev.hcr.hcf.listeners.UserListener;
-import dev.hcr.hcf.listeners.player.MiningListener;
-import dev.hcr.hcf.listeners.player.PlayerPacketListener;
+import dev.hcr.hcf.listeners.factions.FactionTerritoryProtectionListener;
+import dev.hcr.hcf.listeners.player.*;
 import dev.hcr.hcf.packets.PacketHandler;
-import dev.hcr.hcf.listeners.player.TimerListener;
-import dev.hcr.hcf.pvpclass.KitDetectionTask;
+import dev.hcr.hcf.pvpclass.tasks.KitDetectionTask;
+import dev.hcr.hcf.pvpclass.tasks.PassiveEffectApplyTask;
 import dev.hcr.hcf.pvpclass.types.ArcherClass;
+import dev.hcr.hcf.pvpclass.types.BardClass;
+import dev.hcr.hcf.pvpclass.types.MinerClass;
+import dev.hcr.hcf.scoreboard.HCFBoardAdapter;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
+import io.github.thatkawaiisam.assemble.Assemble;
+import io.github.thatkawaiisam.assemble.AssembleStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,14 +47,12 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class HCF extends JavaPlugin {
     private static HCF plugin;
     private final NumberFormat format = NumberFormat.getCurrencyInstance();
     private MongoImplementation database;
     private FactionRegenTask regenTask;
-    private KitDetectionTask detectionTask;
     private PacketHandler packetHandler;
     private PluginHook core;
     private final List<ConfigFile> files = new ArrayList<>();
@@ -62,26 +67,16 @@ public final class HCF extends JavaPlugin {
         loadFactions();
         loadPvPClasses();
         registerEvents();
+        loadUI();
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
         saveFactions();
+        // Runtime.getRuntime().exec("mongoexport --host host_name --port port_number --db myDatabase --collection Page --out Page.json");
         User.getUsers().forEach(user -> getMongoImplementation().appendUserDataSync(user.save()));
         Bukkit.getOnlinePlayers().forEach(player -> FactionClaimingListener.removeWand(player.getInventory()));
-        // TODO: 2/6/2022 Create mongodb database backup upon disable
-        List<String> command = Arrays.asList(
-                "mongodump",
-                "--out", "/backup/" // DEFAULTS TO working directory
-        );
-
-    }
-
-    private List<String> readOutputHelper(InputStream inputStream) throws IOException {
-        try (BufferedReader output = new BufferedReader(new InputStreamReader(inputStream))) {
-            return output.lines().collect(Collectors.toList());
-        }
     }
 
     private void loadConfigurationFiles() {
@@ -104,11 +99,14 @@ public final class HCF extends JavaPlugin {
         getCommand("claimbonuschest").setExecutor(new ClaimBonusChestCommand());
         getCommand("economy").setExecutor(new EconomyCommand());
         getCommand("faction").setExecutor(new DefaultFactionCommand());
+        getCommand("pay").setExecutor(new PayCommand());
         getCommand("sotw").setExecutor(new SOTWCommand());
     }
 
     private void implementDatabases() {
         database = new MongoImplementation(this);
+        database.loadFactions();
+        database.loadDeathBans();
     }
 
     private void loadHooks() {
@@ -124,7 +122,6 @@ public final class HCF extends JavaPlugin {
     private void loadFactions() {
         regenTask = new FactionRegenTask();
         regenTask.runTaskTimerAsynchronously(this, 20L, 20L * ConfigurationType.getConfiguration("faction.properties").getInteger("regen-delay-time"));
-        database.loadFactions();
         if (Faction.getWilderness() == null) {
             new WildernessFaction();
         }
@@ -149,9 +146,18 @@ public final class HCF extends JavaPlugin {
     }
 
     private void loadPvPClasses() {
-        detectionTask = new KitDetectionTask();
-        detectionTask.runTaskTimerAsynchronously(this, 20L, 20L);
+        ConfigFile config = getConfiguration("config");
+        if (config.getBoolean("use-ihcf-events")) {
+            Bukkit.getPluginManager().registerEvents(new iHCFListener(), this);
+        } else {
+            KitDetectionTask detectionTask = new KitDetectionTask();
+            detectionTask.runTaskTimerAsynchronously(this, 20L, 5L);
+            PassiveEffectApplyTask applyTask = new PassiveEffectApplyTask();
+            applyTask.runTaskTimerAsynchronously(this, 20L, 5L);
+        }
         new ArcherClass();
+        new MinerClass();
+        new BardClass();
     }
 
     private void saveFactions() {
@@ -163,7 +169,13 @@ public final class HCF extends JavaPlugin {
     private void registerEvents() {
         // Handle packet managers
         packetHandler = new PacketHandler();
-        Arrays.asList(new UserListener(), new FactionListener(plugin), new FactionClaimingListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
+        Arrays.asList(new UserListener(), new ChatListener(this), new FactionListener(), new FactionTerritoryProtectionListener(), new FactionClaimingListener(),
+                new PlayerListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener(), new DeathBanListener(), new PvPClassListener()).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
+    }
+
+    private void loadUI() {
+        Assemble assemble = new Assemble(this, new HCFBoardAdapter());
+        assemble.setAssembleStyle(AssembleStyle.KOHI);
     }
 
     public PacketHandler getPacketHandler() {

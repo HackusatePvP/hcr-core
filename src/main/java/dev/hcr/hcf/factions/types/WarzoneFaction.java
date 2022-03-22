@@ -9,7 +9,7 @@ import java.util.UUID;
 public class WarzoneFaction extends Faction implements SystemFaction {
 
     public WarzoneFaction() {
-        super(UUID.randomUUID(), "Warzone");
+        super(UUID.randomUUID(), "Warzone", true);
         this.setColor(ChatColor.RED);
     }
 

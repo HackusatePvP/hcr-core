@@ -1,5 +1,6 @@
 name: HCF
 version: '${project.version}'
+author: Hackusate_PvP
 main: dev.hcr.hcf.HCF
 depend: [ProtocolLib]
 commands:
@@ -16,6 +17,8 @@ commands:
   faction:
     aliases: [factions, f]
     description: Main faction command.
+  pay:
+    description: Send in-game currency to another user.
   sotw:
     aliases: [startoftheworld]
     description: Managers the SOTW event.

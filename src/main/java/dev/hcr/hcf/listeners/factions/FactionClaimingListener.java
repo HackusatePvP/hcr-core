@@ -68,12 +68,18 @@ public class FactionClaimingListener implements Listener {
             event.setUseItemInHand(Event.Result.DENY);
             if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
+                if (position1ClaimingMap.containsKey(user)) {
+                    handlePacketEvents(event, player, user, faction, false);
+                }
                 position1ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 1 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
                 handlePacketEvents(event, player, user, faction, true);
             }
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
+                if (position2ClaimingMap.containsKey(user)) {
+                    handlePacketEvents(event, player, user, faction, false);
+                }
                 position2ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 2 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
                 handlePacketEvents(event, player, user, faction, true);

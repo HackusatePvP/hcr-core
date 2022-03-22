@@ -17,6 +17,22 @@ public class LocationUtils {
     }
 
     public static Cuboid parseCuboid(String parse) {
+        // -56.0 * 309.0 * -50.0 * 321.0 * world
+        try {
+            String[] split = parse.split("\\*");
+            double x1 = Double.parseDouble(split[0]);
+            double z1 = Double.parseDouble(split[1]);
+            double x2 = Double.parseDouble(split[2]);
+            double z2 = Double.parseDouble(split[3]);
+            String world = split[4];
+            return new Cuboid(world, x1, z1, x2, z2);
+        } catch (Exception ignored) {
+            throw new NullPointerException();
+        }
+
+    }
+
+ /*   public static Cuboid parseCuboid(String parse) {
         // Dont even ask LMAOOO
         for (int s1 = 0; s1 < parse.length(); s1++) {
             if (parse.charAt(s1) == '*') {
@@ -55,5 +71,5 @@ public class LocationUtils {
             }
         }
         return null;
-    }
+    } */
 }

@@ -7,13 +7,28 @@ import org.bson.Document;
 import java.util.UUID;
 
 public abstract class RoadFaction extends Faction implements SystemFaction {
+    private final String name;
 
     public RoadFaction(String name) {
-        super(UUID.randomUUID(), name);
+        super(UUID.randomUUID(), name, true);
+        this.name = name;
     }
 
     public RoadFaction(Document document) {
         super(document);
-        load(document);
+        this.name = document.getString("name");
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public String getDisplayName() {
+        return name.replaceAll("(?!^)([A-Z])", " $1");
+    }
+
+    public String getDirection() {
+        return name.replace("Road", "");
     }
 }

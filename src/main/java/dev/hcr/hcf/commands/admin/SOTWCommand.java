@@ -38,13 +38,12 @@ public class SOTWCommand implements CommandExecutor {
                     player.sendMessage(ChatColor.RED + "SOTW is currently not running.");
                     return true;
                 }
-                if (!timer.isEnabled()) {
+                if (!timer.isActive()) {
                     player.sendMessage(ChatColor.RED + "SOTW is currently not running.");
                     return true;
                 }
-                if (timer.isEnabled()) {
-                    timer.setEnabled(false);
-                    timer.cancel();
+                if (timer.isActive()) {
+                    timer.end(true);
                     player.sendMessage(ChatColor.RED + "You have stopped the SOTW timer.");
                 }
             } else {
@@ -58,7 +57,7 @@ public class SOTWCommand implements CommandExecutor {
                 if (timer == null) {
                     timer = new SOTWTimer(duration.getValue());
                 } else {
-                    if (timer.isEnabled()) {
+                    if (timer.isActive()) {
                         player.sendMessage(ChatColor.RED + "SOTW timer is already running.");
                         return true;
                     }

@@ -30,6 +30,7 @@ public abstract class FactionCommand {
         this.name = name;
         this.description = description;
         commandMap.put(name.toLowerCase(), this);
+        this.aliases = aliases;
         for (String s : aliases) {
             aliasMap.put(s.toLowerCase(), this);
         }
@@ -39,6 +40,7 @@ public abstract class FactionCommand {
         this.name = name;
         this.description = description;
         this.permission = permission;
+        this.aliases = aliases;
         commandMap.put(name.toLowerCase(), this);
         for (String s : aliases) {
             aliasMap.put(s.toLowerCase(), this);
@@ -55,6 +57,10 @@ public abstract class FactionCommand {
 
     public String getPermission() {
         return "hcf.faction.commands." + permission;
+    }
+
+    public String[] getAliases() {
+        return aliases;
     }
 
     public static FactionCommand getCommand(String name) {

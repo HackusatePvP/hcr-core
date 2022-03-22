@@ -3,10 +3,15 @@ package dev.hcr.hcf.factions.commands.member;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
+import dev.hcr.hcf.factions.types.SafeZoneFaction;
 import dev.hcr.hcf.factions.types.SystemFaction;
 import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.roads.RoadFaction;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
+import dev.hcr.hcf.utils.PlayerUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,6 +21,7 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class FactionShowCommand extends FactionCommand {
 
@@ -69,8 +75,19 @@ public class FactionShowCommand extends FactionCommand {
     private void printSystemInfo(Faction faction, CommandSender sender) {
         List<String> message = new ArrayList<>();
         message.add("&7&m-----------------------------------------------------");
-        message.add("&4" + faction.getName() + ": ");
-        message.add("  &7Location: &7(&c0&7,&c0&7)");
+        if (faction instanceof SafeZoneFaction) {
+            message.add("&a&lSafeZone");
+            message.add("");
+            message.add("&7Location: &c[" + faction.getHome().getBlockX() + "&7," + faction.getHome().getBlockZ() + "]");
+        } else if (faction instanceof RoadFaction) {
+            message.add("&6&l" + faction.getDisplayName());
+            message.add("");
+            message.add("&7Direction: &c" + ((RoadFaction) faction).getDirection());
+        } else {
+            message.add(faction.getColor() + faction.getName());
+            message.add("");
+            message.add("&cNo information.");
+        }
         message.add("&7&m-----------------------------------------------------");
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));
     }
@@ -86,11 +103,68 @@ public class FactionShowCommand extends FactionCommand {
             message.add("  &7Home: &c[N/A]");
         }
         message.add("  &7Balance: &c" + HCF.getPlugin().getFormat().format(playerFaction.getBalance()));
-        message.add("  &7Leader: &c" + playerFaction.getLeader()); //TODO convert uuid to leader name
+        if (Bukkit.getPlayer(playerFaction.getLeader()) == null) {
+            message.add("  &7Leader: &c" + PlayerUtils.getPlayerNameByUUID(playerFaction.getLeader()));
+        } else {
+            message.add("  &7Leader: &a" + Bukkit.getPlayer(playerFaction.getLeader()).getName());
+        }
+        List<UUID> coleaders = new ArrayList<>();
+        List<UUID> captains = new ArrayList<>();
+        List<UUID> members = new ArrayList<>();
+        for (UUID uuid : playerFaction.getFactionMembers()) {
+            if (playerFaction.getRole(uuid) == Role.COLEADER) {
+                coleaders.add(uuid);
+            } else if (playerFaction.getRole(uuid) == Role.CAPTAIN) {
+                captains.add(uuid);
+            } else if (playerFaction.getRole(uuid) != Role.LEADER) {
+                members.add(uuid);
+            }
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("  &7Co-Leaders: &7[");
+        handlePlayerRoles(coleaders, builder);
+        builder.append("&7]");
+        message.add(builder.toString());
+        builder = new StringBuilder();
+        builder.append("  &7Captain: &7[");
+        handlePlayerRoles(captains, builder);
+        builder.append("&7]");
+        message.add(builder.toString());
+        builder = new StringBuilder();
+        builder.append("  &7Members: &7[");
+        handlePlayerRoles(members, builder);
+        builder.append("&7]");
+        message.add(builder.toString());
         message.add("  &7Current DTR: " + playerFaction.getFormattedCurrentDTR());
         message.add("  &7Points: &c" + playerFaction.getPoints()); //TODO implement faction points
         message.add("&7&m-----------------------------------------------------");
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));
+    }
+
+    private void handlePlayerRoles(List<UUID> group, StringBuilder builder) {
+        if (group.isEmpty()) {
+            builder.append("&cN/A");
+            return;
+        }
+        for (UUID uuid : group) {
+            if (Bukkit.getPlayer(uuid) == null) {
+                System.out.println("Length: " + builder.length());
+                if (builder.length() > 16) {
+                    builder.append(", &c");
+                } else {
+                    builder.append("&c");
+                }
+                builder.append(PlayerUtils.getPlayerNameByUUID(uuid));
+            } else {
+                System.out.println("Length: " + builder.length());
+                if (builder.length() > 16) {
+                    builder.append(", &a");
+                } else {
+                    builder.append("&a");
+                }
+                builder.append(Bukkit.getPlayer(uuid).getName());
+            }
+        }
     }
 
 }

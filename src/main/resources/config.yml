@@ -1,0 +1,15 @@
+# Set this to true if you are using a spigot which supports PotionEffectRemoveEvent and EquipmentSetEvent.
+# Note using iHCF events is known to improve performance. IF you are not using iHCF events the plugin will be using a constant running task to detect class changes and potion effects.
+use-ihcf-events: false
+
+# Deathban duration configuration. Please note you will need a hook in order for this configuration to work.
+# Parameters
+# Rank:
+#   The  name of the rank, this will be used to retrieve the rank from the user using your hook.
+#  Rank: Number
+#   Integer number representing the delay of the deathban in minutes.
+deathbans:
+  # You will need to configure a default rank for the server. I highly recommend naming this rank Default.
+  default: 240
+  # In this example the rank name is "rank1" and the duration is 1 hour or 60 minutes.
+  rank1: 60

@@ -9,7 +9,7 @@ import java.util.UUID;
 public class WildernessFaction extends Faction implements SystemFaction {
 
     public WildernessFaction() {
-        super(UUID.randomUUID(), "Wilderness");
+        super(UUID.randomUUID(), "Wilderness", true);
         this.setColor(ChatColor.DARK_GREEN);
     }
 

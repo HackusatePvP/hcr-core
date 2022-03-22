@@ -3,13 +3,14 @@ package dev.hcr.hcf.timers.types.player;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
-import dev.hcr.hcf.timers.events.TimerStopEvent;
 import dev.hcr.hcf.users.User;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+
+import java.util.concurrent.TimeUnit;
 
 public class EnderPearlTimer extends Timer implements Listener {
     private final Player player;
@@ -20,7 +21,7 @@ public class EnderPearlTimer extends Timer implements Listener {
         super(player, "enderpearl");
         this.player = player;
         this.active = true;
-        this.delay = 15;
+        this.delay = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(15L);
         this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
@@ -45,25 +46,24 @@ public class EnderPearlTimer extends Timer implements Listener {
     }
 
     @Override
+    public String getDisplayName() {
+        return "&9Ender-Pearl";
+    }
+
+    @Override
     public void run() {
         if (!active) return;
-        --delay;
-        if (delay <= 0) {
+        long left = delay - System.currentTimeMillis();
+        if (left <= 0) {
             TimerExpireEvent event = new TimerExpireEvent(this, player);
             Bukkit.getPluginManager().callEvent(event);
             end(false);
         }
     }
 
-    public void end(boolean forced) {
-        if (forced) {
-            TimerStopEvent event = new TimerStopEvent(this, player);
-            Bukkit.getPluginManager().callEvent(event);
-        }
-        this.delay = 0;
-        this.active = false;
-        cancel();
-        super.end();
+    @Override
+    public long getTimeLeft() {
+        return delay - System.currentTimeMillis();
     }
 
     @EventHandler

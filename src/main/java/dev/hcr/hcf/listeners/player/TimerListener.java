@@ -21,11 +21,11 @@ public class TimerListener implements Listener {
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
             Player player = (Player) event.getEntity();
             User user = User.getUser(player.getUniqueId());
-            user.setCombat(true);
+            user.setTimer("combat", true);
             Player attacker = (Player) event.getDamager();
             if (attacker.getUniqueId() != player.getUniqueId()) {
                 User target = User.getUser(attacker.getUniqueId());
-                target.setCombat(true);
+                target.setTimer("combat", true);
             }
         }
     }
@@ -35,7 +35,7 @@ public class TimerListener implements Listener {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             User user = User.getUser(player.getUniqueId());
-            user.setCombat(true);
+            user.setTimer("combat", true);
         }
     }
 
@@ -50,7 +50,7 @@ public class TimerListener implements Listener {
                 player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
                 event.setCancelled(true);
             } else {
-                user.setEnderPearl(true);
+                user.setTimer("enderpearl", true);
             }
         }
     }

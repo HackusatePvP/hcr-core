@@ -35,7 +35,7 @@ public class PlayerFaction extends Faction {
     private final HCF plugin = HCF.getPlugin();
 
     public PlayerFaction(String name, UUID leader) {
-        super(UUID.randomUUID(), name, new Claim(name));
+        super(UUID.randomUUID(), name, new Claim(name), true);
         this.leader = leader;
         this.currentDTR = 1.1;
         this.maxDTR = 1.1;
@@ -109,18 +109,7 @@ public class PlayerFaction extends Faction {
             }
         }
         if (document.containsKey("invites")) {
-            List<String> invites = document.get("invites", ArrayList.class);
-            for (String s : invites) {
-                for (int i = 0; i < s.length(); i++) {
-                    if (s.charAt(i) == '-') {
-                        String sub = s.substring(i).replace("*", "");
-                        UUID inviter = UUID.fromString(sub);
-                        s = s.replace(sub, "");
-                        String invited = s;
-                        factionInviteMap.put(s, inviter);
-                    }
-                }
-            }
+           //FIXME removed for now,
         }
         // Call the super method for loading claims and other basic faction data.
         super.load(document);
@@ -145,7 +134,6 @@ public class PlayerFaction extends Faction {
         factionInviteMap.forEach((s, uuid) -> invites.add(s + "*" + uuid.toString()));
         document.append("invites", invites);
 
-        //FIXME Duplicate code, I need to improve the faction system in order to call the super method "save".
         plugin.getMongoImplementation().appendFactionData(document);
         super.save();
     }
@@ -196,7 +184,7 @@ public class PlayerFaction extends Faction {
     }
 
     public boolean isRaidable() {
-        return getCurrentDTR() > 0;
+        return getCurrentDTR() < 0;
     }
 
     public double getBalance() {
@@ -228,6 +216,10 @@ public class PlayerFaction extends Faction {
             return Role.NONE;
         }
         return roleMap.get(user.getUuid());
+    }
+
+    public Role getRole(UUID uuid) {
+        return roleMap.get(uuid);
     }
 
     public void setRole(User user, Role role) {

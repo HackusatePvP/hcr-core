@@ -9,9 +9,7 @@ import dev.hcr.hcf.factions.commands.coleader.FactionPromoteCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionCreateCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionDisbandCommand;
 import dev.hcr.hcf.factions.commands.member.*;
-import dev.hcr.hcf.factions.commands.staff.FactionBypassCommand;
-import dev.hcr.hcf.factions.commands.staff.FactionClaimForCommand;
-import dev.hcr.hcf.factions.commands.staff.FactionTestCommand;
+import dev.hcr.hcf.factions.commands.staff.*;
 
 public class FactionCommandManager {
 
@@ -19,6 +17,7 @@ public class FactionCommandManager {
         // MEMBER COMMANDS
         new FactionChatCommand();
         new FactionDepositCommand();
+        new FactionHomeCommand();
         new FactionJoinCommand();
         new FactionLeaveCommand();
         new FactionMapCommand();
@@ -41,6 +40,9 @@ public class FactionCommandManager {
         // STAFF COMMANDS
         new FactionBypassCommand();
         new FactionClaimForCommand();
+        new FactionForceJoinCommand();
+        new FactionForceLeaderCommand();
+        new FactionForceSetHomeCommand();
         new FactionTestCommand();
 
         // Register last for pagination

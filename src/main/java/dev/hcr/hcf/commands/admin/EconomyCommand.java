@@ -71,7 +71,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                 } finally {
                     if (amount != -1D) {
                         user.takeFromBalance(amount);
-                        sender.sendMessage(ChatColor.GREEN + "Successfully removed \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a.");
+                        sender.sendMessage(CC.translate("Successfully removed \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a."));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Balance must be positive.");
                     }
@@ -88,7 +88,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                 } finally {
                     if (amount != -1D) {
                         user.setBalance(amount);
-                        sender.sendMessage(ChatColor.GREEN + "Successfully set \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a.");
+                        sender.sendMessage(CC.translate("Successfully set \"" + HCF.getPlugin().getFormat().format(amount) + "\" to &b" + user.getName() + "&a."));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Balance must be positive.");
                     }

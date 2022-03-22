@@ -3,8 +3,7 @@ package dev.hcr.hcf.timers.types.player;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
-import dev.hcr.hcf.timers.events.TimerStopEvent;
-import org.bukkit.Bukkit;
+import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +22,14 @@ public class PvPTimer extends Timer implements Listener {
         this.player = player;
         this.active = true;
         this.delay = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(30L);
+        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
+    }
+
+    public PvPTimer(Player player, Document document) {
+        super(player, document);
+        this.player = player;
+        this.active = true;
+        this.delay = document.getLong("delay");
         this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
@@ -47,26 +54,22 @@ public class PvPTimer extends Timer implements Listener {
     }
 
     @Override
+    public String getDisplayName() {
+        return "&aPvP-Timer";
+    }
+
+    @Override
     public void run() {
         if (!active) return;
-        delay -= System.currentTimeMillis();
-        if (delay <= 0) {
+        long left = delay - System.currentTimeMillis();
+        if (left <= 0) {
             end(true);
         }
     }
 
-    public void end(boolean forced) {
-        if (forced) {
-            TimerStopEvent event = new TimerStopEvent(this, player);
-            Bukkit.getPluginManager().callEvent(event);
-        } else {
-            TimerExpireEvent event = new TimerExpireEvent(this);
-            Bukkit.getPluginManager().callEvent(event);
-        }
-        this.delay = 0;
-        this.active = false;
-        cancel();
-        super.end();
+    @Override
+    public long getTimeLeft() {
+        return delay - System.currentTimeMillis();
     }
 
     @EventHandler
@@ -74,7 +77,6 @@ public class PvPTimer extends Timer implements Listener {
         Timer timer = event.getTimer();
         Player[] affected = event.getAffected();
         if (timer == this) {
-            timer.end();
             if (affected.length == 0) return;
             for (Player player : affected) {
                 player.sendMessage(ChatColor.RED + "You no longer have invincibility from pvp.");

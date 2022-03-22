@@ -43,7 +43,7 @@ public class FactionHelpCommand extends FactionCommand {
     public void execute(CommandSender sender, Command c, String label, String[] args) {
         List<String> message = new ArrayList<>();
         if (args.length < 2) {
-            message.add("&7&m-----------------------------------------------------");
+            message.add("&7&m-------------------------------------------------------------");
             message.add("&cFaction Help &7(&c" + 1 + "&7/&c" + getMaxPage() + "&7)");
             message.add("");
             for (String s : pageMap.keySet()) {
@@ -53,11 +53,11 @@ public class FactionHelpCommand extends FactionCommand {
                 }
             }
             message.add("");
-            message.add("&7You are on page (" + 1 + "/" + getMaxPage() + ") To view the next page use the command \"" + label + " " + this.getName() + " <page>.");
-            message.add("&7&m-----------------------------------------------------");
+            message.add("&7You are on page (" + 1 + "/" + getMaxPage() + ") To view the next page use the command \"/" + label + " " + this.getName() + " <page>.\"");
+            message.add("&7&m-------------------------------------------------------------");
         }
         if (args.length == 2) {
-            message.add("&7&m-----------------------------------------------------");
+            message.add("&7&m-------------------------------------------------------------");
             int page = Integer.parseInt(args[1]);
             if (page > getMaxPage()) {
                 message.add(ChatColor.RED + "This page doesn't exist!");
@@ -71,9 +71,9 @@ public class FactionHelpCommand extends FactionCommand {
                     }
                 }
                 message.add("");
-                message.add("&7You are on page (" + page + "/" + getMaxPage() + ") To view the next page use the command \"" + label + " " + this.getName() + " <page>.");
+                message.add("&7You are on page (" + 1 + "/" + getMaxPage() + ") To view the next page use the command \"/" + label + " " + this.getName() + " <page>.\"");
             }
-            message.add("&7&m-----------------------------------------------------");
+            message.add("&7&m-------------------------------------------------------------");
         }
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));
     }
