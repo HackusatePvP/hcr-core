@@ -3,9 +3,7 @@ package dev.hcr.hcf.factions.commands.member;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
-import dev.hcr.hcf.factions.types.SafeZoneFaction;
-import dev.hcr.hcf.factions.types.SystemFaction;
-import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.*;
 import dev.hcr.hcf.factions.types.roads.RoadFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
@@ -78,12 +76,20 @@ public class FactionShowCommand extends FactionCommand {
         if (faction instanceof SafeZoneFaction) {
             message.add("&a&lSafeZone");
             message.add("");
-            message.add("&7Location: &c[" + faction.getHome().getBlockX() + "&7," + faction.getHome().getBlockZ() + "]");
+            if (faction.getHome() != null) {
+                message.add("&7Location: &c[&7" + faction.getHome().getBlockX() + "&7," + faction.getHome().getBlockZ() + "&c]");
+            } else {
+                message.add("&7Location: &cN/A");
+            }
         } else if (faction instanceof RoadFaction) {
             message.add("&6&l" + faction.getDisplayName());
             message.add("");
             message.add("&7Direction: &c" + ((RoadFaction) faction).getDirection());
-        } else {
+        } else if (faction instanceof WildernessFaction) {
+            message.add("&2&lWilderness");
+            message.add("");
+            message.add("&7Claimable land.");
+        }  else {
             message.add(faction.getColor() + faction.getName());
             message.add("");
             message.add("&cNo information.");
@@ -98,7 +104,7 @@ public class FactionShowCommand extends FactionCommand {
         message.add("&7&m-----------------------------------------------------");
         message.add("&c&l" + playerFaction.getName().toUpperCase() + ": &7[&6" + playerFaction.getOnlineMembers().size() + "&7/&6" + playerFaction.getFactionMembers().size() + "&7]");
         if (playerFaction.getHome() != null) {
-            message.add("  &7Home: &7[&c" + playerFaction.getHome().getBlockX() + "," + playerFaction.getHome().getBlockZ() + "&7]"); //TODO implement faction home + claims
+            message.add("  &7Home: &7[&c" + playerFaction.getHome().getBlockX() + "," + playerFaction.getHome().getBlockZ() + "&7]");
         } else {
             message.add("  &7Home: &c[N/A]");
         }
@@ -135,7 +141,7 @@ public class FactionShowCommand extends FactionCommand {
         handlePlayerRoles(members, builder);
         builder.append("&7]");
         message.add(builder.toString());
-        message.add("  &7Current DTR: " + playerFaction.getFormattedCurrentDTR());
+        message.add("  &7Current DTR: " + (playerFaction.isRaidable() ? playerFaction.getRaidableCurrentDTR() : playerFaction.getFormattedCurrentDTR()));
         message.add("  &7Points: &c" + playerFaction.getPoints()); //TODO implement faction points
         message.add("&7&m-----------------------------------------------------");
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));

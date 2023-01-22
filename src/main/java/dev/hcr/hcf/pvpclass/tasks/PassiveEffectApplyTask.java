@@ -1,28 +1,34 @@
 package dev.hcr.hcf.pvpclass.tasks;
 
 import dev.hcr.hcf.pvpclass.PvPClass;
-import dev.hcr.hcf.pvpclass.tasks.objects.Effect;
-import org.bukkit.Bukkit;
+import dev.hcr.hcf.pvpclass.types.bard.BardClass;
+import dev.hcr.hcf.users.User;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.UUID;
+import java.util.Arrays;
 
 public class PassiveEffectApplyTask extends BukkitRunnable {
+    private final Player player;
+    private final PvPClass pvPClass;
+
+    public PassiveEffectApplyTask(Player player, PvPClass pvPClass) {
+        this.player = player;
+        this.pvPClass = pvPClass;
+    }
+
 
     @Override
     public void run() {
-        for (UUID uuid : PvPClass.getTrackerEntries()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) continue;
-            PvPClass pvPClass = PvPClass.getEquippedClass(player);
-            for (Effect effect : pvPClass.getEffects(player)) {
-                // Scan to see if the player has the potion effect in use, this could be a clickable effect so we don't want to replace the effect.
-                PotionEffect foundEffect = player.getActivePotionEffects().stream().filter(effect1 -> effect1.getType().getName().equalsIgnoreCase(effect.getType().getName())).findAny().orElse(null);
-                if (foundEffect == null) {
-                    PvPClass.getPlayerEffectTask(player).addEffect(effect);
-                }
+        User user = User.getUser(player.getUniqueId());
+        if (user.getCurrentClass() == null) return;
+        if (user.getCurrentClass().getEffects(player) != null)
+            Arrays.stream(user.getCurrentClass().getEffects(player)).forEach(effect -> player.addPotionEffect(effect.getEffect()));
+
+        if (user.getCurrentClass() instanceof BardClass) {
+            if (player.getItemInHand() != null && !(player.getItemInHand().getType().equals(Material.AIR))) {
+                ((BardClass) user.getCurrentClass()).applyHeldBard(player, player.getItemInHand());
             }
         }
     }

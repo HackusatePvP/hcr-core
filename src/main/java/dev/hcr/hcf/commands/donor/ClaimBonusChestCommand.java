@@ -24,6 +24,7 @@ public class ClaimBonusChestCommand implements CommandExecutor {
             player.sendMessage(ChatColor.RED + "You already claimed your chest for this map.");
             return true;
         }
+        user.setClaimedChest(true);
         giveBonusChestItems(player.getInventory());
         return false;
     }

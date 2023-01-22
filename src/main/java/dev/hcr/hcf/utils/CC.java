@@ -18,12 +18,4 @@ public class CC {
         return toReturn;
     }
 
-    public static void main(String[] args) {
-        String parse = "50.0%70%-50.0";
-        String[] split = parse.split("%");
-        double x = Double.parseDouble(split[0]);
-        int y = Integer.parseInt(split[1]);
-        double z = Double.parseDouble(split[2]);
-        System.out.println(x + "," + y + "," + z);
-    }
 }

@@ -22,7 +22,6 @@ public class EnderPearlTimer extends Timer implements Listener {
         this.player = player;
         this.active = true;
         this.delay = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(15L);
-        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
     public boolean isActive() {
@@ -52,6 +51,7 @@ public class EnderPearlTimer extends Timer implements Listener {
 
     @Override
     public void run() {
+        if (isPause()) return;
         if (!active) return;
         long left = delay - System.currentTimeMillis();
         if (left <= 0) {

@@ -19,6 +19,11 @@ public class SafeZoneFaction extends Faction implements SystemFaction {
 
     public SafeZoneFaction(Document document) {
         super(document);
-        load(document);
+        super.load(document);
+    }
+
+    @Override
+    public double getDTRMultiplier() {
+        return 1;
     }
 }

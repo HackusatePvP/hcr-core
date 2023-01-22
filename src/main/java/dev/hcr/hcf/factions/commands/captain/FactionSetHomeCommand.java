@@ -38,14 +38,14 @@ public class FactionSetHomeCommand extends FactionCommand {
             return;
         }
         Location location = player.getLocation();
-        //Claim claim = playerFaction.getClaims().stream().findFirst().orElse(playerFaction.getClaims().stream().findFirst().orElse(null));
         Claim claim = playerFaction.getClaims().stream().filter(claim1 -> claim1.getCuboid().isIn(location)).findAny().orElse(null);
         if (claim == null) {
             player.sendMessage(ChatColor.RED + "You can only a set a faction home inside your own territory.");
             return;
         }
         playerFaction.setHome(location);
-        playerFaction.broadcast(CC.translate("&d[" + playerFaction.getName() + "] " + playerFaction.getRole(user).getAstrix() + " " + player.getName() + " has updated the faction home."));
+        playerFaction.broadcast(CC.translate("&7[&4" + playerFaction.getName().toUpperCase() + "&7] &c" + player.getName() + " &7has &aUPDATED &7the faction home."));
+
     }
 
     @Override

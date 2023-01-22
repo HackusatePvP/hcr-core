@@ -1,6 +1,5 @@
 package dev.hcr.hcf.timers.types.player;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
@@ -23,7 +22,6 @@ public class ClassWarmupTimer extends Timer implements Listener {
         this.player = player;
         this.active = true;
         this.delay = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
-        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
     public boolean isActive() {
@@ -53,6 +51,7 @@ public class ClassWarmupTimer extends Timer implements Listener {
 
     @Override
     public void run() {
+        if (isPause()) return;
         if (!active) return;
         if (PvPClass.getApplicableClass(player) == null) {
             end(true);

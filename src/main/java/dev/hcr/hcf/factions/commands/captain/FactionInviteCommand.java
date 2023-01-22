@@ -45,7 +45,7 @@ public class FactionInviteCommand extends FactionCommand {
                 sender.sendMessage("&cCould not find user \"" + name + "\".");
                 return;
             }
-            if (inviterFaction.hasMember(user.getUuid())) {
+            if (inviterFaction.hasMember(user.getUniqueID())) {
                 player.sendMessage(ChatColor.RED + "User is already in your faction.");
                 return;
             }

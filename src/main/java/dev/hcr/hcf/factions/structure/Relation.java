@@ -32,7 +32,6 @@ public enum Relation {
         if (user.getFaction().getName().equalsIgnoreCase(faction.getName())) {
             return FRIENDLY;
         }
-
         return ENEMY;
     }
 }

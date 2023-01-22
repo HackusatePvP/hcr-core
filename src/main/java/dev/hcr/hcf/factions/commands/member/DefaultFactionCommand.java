@@ -28,7 +28,7 @@ public class DefaultFactionCommand implements CommandExecutor, TabExecutor {
             sender.sendMessage(ChatColor.RED + "Could not find argument \"" + args[0] + "\". /" + label + " help");
             return true;
         }
-        if (!command.getPermission().replace("hcf.faction.commands.", "").isEmpty()) {
+        if (!command.getPermission().replace("hcf.faction.commands.", "").equalsIgnoreCase("")) {
             if (!sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(ChatColor.RED + "No permission.");
                 return true;

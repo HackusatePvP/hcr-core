@@ -7,47 +7,40 @@ import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.pvpclass.structure.Abilities;
 import dev.hcr.hcf.timers.Timer;
-import dev.hcr.hcf.timers.types.player.CombatTimer;
-import dev.hcr.hcf.timers.types.player.EnderPearlTimer;
-import dev.hcr.hcf.timers.types.player.effects.ArcherResistanceTimer;
-import dev.hcr.hcf.timers.types.player.effects.ArcherSpeedTimer;
-import dev.hcr.hcf.timers.types.player.faction.FactionHomeTimer;
+import dev.hcr.hcf.timers.events.TimerStartEvent;
+import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.users.faction.ChatChannel;
-import dev.hcr.hcf.users.statistics.types.OreStatistics;
-import dev.hcr.hcf.users.statistics.types.PvPStatistics;
+import dev.hcr.hcf.users.statistics.UserStatistics;
 import dev.hcr.hcf.utils.TaskUtils;
-import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class User {
     private final UUID uuid;
     private final String name;
-    private OreStatistics oreStatistics;
-    private PvPStatistics pvPStatistics;
     private double balance;
+    private int lives;
     private boolean claimedChest;
     private boolean factionMap = false;
     private boolean bypass = false;
+    private UserStatistics userStatistics;
     private PvPClass currentClass = null;
     private ChatChannel channel = ChatChannel.PUBLIC;
     private Faction faction;
     private final Set<Timer> activeTimers = new HashSet<>();
 
     private final static ConcurrentHashMap<UUID, User> users = new ConcurrentHashMap<>();
+    private final static Map<UUID, BukkitTask> wallBorderTask = new HashMap<>();
 
     public User(UUID uuid, String name) {
         this.uuid = uuid;
         this.name = name;
-        this.pvPStatistics = new PvPStatistics(this);
-        this.oreStatistics = new OreStatistics(this);
+        userStatistics = new UserStatistics(uuid);
         loadFaction();
         users.put(uuid, this);
     }
@@ -64,24 +57,48 @@ public class User {
         });
     }
 
-    public void load(Document document) {
-        this.pvPStatistics = new PvPStatistics(this, document);
-        this.oreStatistics = new OreStatistics(this, document);
-        if (document.containsKey("balance")) {
-            this.balance = document.getDouble("balance");
+    public void load(Map<String, Object> map) {
+
+        if (map.containsKey("balance")) {
+            this.balance = (Double) map.get("balance");
         }
-        if (document.containsKey("claimedChest")) {
-            this.claimedChest = document.getBoolean("claimedChest");
+        if (map.containsKey("claimedChest")) {
+            this.claimedChest = (Boolean) map.get("claimedChest");
+        }
+        if (map.containsKey("statsMap")) {
+            String statsString = (String) map.get("statsMap");
+
+            Map<String, Object> statsMap = new HashMap<>();
+            String[] entrySplit = statsString.split("%");
+            for (String s : entrySplit) {
+                String key = s.split("&")[0];
+                String value = s.split("&")[1];
+                try {
+                    int i = Integer.parseInt(value);
+                    statsMap.put(key, i);
+                } catch (NumberFormatException ignored) {
+                    statsMap.put(key, value);
+                }
+            }
+            userStatistics = new UserStatistics(uuid, statsMap);
         }
     }
 
-    public Document save() {
-        Document document = new Document("uuid", uuid.toString());
-        document.append("name", this.name);
-        oreStatistics.getStatisticKeyMapping().forEach(document::append);
-        document.append("balance", balance);
-        document.append("claimedChest", claimedChest);
-        return document;
+    public Map<String, Object> save() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("uuid", uuid.toString());
+        map.put("name", this.name);
+        map.put("balance", this.balance);
+        map.put("claimedChest", claimedChest);
+        Map<String, Object> statsMap = new HashMap<>(userStatistics.toMap());
+
+        StringBuilder builder = new StringBuilder();
+        for (String s : statsMap.keySet()) {
+            builder.append(s).append("&").append(statsMap.get(s)).append("%");
+        }
+        map.put("statsMap", builder.toString());
+        System.out.println("Stats Map: " + builder);
+        return map;
     }
 
     public ChatChannel getChannel() {
@@ -116,6 +133,22 @@ public class User {
         this.faction = faction;
     }
 
+    public boolean hasFaction() {
+        return faction != null;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
+
+    public UserStatistics getUserStatistics() {
+        return userStatistics;
+    }
+
     public boolean hasFactionMap() {
         return factionMap;
     }
@@ -126,6 +159,10 @@ public class User {
 
     public boolean hasClaimedChest() {
         return claimedChest;
+    }
+
+    public void setClaimedChest(boolean claimedChest) {
+        this.claimedChest = claimedChest;
     }
 
     public boolean isClaimingLand() {
@@ -140,15 +177,6 @@ public class User {
         this.bypass = bypass;
     }
 
-    public boolean inCombat() {
-        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase("combat")).findAny().orElse(null) == null;
-    }
-
-    public boolean canEnderPearl() {
-        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase("enderpearl")).findAny().orElse(null) == null;
-    }
-
-
     public void setTimer(String timer, boolean add) {
         Player player = toPlayer();
         Timer currentTimer = activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(timer)).findAny().orElse(null);
@@ -156,7 +184,33 @@ public class User {
             if (currentTimer != null) {
                 currentTimer.end(true);
             }
-            Timer.createTimerForPlayer(timer, player);
+            Timer newTimer = Timer.createTimerForPlayer(timer, player);
+            if (newTimer == null) return;
+            TimerStartEvent event = new TimerStartEvent(newTimer);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                newTimer.end(true);
+            }
+        } else {
+            if (currentTimer == null) return;
+            currentTimer.end(true);
+            activeTimers.remove(currentTimer);
+            if (currentTimer instanceof PauseTimer) {
+                HCF.getPlugin().getStorage().removeTimer((PauseTimer) currentTimer);
+            }
+        }
+    }
+
+    public void setTimer(Abilities type, boolean add) {
+        System.out.println("Created timer for " + name);
+        Player player = toPlayer();
+        Timer currentTimer = activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(type.getName())).findAny().orElse(null);
+        if (add) {
+            if (currentTimer != null) {
+                System.out.println("Ending...");
+                currentTimer.end(true);
+            }
+            Timer.createEffectTimer(player, type);
         } else {
             if (currentTimer == null) return;
             currentTimer.end(true);
@@ -164,110 +218,38 @@ public class User {
         }
     }
 
-   /* public void setCombat(boolean combat) {
-        Player player = toPlayer();
-        CombatTimer timer = (CombatTimer) activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase("combat")).findAny().orElse(null);
-        if (combat) {
-            if (timer != null) {
-                timer.end(true);
-            }
-            new CombatTimer(player);
-        } else {
-           if (timer == null) return;
-           timer.end(true);
-           activeTimers.remove(timer);
-        }
+    public Set<Timer> getActiveTimers() {
+        return activeTimers;
     }
 
-    public void setEnderPearl(boolean enderpearl) {
-        Player player = toPlayer();
-        EnderPearlTimer timer = (EnderPearlTimer) getActiveTimer("enderpearl");
-        if (enderpearl) {
-            if (timer == null) {
-                new EnderPearlTimer(player);
-            } else {
-                timer.setDelay(30L);
-                timer.setActive(true);
-                try {
-                    timer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
-                } catch (IllegalStateException ignored) {
-
-                }
-            }
-        } else {
-            if (timer == null) return;
-            timer.end(true);
-            activeTimers.remove(timer);
-        }
+    public Timer getActiveTimer(String timerName) {
+        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase(timerName) && timer.isActive()).findAny().orElse(null);
     }
 
-    public void setTimer(Timer timer, boolean set) {
-        Player player = toPlayer();
-        if (timer instanceof FactionHomeTimer) {
-            FactionHomeTimer homeTimer = (FactionHomeTimer) getActiveTimer("faction_home");
-            if (set) {
-                if (homeTimer == null) {
-                    new FactionHomeTimer(player);
-                } else {
-                    homeTimer.setDelay(30L);
-                    homeTimer.setActive(true);
-                    try {
-                        homeTimer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
-                    } catch (IllegalStateException ignored) {
-
-                    }
-                }
-            }
-        }
-    } */
-
-    public void addEffectCooldown(Abilities ability) {
-        Player player = toPlayer();
-        Timer timer;
-        switch (ability) {
-            case ARCHER_SPEED:
-                timer = getActiveTimer("archer_speed");
-                if (timer == null) {
-                    new ArcherSpeedTimer(player);
-                } else {
-                    timer.setDelay(ability.getCooldown());
-                    timer.setActive(true);
-                    try {
-                        timer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
-                    } catch (IllegalStateException ignored) {
-
-                    }
-                }
-                break;
-            case ARCHER_RESISTANCE:
-                timer = getActiveTimer("archer_resistance");
-                if (timer == null) {
-                    new ArcherResistanceTimer(player);
-                } else {
-                    timer.setDelay(ability.getCooldown());
-                    timer.setActive(true);
-                    try {
-                        timer.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
-                    } catch (IllegalStateException ignored) {
-
-                    }
-                }
-                break;
-        }
+    public Timer getActiveTimer(Abilities type) {
+        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase(type.getName()) && timer.isActive()).findAny().orElse(null);
     }
 
-    public boolean hasEffectCooldown(Abilities ability) {
-        return getEffectCooldown(ability) != null;
+    public boolean hasTimer(String timerName) {
+        return activeTimers.stream().filter(timer -> timer.getName().equalsIgnoreCase(timerName)).findAny().orElse(null) != null;
     }
 
-    public Timer getEffectCooldown(Abilities ability) {
-        return activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(ability.getName())).findAny().orElse(null);
+    public boolean hasActiveTimer(String timerName) {
+        Timer timer = activeTimers.stream().filter(timer1 -> timer1 != null && timer1.getName().equalsIgnoreCase(timerName)).findAny().orElse(null);
+        if (timer != null) {
+            return timer.isActive();
+        }
+        return false;
+    }
+
+    public boolean hasActiveTimer(Abilities type) {
+        return activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(type.getName()) && timer1.isActive()).findAny().orElse(null) != null;
     }
 
     public boolean hasAnyEffectCooldown() {
         for (Timer timer : activeTimers) {
-           Abilities abilities =  Abilities.stream().filter(abilities1 -> abilities1.getName().equals(timer.getName())).findAny().orElse(null);
-           return abilities != null;
+            Abilities abilities =  Abilities.stream().filter(abilities1 -> abilities1.getName().equals(timer.getName())).findAny().orElse(null);
+            return abilities != null;
         }
         return false;
     }
@@ -280,15 +262,7 @@ public class User {
         this.currentClass = currentClass;
     }
 
-    public Timer getActiveTimer(String name) {
-        return activeTimers.stream().filter(timer -> timer != null && timer.getName().equalsIgnoreCase(name)).findAny().orElse(null);
-    }
-
-    public Set<Timer> getActiveTimers() {
-        return activeTimers;
-    }
-
-    public UUID getUuid() {
+    public UUID getUniqueID() {
         return uuid;
     }
 
@@ -300,13 +274,6 @@ public class User {
         return Bukkit.getPlayer(uuid);
     }
 
-    public PvPStatistics getPvPStatistics() {
-        return pvPStatistics;
-    }
-
-    public OreStatistics getOreStatistics() {
-        return oreStatistics;
-    }
 
     /**
      * Attempt to get a user form the cached mappings. Or attempt to unsafely load the user.
@@ -318,7 +285,7 @@ public class User {
         if (users.containsKey(uuid)) {
             return users.get(uuid);
         }
-        HCF.getPlugin().getMongoImplementation().loadUserAsync(uuid, name);
+        HCF.getPlugin().getStorage().loadUserAsync(uuid, name);
         return users.get(uuid);
     }
 
@@ -331,6 +298,31 @@ public class User {
     }
 
     public static User getUser(UUID uuid) {
+        if (!users.containsKey(uuid)) {
+            // The mapping does not contain the uuid attempt to load the user
+            HCF.getPlugin().getStorage().loadUserAsync(uuid);
+            return users.get(uuid);
+        }
         return users.get(uuid);
+    }
+
+    public static User getOfflineUser(String name) {
+        Player target = Bukkit.getPlayer(name);
+        UUID targetUUID;
+        if (target == null) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
+            if (offlinePlayer == null) {
+                return null;
+            }
+            targetUUID = offlinePlayer.getUniqueId();
+        } else {
+            targetUUID = target.getUniqueId();
+        }
+        User user = User.getUser(targetUUID);;
+        return user;
+    }
+
+    public static Map<UUID, BukkitTask> getWallBorderTask() {
+        return wallBorderTask;
     }
 }

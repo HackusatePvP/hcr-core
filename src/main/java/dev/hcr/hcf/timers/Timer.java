@@ -5,13 +5,11 @@ import dev.hcr.hcf.pvpclass.structure.Abilities;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.timers.events.TimerStopEvent;
 import dev.hcr.hcf.timers.structure.TimerType;
+import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.timers.types.player.*;
-import dev.hcr.hcf.timers.types.player.effects.ArcherResistanceTimer;
-import dev.hcr.hcf.timers.types.player.effects.ArcherSpeedTimer;
 import dev.hcr.hcf.timers.types.player.faction.FactionHomeTimer;
 import dev.hcr.hcf.users.User;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -24,6 +22,8 @@ public abstract class Timer extends BukkitRunnable {
     private final String name;
     private final TimerType timerType;
     private Player player;
+    private UUID uuid;
+    private boolean pause;
     private static final Set<Timer> timers = new HashSet<>();
 
     public Timer(String name, TimerType timerType) {
@@ -32,8 +32,11 @@ public abstract class Timer extends BukkitRunnable {
         if (this instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) this, HCF.getPlugin());
         }
+        this.pause = false;
         timers.add(this);
+        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
+
 
     public Timer(Player player, String name) {
         this.name = name;
@@ -44,16 +47,22 @@ public abstract class Timer extends BukkitRunnable {
         }
         User user = User.getUser(player.getUniqueId());
         user.getActiveTimers().add(this);
+        this.pause = false;
+        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
-    public Timer(Player player, Document document) {
-        this.name = document.getString("name");
+    public Timer(UUID uuid, Map<String, Object> map) {
+        this.uuid = uuid;
+        this.name = (String) map.get("type");
+        System.out.println("Timer: " + name);
         this.timerType = TimerType.PLAYER;
         if (this instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) this, HCF.getPlugin());
         }
-        User user = User.getUser(player.getUniqueId());
+        User user = User.getUser(UUID.fromString((String) map.get("uuid")));
         user.getActiveTimers().add(this);
+        this.pause = (Boolean) map.get("paused");
+        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
     public String getName() {
@@ -68,6 +77,21 @@ public abstract class Timer extends BukkitRunnable {
         return timers.stream().filter(timer -> timer.getName().equals(name)).findAny().orElse(null);
     }
 
+    public boolean isPause() {
+        return pause;
+    }
+
+    public void setPause(boolean pause) {
+        this.pause = pause;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
 
     public static Set<Timer> getTimers() {
         return timers;
@@ -88,11 +112,22 @@ public abstract class Timer extends BukkitRunnable {
     public abstract void setActive(boolean active);
 
     public void save() {
-        for (User user : User.getUsers()) {
-            for (Timer timer : user.getActiveTimers()) {
-                if (timer == null) continue;
-
+        if (timerType == TimerType.PLAYER) {
+            Map<String, Object> map = new HashMap<>();
+            if (player == null) {
+                map.put("uuid", uuid.toString());
+            } else {
+                map.put("uuid", player.getUniqueId().toString());
             }
+            map.put("type", getName());
+            map.put("active", isActive());
+            map.put("delay", getDelay());
+            map.put("timeLeft", getTimeLeft());
+            map.put("paused", isPause());
+            if (this instanceof PauseTimer) {
+                map.put("pauseMillis", ((PauseTimer) this).getPauseMillis());
+            }
+            HCF.getPlugin().getStorage().appendTimerDataAsync(map);
         }
     }
 
@@ -108,7 +143,12 @@ public abstract class Timer extends BukkitRunnable {
         setActive(false);
         cancel();
         if (timerType == TimerType.PLAYER) {
-            User user = User.getUser(player.getUniqueId());
+            User user;
+            if (player == null) {
+                user = User.getUser(uuid);
+            } else {
+                user = User.getUser(player.getUniqueId());
+            }
             user.getActiveTimers().remove(this);
         }
     }
@@ -120,6 +160,10 @@ public abstract class Timer extends BukkitRunnable {
     public String getTimerDisplay() {
         Timer timer = this;
         long duration = timer.getTimeLeft();
+        if (timer.isPause() && timer instanceof PauseTimer) {
+            long pauseMillis = ((PauseTimer) timer).getPauseMillis();
+            duration = timer.getDelay() - pauseMillis;
+        }
         long hours = TimeUnit.MILLISECONDS.toHours(duration);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(duration - TimeUnit.HOURS.toMillis(hours));
         if (hours <= 0L) {
@@ -146,11 +190,38 @@ public abstract class Timer extends BukkitRunnable {
             case "faction_home":
                 return new FactionHomeTimer(player);
             case "archer_resistance":
-                return new ArcherResistanceTimer(player);
-            case "archer_speed":
-                return new ArcherSpeedTimer(player);
+            case "ability":
+                return new EffectTimer(player, Abilities.getAbility(timer));
             case "archer_tag":
                 return new ArcherTagTimer(player);
+        }
+        return null;
+    }
+
+    public static Timer createEffectTimer(Player player, Abilities abilities) {
+        return new EffectTimer(player, abilities);
+    }
+
+    public static Timer createTimer(Map<String, Object> map) {
+        String type = (String) map.get("type");
+        switch (type.toLowerCase()) {
+         /*   case "class_warmup":
+                return new ClassWarmupTimer(map);
+            case "combat":
+                return new CombatTimer(player);
+            case "enderpearl":
+                return new EnderPearlTimer(player); */
+            case "pvp":
+                UUID uuid = UUID.fromString((String) map.get("uuid"));
+                Player player = Bukkit.getPlayer(uuid);
+                return new PvPTimer(uuid, map);
+           /* case "faction_home":
+                return new FactionHomeTimer(player);
+            case "archer_resistance":
+            case "archer_speed":
+                return new EffectTimer(player, Abilities.getAbility(timer));
+            case "archer_tag":
+                return new ArcherTagTimer(player); */
         }
         return null;
     }

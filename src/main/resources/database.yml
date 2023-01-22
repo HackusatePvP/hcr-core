@@ -10,6 +10,10 @@ mongo:
   password: '' # Leave blank for no authentication. By default mongodb authentication is disabled.
   admin-db: "admin" # Mongo authentication database. By default its "admin"
 
+# For keeping user pruchases such as in-game lives we will use a different database to store. So even if the server resets they won't be scammed out of what they paid for.
+lives: # This will use whatever handler is in place and the same credentials for that handler.
+  database: "lives"
+
 mysql: "Not yet implemented"
 mariadb: "Not yet implemented"
 redis: "Not yet implemented"

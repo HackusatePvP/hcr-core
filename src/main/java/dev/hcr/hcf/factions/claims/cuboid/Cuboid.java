@@ -1,6 +1,7 @@
 package dev.hcr.hcf.factions.claims.cuboid;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -77,6 +79,19 @@ public class Cuboid {
         return bL.listIterator();
     }
 
+    public Iterator<Block> edgeBlocks(int buffer) {
+        final ArrayList<Block> bL = new ArrayList<>();
+        for (int x = xMin, xBuffer = 0; x <= xMax && xBuffer < buffer; x ++, xBuffer++) {
+            for (int y = yMin, yBuffer = 0; y <= yMax && yBuffer < buffer; y++, yBuffer++) {
+                for (int z = zMin, zBuffer = 0; z <= zMax && zBuffer < buffer; z++, zBuffer++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    bL.add(block);
+                }
+            }
+        }
+        return bL.listIterator();
+    }
+
     public Location getCenter() {
         return new Location(this.world, (this.xMax - this.xMin) / 2 + this.xMin, (this.yMax - this.yMin) / 2 + this.yMin, (this.zMax - this.zMin) / 2 + this.zMin);
     }
@@ -108,6 +123,22 @@ public class Cuboid {
         final int z = rand.nextInt(Math.abs(this.zMax - this.zMin) + 1) + this.zMin;
         return new Location(this.world, x, y, z);
     }
+
+    public List<Chunk> getChunks() {
+        List<Chunk> toReturn = new ArrayList<>();
+        World w = this.world;
+        int x1 = this.xMin & ~0xf;
+        int x2 = this.xMax & ~0xf;
+        int z1 = this.zMin & ~0xf;
+        int z2 = this.zMax & ~0xf;
+        for(int x = x1; x <= x2; x += 16) {
+            for(int z = z1; z <= z2; z += 16) {
+                toReturn.add(w.getChunkAt(x >> 4, z >> 4));
+            }
+        }
+        return toReturn;
+    }
+
 
     public Location getCorner(int corner) {
         switch (corner) {
@@ -151,5 +182,33 @@ public class Cuboid {
     public boolean isInWithMarge(final Location loc, final double marge) {
         return loc.getWorld() == this.world && loc.getX() >= this.xMinCentered - marge && loc.getX() <= this.xMaxCentered + marge && loc.getY() >= this.yMinCentered - marge && loc
                 .getY() <= this.yMaxCentered + marge && loc.getZ() >= this.zMinCentered - marge && loc.getZ() <= this.zMaxCentered + marge;
+    }
+
+    public int getMAxX() {
+        return xMax;
+    }
+
+    public int getMinX() {
+        return xMin;
+    }
+
+    public int getMaxY() {
+        return yMax;
+    }
+
+    public int getMinY() {
+        return yMin;
+    }
+
+    public int getMaxZ() {
+        return zMax;
+    }
+
+    public int getMinZ() {
+        return zMin;
+    }
+
+    public World getWorld() {
+        return world;
     }
 }

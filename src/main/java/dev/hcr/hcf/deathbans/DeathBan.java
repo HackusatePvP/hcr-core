@@ -26,7 +26,7 @@ public class DeathBan {
         this.expiredTime = System.currentTimeMillis() + duration;
         activeDeathbans.put(uuid, this);
 
-        HCF.getPlugin().getMongoImplementation().saveDeathBan(this);
+        HCF.getPlugin().getStorage().saveDeathBan(this);
     }
 
     public DeathBan(Map<String, Object> map) {
@@ -74,7 +74,7 @@ public class DeathBan {
     }
 
     public void complete() {
-        HCF.getPlugin().getMongoImplementation().removeDeathBan(uuid);
+        HCF.getPlugin().getStorage().removeDeathBan(uuid);
         activeDeathbans.remove(uuid);
     }
 

@@ -3,13 +3,10 @@ package dev.hcr.hcf.factions;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
-import dev.hcr.hcf.factions.types.PlayerFaction;
-import dev.hcr.hcf.factions.types.SafeZoneFaction;
-import dev.hcr.hcf.factions.types.WarzoneFaction;
-import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.factions.types.*;
 import dev.hcr.hcf.factions.types.roads.*;
 import dev.hcr.hcf.utils.LocationUtils;
-import dev.hcr.hcf.utils.backend.ConfigurationType;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,10 +22,11 @@ public abstract class Faction extends Claim {
     private ChatColor color = ChatColor.WHITE;
     private final Collection<Claim> claims = new ArrayList<>();
     private Location home;
-    private boolean deathban;
+    private final boolean deathban;
     private static WildernessFaction wilderness;
     private static WarzoneFaction warzone;
     private static RoadFaction northRoad, southRoad, eastRoad, westRoad;
+    private static GlowStoneMountainFaction glowStoneMountainFaction;
     private static final ConcurrentHashMap<UUID, Faction> factionUUIDMap = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Faction> factionNameMap = new ConcurrentHashMap<>();
 
@@ -49,6 +47,9 @@ public abstract class Faction extends Claim {
         if (this instanceof WarzoneFaction) {
             warzone = (WarzoneFaction) this;
         }
+        if (this instanceof GlowStoneMountainFaction) {
+            glowStoneMountainFaction = (GlowStoneMountainFaction) this;
+        }
     }
 
     public Faction(UUID uuid, String name, boolean deathban) {
@@ -63,6 +64,9 @@ public abstract class Faction extends Claim {
         }
         if (this instanceof WarzoneFaction) {
             warzone = (WarzoneFaction) this;
+        }
+        if (this instanceof GlowStoneMountainFaction) {
+            glowStoneMountainFaction = (GlowStoneMountainFaction) this;
         }
     }
 
@@ -83,6 +87,9 @@ public abstract class Faction extends Claim {
         if (this instanceof WarzoneFaction) {
             warzone = (WarzoneFaction) this;
         }
+        if (this instanceof GlowStoneMountainFaction) {
+            glowStoneMountainFaction = (GlowStoneMountainFaction) this;
+        }
         if (this instanceof NorthRoad) {
             northRoad = (NorthRoad) this;
         }
@@ -98,30 +105,33 @@ public abstract class Faction extends Claim {
     }
 
     public void save() {
-        Document document = new Document("uuid", getUniqueID().toString());
-        document.append("name", getName());
-        document.append("deathban", deathban);
-        document.append("color", (getColor() == null ? ChatColor.WHITE.toString() : getColor().name()));
+        Map<String, Object> map = new HashMap<>();
+        map.put("uuid", uniqueID.toString());
+        map.put("name", getName());
+        map.put("deathban", deathban);
+        map.put("color",  (getColor() == null ? ChatColor.WHITE.toString() : getColor().name()));
         if (hasClaims()) {
             List<String> c = new ArrayList<>();
             for (Claim claim : getClaims()) {
-                System.out.println("Found claim: " + claim.getName());
-                c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());                System.out.println("Added claim!");
+                if (c.contains(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName())) {
+                    continue;
+                }
+                c.add(claim.getCuboid().getPoint1().getX() + "*" + claim.getCuboid().getPoint1().getZ() + "*" + claim.getCuboid().getPoint2().getX() + "*" + claim.getCuboid().getPoint2().getZ() + "*" + claim.getCuboid().getPoint1().getWorld().getName());
             }
-            document.append("claims", c);
+            map.put("claims", c);
         }
         if (home != null) {
             String parse = home.getX() + "%" + home.getY() + "%" + home.getZ() + "%" + home.getWorld().getName();
-            document.append("home", parse);
+            map.put("home", parse);
         }
-        HCF.getPlugin().getMongoImplementation().appendFactionData(document);
+        HCF.getPlugin().getStorage().appendFactionData(map);
     }
 
     public void load(Document document) {
         if (document.containsKey("claims")) {
             List<String> claims = document.get("claims", ArrayList.class);
             for (String s : claims) {
-                if (claims.contains(s)) continue;
+                //System.out.println("Found Claim: " + s);
                 this.claims.add(new Claim(name, LocationUtils.parseCuboid(s)));
             }
         }
@@ -134,10 +144,7 @@ public abstract class Faction extends Claim {
     }
 
     public void disband() {
-        // Start termination process of this faction.
-        // First remove from db.
-        HCF.getPlugin().getMongoImplementation().findFactionAndDelete(uniqueID);
-        // Now lets remove the faction from all mappings
+        HCF.getPlugin().getStorage().findFactionAndDelete(uniqueID);
         factionNameMap.remove(name.toLowerCase());
         factionUUIDMap.remove(uniqueID);
     }
@@ -183,6 +190,7 @@ public abstract class Faction extends Claim {
             claims.clear();
         }
         claims.add(new Claim(getName(), cuboid));
+        save();
         return true;
     }
 
@@ -196,11 +204,23 @@ public abstract class Faction extends Claim {
     }
 
     public double getClaimingLandPrice(Location location, Location location2) {
-        // Huge fucking brain fart while trying to do simple math, here is an extremely cracked methed and just pure heroine way of doing something very simple
+        PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("claims.properties");
         double distance = location.distance(location2);
         double total = 0D;
         for (int block = 0; block < distance; block++) {
-            total += block * 3;
+            total += block * configuration.getDouble("claim-price-per-block");
+        }
+        return total;
+    }
+
+    public double getLandRefundPrice() {
+        PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("claims.properties");
+        double total = 0D;
+        Claim claim = claims.stream().findFirst().orElse(null);
+        if (claim != null) {
+            for (int block = 0; block < claim.getCuboid().getDistance(); block++) {
+                total += block * configuration.getDouble("unclaim-price-per-block");
+            }
         }
         return total;
     }
@@ -232,6 +252,8 @@ public abstract class Faction extends Claim {
     public void setHome(Location home) {
         this.home = home;
     }
+
+    public abstract double getDTRMultiplier();
 
     /* All static methods below */
 
@@ -282,6 +304,10 @@ public abstract class Faction extends Claim {
         return warzone;
     }
 
+    public static GlowStoneMountainFaction getGlowStoneMountainFaction() {
+        return glowStoneMountainFaction;
+    }
+
     public static Faction getByLocation(Location location) {
         for (Faction faction : getFactions()) {
             if (!faction.hasClaims()) continue;
@@ -291,7 +317,7 @@ public abstract class Faction extends Claim {
                 }
             }
         }
-        int radius = ConfigurationType.getConfiguration("faction.properties").getInteger("warzone-radius");
+        int radius = PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getInteger("warzone-radius");
         if (Math.abs(location.getBlockX()) <= radius && Math.abs(location.getBlockZ()) <= radius) {
             return getWarzone();
         }

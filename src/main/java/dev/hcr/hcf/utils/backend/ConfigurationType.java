@@ -1,27 +1,45 @@
 package dev.hcr.hcf.utils.backend;
 
+
+import dev.hcr.hcf.HCF;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class ConfigurationType {
-    private static final Map<String, ConfigurationType> configurationFiles = new HashMap<>();
+    private final File file;
+    private final String fileName;
 
-    public ConfigurationType(File file) {
+    public ConfigurationType(String fileName) {
+        this.fileName = fileName;
+        this.file = new File(HCF.getPlugin().getDataFolder(), fileName);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
         try {
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
+            if (file.createNewFile()) {
+                preset(file);
             }
-            file.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        configurationFiles.put(file.getName(), this);
     }
 
-    public static ConfigurationType getConfiguration(String name) {
-        return configurationFiles.get(name);
+    public ConfigurationType(String fileName, String directory) {
+        this.fileName = fileName;
+        File fileDirectory = new File(HCF.getPlugin().getDataFolder(), directory);
+        fileDirectory.mkdirs();
+        this.file = new File(fileDirectory, fileName);
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        try {
+           if (file.createNewFile()) {
+               preset(file);
+           }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public abstract String getString(String path);
@@ -38,6 +56,16 @@ public abstract class ConfigurationType {
 
     public abstract Object get(String path);
 
-    public abstract void set(String path, Object value);
+    public abstract void write(String path, Object value);
+
+    public abstract void preset(File file);
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public File getFile() {
+        return file;
+    }
 
 }

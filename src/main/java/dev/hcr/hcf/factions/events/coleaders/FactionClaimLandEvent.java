@@ -11,6 +11,7 @@ public class FactionClaimLandEvent extends PlayerFactionEvent implements Cancell
     private boolean cancelled = false;
     private double cost;
     private final Location location1, location2;
+    private String denyReason;
     private static final HandlerList handlers = new HandlerList();
 
     public FactionClaimLandEvent(Faction faction, Player player, Location location1, Location location2) {
@@ -34,6 +35,14 @@ public class FactionClaimLandEvent extends PlayerFactionEvent implements Cancell
 
     public void setCost(double cost) {
         this.cost = cost;
+    }
+
+    public String getDenyReason() {
+        return denyReason;
+    }
+
+    public void setDenyReason(String denyReason) {
+        this.denyReason = denyReason;
     }
 
     public HandlerList getHandlers() {

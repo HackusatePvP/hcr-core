@@ -3,6 +3,7 @@ version: '${project.version}'
 author: Hackusate_PvP
 main: dev.hcr.hcf.HCF
 depend: [ProtocolLib]
+softdepend: [Cove, Yuni]
 commands:
   balance:
     aliases: [bal]
@@ -14,11 +15,19 @@ commands:
     aliases: [eco]
     description: Economy management command.
     permission: hcf.commands.admin.economy
+  glowstonescanner:
+  koth:
+    description: Main koth command.
   faction:
     aliases: [factions, f]
     description: Main faction command.
+  lives:
+    description: Send in-game lives to another player.
   pay:
     description: Send in-game currency to another user.
+  pvptimer:
+    aliases: [pvp]
+    description: View and set your pvp status.
   sotw:
     aliases: [startoftheworld]
     description: Managers the SOTW event.

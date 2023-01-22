@@ -13,4 +13,9 @@ public class SouthRoad extends RoadFaction {
     public SouthRoad(Document document) {
         super(document);
     }
+
+    @Override
+    public double getDTRMultiplier() {
+        return 1;
+    }
 }

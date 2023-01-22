@@ -26,7 +26,7 @@ public class PayCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Usage: /" + label + " <player> <amount>");
         } else {
             Player target = Bukkit.getPlayer(args[0]);
-            double amount = -1D;
+            double amount;
             try {
                 amount = Double.parseDouble(args[1]);
             } catch (NumberFormatException ignored) {

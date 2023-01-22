@@ -1,3 +1,60 @@
+# Changelog 2023.01.a7
+This is a merge between two updates 2022.8.15 and 2022.11.30 some change logs may have fixes for the previous update which was 
+not published. 
+
+**DISCLAIMER**
+This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and maybe far in between.
+
+- TODO:
+  - Still some issues with the claiming pillars, sometimes not all four pillars will show when claiming.
+  - Fix combat tag issues with double messages.
+- Massive bug fixes.
+  - Fixed [LivesCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/players/lives/LiveCommand.java) array out of bounds error.
+  - Fixed multiple tab completion errors for faction commands.
+  - Fixed issue when loading a PlayerFactions' members.
+  - [PvPTimer](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/timers/types/player/PvPTimer.java) will now pause when a player logs off or goes into a SafeZone.
+  - Fixed issue when loading timers before Bukkit could initialize the player.
+  - Fixed NPE thrown when loading inactive or completed timers.
+  - Fixed NPE errors when loading PlayerFactions from the database.
+  - Fixed display issues when a timer is paused.
+  - Fixed issues with [PropertiesConfiguration](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/utils/backend/types/PropertiesConfiguration.java) always presseting file and reverting any changes made.
+  - PvP is now disabled in safezones.
+  - Players will no longer lose hunger while in a safezone.
+  - When a player leaves a Faction, they will now be removed from the members stored in the database.
+  - Players will no longer take damage in safezones.
+  - Fixed error when using the faction home command when no faction home was set.
+- Improved configuration stability.
+  - All properties' configuration will write a preset file if one doesn't exist.
+  - Started implementation of different properties files for better organization.
+- Improved faction design.
+  - Added [FactionListCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/member/FactionListCommand.java).
+  - Added [FactionResetClaimsCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionResetClaimsCommand.java).
+  - Added [FactionLeaderCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/leader/FactionLeaderCommand.java).
+  - Added [FactionDemoteCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionDemoteCommand.java).
+  - Added [FactionUnclaimCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionUnclaimCommand.java).
+  - Added [FactionTerritoryEnterEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/members/FactionTerritoryEnterEvent.java).
+  - Added [FactionTerritoryLeaveEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/members/FactionTerritoryLeaveEvent.java).
+  - Started KoTH implementation.
+    - Added [KothTask](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/koths/KothTask.java).
+    - Added [KothFaction](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/koths/KothFaction.java).
+    - Added [KothCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/koths/commands/KothCommand.java)
+       - Added basic subcommands.
+- PvP class system improvement.
+  - Fixed kit detection task when a player un-equips a class.
+  - Fixed issues when a clickable effect would not override a passive effect.
+  - Re-wrote the potion effect restore task.
+  - Fixed issue when players would disconnect with class would spawn in with the permanent class effects.
+  - Added RougeClass[](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/types/RogueClass.java).
+  - Added more functionality for the [BardClass](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/pvpclass/types/BardClass.java).
+    - Bards can now give holdable effects not just click effects.
+- Removed support for Cove and added support for [Yuni](https://github.com/HackusatePvP/Yuni)
+- Removed support for iHCF events.  
+- Added more features.
+  - Added Glowstone Mountain.
+    - Instead of setting cubes for glowstone mountain it uses a scanner system similar to HCTeams.
+- Add lives functionality and commands.
+- You can now easily compile the projects' dependencies by running load.bat or load.sh.
+
 # Changelog 2022.03.a6 (3/22/2022)
 - Greatly improved the pvp class system
   - Added the ability to hook iHCF events instead of using the class task detection system.
@@ -5,8 +62,8 @@
   - Created task to handle default class effects.
   - Added archer tags (untested).
     - Added [ArcherTagPlayerEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/archer/ArcherTagPlayerEvent.java)
-  - Added [MinerClass]() (untested).
-  - Added [BardClass]()
+  - Added [MinerClass](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/pvpclass/types/MinerClass.java) (untested).
+  - Added [BardClass](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/pvpclass/types/BardClass.java)
     - Bard class can only give out positive effects to teammates, negative effects will be added in the next update.
   - Greatly improved applying class effects to the class holder and teammate effects.
     - Passive effects will no longer override any clickable effects.

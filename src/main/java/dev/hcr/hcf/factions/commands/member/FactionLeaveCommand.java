@@ -4,6 +4,7 @@ import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.events.members.PlayerFactionLeaveEvent;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +32,12 @@ public class FactionLeaveCommand extends FactionCommand {
             return;
         }
         PlayerFaction faction = (PlayerFaction) user.getFaction();
+
+        if (faction.getRole(player.getUniqueId()) == Role.LEADER) {
+            player.sendMessage(ChatColor.RED + "Leaders cannot leave factions. You must either transfer ownership or disband the faction.");
+            return;
+        }
+
         PlayerFactionLeaveEvent event = new PlayerFactionLeaveEvent(faction, player);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -38,8 +45,11 @@ public class FactionLeaveCommand extends FactionCommand {
             return;
         }
         user.setFaction(null);
-        faction.getFactionMembers().remove(player.getUniqueId());
-        faction.broadcast(CC.translate("&7[&4" + faction.getName().toUpperCase() + "&7] &c" + player.getName() + " &7has left the faction."));
+        if (faction.removeUserFromFaction(user, false)) {
+            faction.broadcast(CC.translate("&7[&4" + faction.getName().toUpperCase() + "&7] &c" + player.getName() + " &7has left the faction."));
+        } else {
+            player.sendMessage(ChatColor.RED + "Could not leave faction. Are you in combat? Is one of your teammates in combat? Try again later.");
+        }
     }
 
     @Override

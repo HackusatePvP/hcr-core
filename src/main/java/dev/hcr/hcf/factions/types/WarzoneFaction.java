@@ -17,4 +17,9 @@ public class WarzoneFaction extends Faction implements SystemFaction {
         super(document);
         load(document);
     }
+
+    @Override
+    public double getDTRMultiplier() {
+        return 1;
+    }
 }

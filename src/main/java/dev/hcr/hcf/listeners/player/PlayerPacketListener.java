@@ -3,23 +3,29 @@ package dev.hcr.hcf.listeners.player;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
-import dev.hcr.hcf.factions.events.packets.RemoveClaimingPillarPacketsEvent;
-import dev.hcr.hcf.factions.events.packets.RemoveFactionMapPillarPacketsEvent;
-import dev.hcr.hcf.factions.events.packets.SendClaimingPillarPacketsEvent;
-import dev.hcr.hcf.factions.events.packets.SendFactionMapPacketsEvent;
+import dev.hcr.hcf.factions.events.coleaders.FactionClaimLandEvent;
+import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.SafeZoneFaction;
+import dev.hcr.hcf.factions.types.WarzoneFaction;
+import dev.hcr.hcf.factions.types.WildernessFaction;
+import dev.hcr.hcf.packets.*;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.TaskUtils;
+import dev.hcr.hcf.utils.client.lunar.LunarClientPlayerPacket;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PlayerPacketListener implements Listener {
     private final Map<Player, Integer> playerXMoveTracker = new HashMap<>();
@@ -29,9 +35,11 @@ public class PlayerPacketListener implements Listener {
     public void onSendClaimingPillars(SendClaimingPillarPacketsEvent event) {
         Player player = event.getPlayer();
         Cuboid cuboid = event.getCuboid();
-        // TODO: 2/9/2022 Currently making a deprecation solution with PacketControllers
-        for (int corner = 0; corner < 4; corner++) {
+        for (int corner = 1; corner < 5; corner++) {
+            // TODO: 12/2/2022 Corner 2 no work
+            player.sendMessage("Calculating corner: " + corner);
             Location location = cuboid.getCorner(corner);
+            player.sendMessage("Corner " + corner + ": " + location.getBlockX() + "," + location.getBlockZ());
             for (int y = 0; y < 256; y++) {
                 location.setY(y);
                 player.sendBlockChange(location, getPillar(corner), (byte) 0);
@@ -56,14 +64,26 @@ public class PlayerPacketListener implements Listener {
     public void onRemoveClaimingPillars(RemoveClaimingPillarPacketsEvent event) {
         Player player = event.getPlayer();
         Cuboid cuboid = event.getCuboid();
-        for (int corner = 1; corner < 5; corner++) {
-            Location location = cuboid.getCorner(corner);
-            System.out.println("Corner " + corner + ": " + location.toString());
-            for (int y = 0; y < 256; y++) {
-                player.sendBlockChange(location, location.getBlock().getType(), location.getBlock().getData());
-                location.add(0, 1, 0);
+        for (int corner = 0; corner < 4; corner++) {
+            ArrayList<Location> corners = new ArrayList<>(Arrays.asList(cuboid.getCorner(1), cuboid.getCorner(2), cuboid.getCorner(3), cuboid.getCorner(4)));
+            for (Location location1 : corners) {
+                for (int y = 0; y < 256; y++) {
+                    location1.setY(y);
+                    player.sendBlockChange(location1, location1.getBlock().getType(), location1.getBlock().getData());
+                    location1.add(0, 1, 0);
+
+                }
             }
         }
+    }
+
+    @EventHandler
+    public void onFactionClaim(FactionClaimLandEvent event) {
+        Player player = event.getPlayer();
+        Cuboid cuboid = new Cuboid(event.getLocation1(), event.getLocation2());
+        TaskUtils.runAsync(() -> {
+            Bukkit.getPluginManager().callEvent(new RemoveClaimingPillarPacketsEvent(player, cuboid));
+        });
     }
 
     @EventHandler
@@ -93,7 +113,7 @@ public class PlayerPacketListener implements Listener {
         for (Faction faction : factionsNearby) {
             Claim claim = faction.getClaims().stream().findFirst().orElse(faction.getClaims().stream().findFirst().orElse(null));
             if (claim == null) continue;
-            for (int corner = 0; corner < 4; corner++) {
+            for (int corner = 1; corner < 5; corner++) {
                 Location location1 = claim.getCuboid().getCorner(corner);
                 for (int y = 0; y < 256; y++) {
                     location1.setY(y);
@@ -129,4 +149,12 @@ public class PlayerPacketListener implements Listener {
             }
         }
     }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+       LunarClientPlayerPacket packet = new LunarClientPlayerPacket(player);
+       packet.sendWaypoint("Spawn", 5, new Location(Bukkit.getWorld("world"), 0, 70 ,0), true);
+    }
+
 }

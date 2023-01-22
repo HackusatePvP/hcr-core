@@ -9,7 +9,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,7 +66,7 @@ public class FactionKickCommand extends FactionCommand {
             player.sendMessage(ChatColor.RED + "You cannot kick members who have a higher status then you.");
             return;
         }
-        if (!playerFaction.removeUserFromFaction(usr)) {
+        if (!playerFaction.removeUserFromFaction(usr, false)) {
             player.sendMessage(ChatColor.RED + "Could not kick \"" + usr.getName() + "\" from faction.");
             return;
         }
@@ -72,7 +75,22 @@ public class FactionKickCommand extends FactionCommand {
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        if (!(sender instanceof Player)) return new ArrayList<>();
+        List<String> completions = new ArrayList<>();
+        Player player = (Player) sender;
+        User user = User.getUser(player.getUniqueId());
+        PlayerFaction faction = (PlayerFaction) user.getFaction();
+        if (args.length == 2) {
+            List<String> memberNames = new ArrayList<>();
+            for (UUID uuid : faction.getFactionMembers()) {
+                if (uuid == player.getUniqueId()) continue;
+                User target = User.getUser(uuid);
+                memberNames.add(target.getName());
+            }
+            StringUtil.copyPartialMatches(args[1], memberNames, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 }
 

@@ -1,29 +1,38 @@
 package dev.hcr.hcf.timers.types.player;
 
-import dev.hcr.hcf.pvpclass.PvPClass;
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.users.User;
-import dev.hcr.hcf.utils.TaskUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ArcherTagTimer extends Timer implements Listener {
-    private final Player player;
+    private Player player;
     private boolean active;
     private long delay;
+    private long timeLeft;
 
     public ArcherTagTimer(Player player) {
         super(player, "archer_tag");
+        System.out.println("Archer tagged for " + player.getName());
         this.player = player;
         this.active = true;
         this.delay = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5L);
+        this.timeLeft = delay - System.currentTimeMillis();
     }
 
+    public ArcherTagTimer(Player player, Map<String, Object> map) {
+        super(player.getUniqueId(), map);
+        this.active = (Boolean) map.get("active");
+        this.delay = (Long) map.get("delay");
+        this.timeLeft = (Long) map.get("timeLeft");
+    }
 
     @Override
     public String getDisplayName() {
@@ -35,6 +44,7 @@ public class ArcherTagTimer extends Timer implements Listener {
     }
 
     public void setActive(boolean active) {
+        if (isPause()) return;
         if (active) {
             User user = User.getUser(player.getUniqueId());
             user.getActiveTimers().add(this);
@@ -52,11 +62,8 @@ public class ArcherTagTimer extends Timer implements Listener {
 
     @Override
     public void run() {
+        if (isPause()) return;
         if (!active) return;
-        if (PvPClass.getApplicableClass(player) == null) {
-            end(true);
-            return;
-        }
         long left = delay - System.currentTimeMillis();
         if (left <= 0) {
             end(false);
@@ -68,10 +75,11 @@ public class ArcherTagTimer extends Timer implements Listener {
         return delay - System.currentTimeMillis();
     }
 
+
     @EventHandler
     public void onTimerExpireEvent(TimerExpireEvent event) {
         Player player = event.getAffected()[0];
-
+        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
     }
 
     @EventHandler

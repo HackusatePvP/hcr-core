@@ -69,6 +69,12 @@
             <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
@@ -90,24 +96,44 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/AquaCoreAPI.jar</systemPath>
         </dependency>
-        <!--Cove is currently not public which may change in the near future. Delete this dependency and delete CoveHook.java file to resolve issues.-->
+        <!--Yuni is the public version of Cove-->
         <dependency>
             <groupId>dev.hcr</groupId>
-            <artifactId>Cove</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <artifactId>Yuni</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!--This is the spigot which I use to handle iHCF events. Delete this dependency and replace with your own (if you use iHCF events) to resolve the issue.-->
         <dependency>
             <groupId>org.imanity.imanityspigot</groupId>
             <artifactId>server</artifactId>
-            <version>2021.11.1b1</version>
+            <version>2022.08.1b2</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- Reflection dependency fix -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
         </dependency>
         <dependency>
             <groupId>io.github.thatkawaiisam</groupId>
             <artifactId>assemble</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- Lunar client utils, these may error out and you may have to find them on your own means -->
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>bukkitapi-nethandler</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.lunarclient</groupId>
+            <artifactId>bukkitapi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

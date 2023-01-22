@@ -3,6 +3,7 @@ package dev.hcr.hcf.factions.commands.coleader;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
+import dev.hcr.hcf.listeners.factions.data.FactionClaimingData;
 import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FactionClaimCommand extends FactionCommand {
@@ -46,12 +48,12 @@ public class FactionClaimCommand extends FactionCommand {
             return;
         }
         player.getInventory().addItem(FactionClaimingListener.getClaimingWand());
-        FactionClaimingListener.startClaiming(player, playerFaction);
+        FactionClaimingListener.startClaiming(player, new FactionClaimingData(user, playerFaction, false));
     }
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        return new ArrayList<>();
     }
 
     public static boolean hasInventorySpace(Player player) {

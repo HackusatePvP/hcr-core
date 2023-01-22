@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class FactionRegenTask extends BukkitRunnable {
-    private final Map<PlayerFaction, Long> factionPausedRegenCooldown = new HashMap<>();
-    private final Map<PlayerFaction, Long> factionRegenTime = new HashMap<>();
-    private final PropertiesConfiguration configuration = (PropertiesConfiguration) ConfigurationType.getConfiguration("faction.properties");
+    private static final Map<PlayerFaction, Long> factionPausedRegenCooldown = new HashMap<>();
+    private static final Map<PlayerFaction, Long> factionRegenTime = new HashMap<>();
+    private static final PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("faction.properties");
 
     @Override
     public void run() {
@@ -43,12 +43,23 @@ public class FactionRegenTask extends BukkitRunnable {
     }
 
     public void setupFactionRegen(PlayerFaction playerFaction) {
-        // TODO: 1/30/2022 Change 1 min to 30min
         factionPausedRegenCooldown.put(playerFaction, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(configuration.getInteger("regen-start-delay")));
         factionRegenTime.remove(playerFaction);
     }
 
     public void instantRegen(PlayerFaction playerFaction) {
         factionRegenTime.put(playerFaction, TimeUnit.MINUTES.toMillis(configuration.getInteger("regen-start-delay")));
+    }
+
+    public static boolean isWaitingRegeneration(PlayerFaction playerFaction) {
+        return factionPausedRegenCooldown.containsKey(playerFaction);
+    }
+
+    public static Long getRegenPausedDelay(PlayerFaction playerFaction) {
+        return factionPausedRegenCooldown.get(playerFaction);
+    }
+
+    public static Map<PlayerFaction, Long> getFactionPausedRegenCooldown() {
+        return factionPausedRegenCooldown;
     }
 }

@@ -3,53 +3,41 @@ package dev.hcr.hcf.pvpclass.tasks;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.pvpclass.events.ClassEquippedEvent;
 import dev.hcr.hcf.pvpclass.events.ClassUnequippedEvent;
+import dev.hcr.hcf.timers.types.player.ClassWarmupTimer;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.TaskUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.UUID;
+
 public class KitDetectionTask extends BukkitRunnable {
 
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            System.out.println("Kit detection Running...");
-            PvPClass pvPClass = PvPClass.getApplicableClass(player);
             User user = User.getUser(player.getUniqueId());
-            System.out.println("Performing debug checks...");
-            if (user.getCurrentClass() == null) {
-                // If they do not currently have a class equipped we just have to active their new class.
-                if (pvPClass == null) {
-                    System.out.println("Applicable class is null, skipping...");
-                    // dont do anything if we can't find the class.
-                    continue;
-                }
-                if (user.getActiveTimer("class_warmup") != null) {
-                    System.out.println("Player is already activating a class...");
-                    continue;
-                }
-                System.out.println("All checks passed calling ClassEquippedEvent...");
-                ClassEquippedEvent equipEvent = new ClassEquippedEvent(pvPClass, player);
-                Bukkit.getPluginManager().callEvent(equipEvent);
-                if (equipEvent.isCancelled()) {
-                    continue;
-                }
-             /*   TaskUtils.runSync(() -> {
-                    pvPClass.equip(player);
-                });
-                user.setCurrentClass(pvPClass); */
-            } else {
-                System.out.println("User currently has a class equipped. Checking to make sure its still equipped.");
-                // If they do already have a class equip we must deactivate their class.
-                if (pvPClass == null) {
-                    System.out.println("User has unequipped the class passing events...");
-                    ClassUnequippedEvent event = new ClassUnequippedEvent(user.getCurrentClass(), player);
+            if (!player.isOnline()) {
+                continue;
+            }
+            PvPClass pvPClass = PvPClass.getEquippedClass(player);
+            if (pvPClass != null) {
+                // If they have a class equipped lets check to make sure its still applicable.
+                if (PvPClass.getApplicableClass(player) == null ) {
+                   // System.out.println("User should have a class but one was not found.");
+                    // If the class is not applicable unequip the class.
+                   // System.out.println("Calling event to remove class");
+                    ClassUnequippedEvent event = new ClassUnequippedEvent(pvPClass, player);
                     Bukkit.getPluginManager().callEvent(event);
-                    TaskUtils.runSync(() -> {
-                        user.getCurrentClass().unequip(player);
-                    });
                     user.setCurrentClass(null);
+                }
+            } else {
+                // If they do not have a class equip check to see if a class is appliceable
+                PvPClass foundClass = PvPClass.getApplicableClass(player);
+                if (foundClass != null && !user.hasActiveTimer("class_warmup") && user.getCurrentClass() == null) {
+                    // A class was found, equip the class and update the user class var
+                    new ClassWarmupTimer(player);
                 }
             }
         }

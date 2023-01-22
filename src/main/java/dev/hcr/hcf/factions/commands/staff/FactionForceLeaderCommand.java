@@ -1,58 +1,81 @@
 package dev.hcr.hcf.factions.commands.staff;
 
-import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
-import dev.hcr.hcf.users.faction.Role;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class FactionForceLeaderCommand extends FactionCommand {
 
     public FactionForceLeaderCommand() {
-        super("forceleader", "forceleader", "Forcefully set yourself as a leader in a faction.");
+        super("forceleader", "forceleader", "Forcefully set yourself or a player as a leader in a faction.");
     }
 
     @Override
     public void execute(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return;
         Player player = (Player) sender;
-        User user = User.getUser(player.getUniqueId());
+        User user;
+        if (args.length == 1) {
+            user = User.getUser(player.getUniqueId());
+            if (!user.hasFaction()) {
+                player.sendMessage(ChatColor.RED + "You must be in a faction to force leader yourself.");
+                return;
+            }
+            PlayerFaction playerFaction = (PlayerFaction) user.getFaction();
+            if (playerFaction.getLeader() == user.getUniqueID()) {
+                player.sendMessage(ChatColor.RED + "You are already the leader of this faction.");
+                return;
+            }
+            playerFaction.setLeader(playerFaction.getLeader(), user.getUniqueID());
+        }
         if (args.length == 2) {
-            Faction faction = Faction.getFactionByName(args[0]);
-            if (faction == null) {
-                player.sendMessage(ChatColor.RED + "Could not find faction by the name of \"" + args[1] + "\".");
-                return;
-            }
-            if (!(faction instanceof PlayerFaction)) {
-                player.sendMessage(ChatColor.RED + "You cannot join system factions. To modify system factions use; /f claimfor, /f forcesethome, /f setcolor");
-                return;
-            }
-            PlayerFaction playerFaction = (PlayerFaction) faction;
-            if (!playerFaction.hasMember(player.getUniqueId())) {
-                player.sendMessage(ChatColor.RED + "You must be in the faction before you can force yourself to leader. /f forcejoin <" + playerFaction.getHome() + ">.");
-                return;
-            }
-            User currentLeader;
-            if (Bukkit.getPlayer(playerFaction.getLeader()) == null) {
-                currentLeader = User.getUser(playerFaction.getLeader());
+            Player target = Bukkit.getPlayer(args[1]);
+            UUID targetUUID;
+            if (target == null) {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                if (offlinePlayer == null) {
+                    player.sendMessage(ChatColor.RED + "Could not find player \"" + args[1] + "\".");
+                    return;
+                }
+                targetUUID = offlinePlayer.getUniqueId();
             } else {
-                currentLeader = User.getUser(playerFaction.getLeader(), Bukkit.getOfflinePlayer(playerFaction.getLeader()).getName());
+                targetUUID = target.getUniqueId();
             }
-            playerFaction.setRole(currentLeader, Role.COLEADER);
-            playerFaction.setRole(user, Role.LEADER);
-            player.sendMessage(ChatColor.GREEN + "Successfully forced yourself as leader.");
+            user = User.getUser(targetUUID);
+            if (!user.hasFaction()) {
+                player.sendMessage(ChatColor.RED + "\"" + user.getName() + "\" is not in a faction.");
+                return;
+            }
+            PlayerFaction playerFaction = (PlayerFaction) user.getFaction();
+            if (playerFaction.getLeader() == user.getUniqueID()) {
+                player.sendMessage(ChatColor.RED + "\"" + user.getName() + "\" is already the leader of this faction.");
+                return;
+            }
+            playerFaction.setLeader(playerFaction.getLeader(), user.getUniqueID());
         }
     }
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        List<String> completions = new ArrayList<>();
+        List<String> players = new ArrayList<>();
+        Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], players, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 }

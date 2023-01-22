@@ -1,6 +1,5 @@
 package dev.hcr.hcf.timers.types.player;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import org.bukkit.Bukkit;
@@ -22,7 +21,6 @@ public class CombatTimer extends Timer implements Listener {
         this.active = true;
         this.player = player;
         this.delay = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30L);
-        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
     public Player getPlayer() {
@@ -52,6 +50,7 @@ public class CombatTimer extends Timer implements Listener {
 
     @Override
     public void run() {
+        if (isPause()) return;
         if (!active) return;
         long left = delay - System.currentTimeMillis();
         if (left <= 0) {

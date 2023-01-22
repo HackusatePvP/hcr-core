@@ -1,9 +1,12 @@
 package dev.hcr.hcf.pvpclass;
 
 import dev.hcr.hcf.HCF;
-import dev.hcr.hcf.pvpclass.events.ClassUnequippedEvent;
-import dev.hcr.hcf.pvpclass.tasks.EffectApplyTask;
-import dev.hcr.hcf.pvpclass.tasks.objects.Effect;
+import dev.hcr.hcf.factions.Faction;
+import dev.hcr.hcf.pvpclass.tasks.EffectRestoreTask;
+import dev.hcr.hcf.pvpclass.tasks.EnergyBuildTask;
+import dev.hcr.hcf.pvpclass.tasks.PassiveEffectApplyTask;
+import dev.hcr.hcf.pvpclass.types.bard.BardClass;
+import dev.hcr.hcf.pvpclass.types.bard.objects.Effect;
 import dev.hcr.hcf.users.User;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,17 +14,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class PvPClass {
     private final String name;
     private static final Map<String, PvPClass> classes = new HashMap<>();
     private static final Map<UUID, PvPClass> classTracker = new HashMap<>();
-    private static final Map<UUID, EffectApplyTask> effectTaskTracker = new HashMap<>();
+    private static final Map<UUID, EnergyBuildTask> energyTracker = new HashMap<>();
 
     public PvPClass(String name) {
         classes.put(name, this);
@@ -42,7 +43,7 @@ public abstract class PvPClass {
             case "bard":
                 return inventory.getHelmet().getType() == Material.GOLD_HELMET && inventory.getChestplate().getType() == Material.GOLD_CHESTPLATE && inventory.getLeggings().getType() == Material.GOLD_LEGGINGS && inventory.getBoots().getType() == Material.GOLD_BOOTS;
             case "rogue":
-                break;
+                return inventory.getHelmet().getType() == Material.CHAINMAIL_HELMET && inventory.getChestplate().getType() == Material.CHAINMAIL_CHESTPLATE && inventory.getLeggings().getType() == Material.CHAINMAIL_LEGGINGS && inventory.getBoots().getType() == Material.CHAINMAIL_BOOTS;
             case "miner":
                 return inventory.getHelmet().getType() == Material.IRON_HELMET && inventory.getChestplate().getType() == Material.IRON_CHESTPLATE && inventory.getLeggings().getType() == Material.IRON_LEGGINGS && inventory.getBoots().getType() == Material.IRON_BOOTS;
         }
@@ -56,6 +57,8 @@ public abstract class PvPClass {
             return classes.get("miner");
         } else if (isClassApplicable(player, "bard")) {
             return classes.get("bard");
+        } else if (isClassApplicable(player, "rogue")) {
+            return classes.get("rogue");
         } else {
             return null;
         }
@@ -83,7 +86,15 @@ public abstract class PvPClass {
         System.out.println("Created tracker for " + player.getName());
         classTracker.put(player.getUniqueId(), this);
         System.out.println("Creating Effect task...");
-        createEffectTask(player, getEffects(player));
+
+        PassiveEffectApplyTask applyTask = new PassiveEffectApplyTask(player, this);
+        applyTask.runTaskTimer(HCF.getPlugin(), 20L, 5L);
+
+        if (this instanceof BardClass) {
+            EnergyBuildTask energyBuildTask = new EnergyBuildTask(player);
+            energyBuildTask.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
+            energyTracker.put(player.getUniqueId(), energyBuildTask);
+        }
     }
 
     public void unequip(Player player) {
@@ -97,27 +108,61 @@ public abstract class PvPClass {
         classTracker.remove(player.getUniqueId());
 
         System.out.println("Ending effect task...");
-        EffectApplyTask task = effectTaskTracker.get(player.getUniqueId());
-        if (task != null) {
-            task.cancel();
-        }
         System.out.println("Removing task tracker");
-        effectTaskTracker.remove(player.getUniqueId());
     }
+
+    public void applyEffect(Player player, PotionEffect effect) {
+        System.out.println("Applying effect " + effect.getType().getName() + " to " + player.getName());
+        Faction otherFaction = Faction.getByLocation(player.getLocation());
+        if (otherFaction != null && !otherFaction.isDeathBan()) {
+            System.out.println("Could not validate skipping.");
+            return;
+        }
+
+        if (canOverrideLevel(player, effect) && player.hasPotionEffect(effect.getType())) {
+            System.out.println("Attempting to override effect...");
+            PotionEffect temp = player.getActivePotionEffects().stream()
+                    .filter(potionEffect -> potionEffect.getType().getName().equals(effect.getType().getName()))
+                    .findFirst()
+                    .orElse(null);
+            if (temp == null) {
+                System.out.println("Returned null skipping effect...");
+                return;
+            }
+
+            if (temp.getDuration() > 100) {
+                System.out.println("Duration is greater then 100 scheduling task...");
+                PotionEffect pre = new PotionEffect(temp.getType(), temp.getDuration(), temp.getAmplifier(), temp.isAmbient());
+                new EffectRestoreTask(player, pre).runTaskLater(HCF.getPlugin(), effect.getDuration() - 5);
+            }
+        }
+
+        if (canOverrideLevel(player, effect)) {
+            System.out.println("Effect can override again?");
+            player.addPotionEffect(effect, true);
+        }
+        System.out.println("Done!");
+    }
+
+    public boolean canOverrideLevel(Player player, PotionEffect effect) {
+        if(player.hasPotionEffect(effect.getType())) {
+            PotionEffect before = player.getActivePotionEffects().stream().filter(potionEffect -> potionEffect.getType().getId() == effect.getType().getId()).findFirst().orElse(null);
+            if(before == null)
+                return true;
+
+            return before.getAmplifier() < effect.getAmplifier() || (before.getAmplifier() == effect.getAmplifier() && before.getDuration() < effect.getDuration() && !effect.getType().equals(PotionEffectType.REGENERATION));
+        }
+
+        return true;
+    }
+
 
     public abstract Effect[] getEffects(Player player);
 
-    public static EffectApplyTask getPlayerEffectTask(Player player) {
-        return effectTaskTracker.get(player.getUniqueId());
+    public EnergyBuildTask getEnergyTracker(Player player) {
+        return energyTracker.get(player.getUniqueId());
     }
 
-    public static EffectApplyTask createEffectTask(Player player, Effect... effects) {
-        if (effectTaskTracker.containsKey(player.getUniqueId())) return effectTaskTracker.get(player.getUniqueId());
-        EffectApplyTask task = new EffectApplyTask(player, effects);
-        task.runTaskTimerAsynchronously(HCF.getPlugin(), 5L, 5L);
-        effectTaskTracker.put(player.getUniqueId(), task);
-        return task;
-    }
 
     public static PvPClass getType(String name) {
         return classes.get(name);

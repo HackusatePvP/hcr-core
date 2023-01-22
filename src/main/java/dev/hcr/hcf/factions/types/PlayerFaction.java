@@ -3,12 +3,15 @@ package dev.hcr.hcf.factions.types;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.claims.Claim;
+import dev.hcr.hcf.factions.events.members.PlayerFactionLeaveEvent;
 import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
+import dev.hcr.hcf.factions.structure.FactionInvestmentTask;
+import dev.hcr.hcf.factions.structure.regen.FactionRegenTask;
 import dev.hcr.hcf.factions.structure.regen.RegenStatus;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
-import dev.hcr.hcf.utils.backend.ConfigurationType;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -17,19 +20,26 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 
 import java.text.DecimalFormat;
 import java.util.*;
 
 public class PlayerFaction extends Faction {
-    private final UUID leader;
-    private double balance;
+    private UUID leader;
+    private double balance, investment;
     private int points;
     private double currentDTR, maxDTR;
     private RegenStatus regenStatus = RegenStatus.FULL;
     private final Map<String, UUID> factionInviteMap = new HashMap<>();
     private final Collection<UUID> factionMembers = new HashSet<>();
     private final Map<UUID, Role> roleMap = new HashMap<>();
+    private final Collection<UUID> factionAllies = new HashSet<>();
+
+    private long regenDelayTime;
+
+    // Scoreboard trackers cause why not
+    private final Scoreboard scoreboard;
 
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
     private final HCF plugin = HCF.getPlugin();
@@ -43,12 +53,17 @@ public class PlayerFaction extends Faction {
         factionMembers.add(leader);
         user.setFaction(this);
         roleMap.put(leader, Role.LEADER);
+        this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        scoreboard.registerNewTeam(name);
     }
 
     public PlayerFaction(Document document) {
         super(document);
         this.leader = UUID.fromString(document.getString("leader"));
         load(document);
+        this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        scoreboard.registerNewTeam("friendly");
+        scoreboard.registerNewTeam("enemy");
     }
 
     @Override
@@ -56,38 +71,39 @@ public class PlayerFaction extends Faction {
         if (document.containsKey("balance")) {
             this.balance = document.getDouble("balance");
         }
+        if (document.containsKey("investment")) {
+            this.investment = document.getDouble("investment");
+            if (investment > 0) {
+                FactionInvestmentTask task = new FactionInvestmentTask(this);
+                task.runTaskTimerAsynchronously(HCF.getPlugin(), 0, 20L);
+            }
+        }
         if (document.containsKey("points")) {
             this.points = document.getInteger("points");
         }
-        if (document.containsKey("currentDTR")) {
-            this.maxDTR = getMaxDTR();
-            this.currentDTR = document.getDouble("currentDTR");
-            // Check if the faction is suppose to be on regen.
-            if (currentDTR < maxDTR) {
-                loadRegenTask();
-            }
-        }
         if (document.containsKey("members")) {
-            List<UUID> members = document.get("members", ArrayList.class);
-            factionMembers.addAll(members);
+            List<String> members = document.get("members", ArrayList.class);
+            for (String s : members) {
+                factionMembers.add(UUID.fromString(s));
+            }
         }
         if (document.containsKey("roles")) {
             List<String> roles = document.get("roles", ArrayList.class);
             for (String s : roles) {
                 // Some crackhead loading
                 // Roles are appended as String that contains both uuid and role
-                // We separate the uuid and role with a single character "-"
+                // Separate the uuid and role with a single character "-"
                 for (int i = 0; i < s.length(); i++) {
                     // Setup a counter that finds the "-" in the string
                     if (s.charAt(i) == '-') {
-                        // Once found lets create a substring at the - which cuts off the beginning of the string
+                        // Once found create a substring at the "-" which cuts off the beginning of the string
                         // Original: "uuid-role"
                         // Substring: -role
 
                         // Remove the - character
                         String sub = s.substring(i).replace("-", "");
                         System.out.println("Loading MEMBER: " + sub);
-                        // Now we are left with just the role which we can get the Enum Role from the string using value of.
+                        // Left with just the role which can get the Enum Role from the string using value of.
 
                         // Since the uuid isn't saved in hexadecimal format (no dashes) we must add them before we can get the UUID object.
                         String uuidToHexString = sub.replaceAll(
@@ -95,12 +111,9 @@ public class PlayerFaction extends Faction {
                                 "$1-$2-$3-$4-$5");
                         UUID uuid = UUID.fromString(uuidToHexString);
                         s = s.replace("-", "");
-                        // Now we have to get the uuid.
-                        // To do this we will take everything after the - and remove it. Since we already have everything as a string "sub"
-                        // its a simple replace statement.
+                        // Take everything after the - and remove it to get the uuid.
                         s = s.replace(sub, "");
                         // Get the UUID object from the string
-                        System.out.println("Loading role: " + s);
                         Role role = Role.valueOf(s);
                         // Insert data into map.
                         roleMap.put(uuid, role);
@@ -108,11 +121,39 @@ public class PlayerFaction extends Faction {
                 }
             }
         }
-        if (document.containsKey("invites")) {
-           //FIXME removed for now,
+        if (document.containsKey("currentDTR")) {
+            this.maxDTR = getMaxDTR();
+            this.currentDTR = document.getDouble("currentDTR");
+            // Check if the faction is suppose to be on regen.
+            if (currentDTR < maxDTR) {
+                System.out.println("Passed!");
+                if (document.containsKey("regenDelayTime")) {
+                    this.regenDelayTime = document.getLong("regenDelayTime");
+                    loadRegenTask(false);
+                } else {
+                    loadRegenTask(true);
+                }
+            }
         }
+
+        if (document.containsKey("allies")) {
+            // Allies - allyuuid@allyuuid@allyuuid
+            String allyString = document.getString("allies");
+            if (!allyString.isEmpty()) {
+                for (String uuid : allyString.split("@")) {
+                    System.out.println("Ally: " + uuid);
+                    factionAllies.add(UUID.fromString(uuid));
+                }
+            }
+        }
+
         // Call the super method for loading claims and other basic faction data.
         super.load(document);
+    }
+
+    @Override
+    public double getDTRMultiplier() {
+        return 1;
     }
 
     @Override
@@ -121,20 +162,29 @@ public class PlayerFaction extends Faction {
         document.append("name", this.getName());
         document.append("leader", this.leader.toString());
         document.append("balance", this.balance);
+        document.append("investment", this.investment);
         document.append("points", this.points);
         document.append("currentDTR", this.currentDTR);
-        document.append("members", new ArrayList<UUID>(factionMembers));
+        document.append("members", new ArrayList<>(factionMembers));
         ArrayList<String> roles = new ArrayList<>();
         roleMap.forEach((uuid, role) -> {
-            System.out.println("Adding " + uuid.toString() + ": " + role.name() + " To Document!");
             roles.add(role.name() + "-" + uuid.toString());
         });
         document.append("roles", roles);
         ArrayList<String> invites = new ArrayList<>();
         factionInviteMap.forEach((s, uuid) -> invites.add(s + "*" + uuid.toString()));
         document.append("invites", invites);
+        if (FactionRegenTask.isWaitingRegeneration(this)) {
+            this.regenDelayTime = FactionRegenTask.getRegenPausedDelay(this);
+            document.append("regenDelayTime", regenDelayTime);
+        }
 
-        plugin.getMongoImplementation().appendFactionData(document);
+        StringBuilder builder = new StringBuilder();
+        for (UUID uuid : factionAllies) {
+            builder.append(uuid.toString()).append("@");
+        }
+        document.append("allies", builder.toString());
+        plugin.getStorage().appendFactionData(document);
         super.save();
     }
 
@@ -142,9 +192,16 @@ public class PlayerFaction extends Faction {
         return leader;
     }
 
+    public void setLeader(UUID currentOwner, UUID newOwner) {
+        this.leader = newOwner;
+        setRole(currentOwner, Role.MEMBER);
+        setRole(newOwner, Role.LEADER);
+        broadcast(CC.translate("&7[&4" + getName().toUpperCase() + "&7] &c" + User.getUser(currentOwner).getName() + " &7has transferred &eOWNERSHIP &7to &6" + User.getUser(newOwner).getName()));
+    }
+
     public double getMaxDTR() {
         double dtr = 1.1 * factionMembers.size();
-        if (dtr > ConfigurationType.getConfiguration("faction.properties").getDouble("max-dtr")) {
+        if (dtr > PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getDouble("max-dtr")) {
             return 5.5;
         }
         return dtr;
@@ -165,9 +222,17 @@ public class PlayerFaction extends Faction {
         plugin.getRegenTask().setupFactionRegen(this);
     }
 
-    private void loadRegenTask() {
-        this.regenStatus = RegenStatus.REGENERATING;
-        plugin.getRegenTask().instantRegen(this);
+    private void loadRegenTask(boolean instant) {
+        System.out.println(getName() + " is regenerating...");
+        if (instant) {
+            System.out.println("True!");
+            this.regenStatus = RegenStatus.REGENERATING;
+            plugin.getRegenTask().instantRegen(this);
+        } else {
+            System.out.println("False!");
+            this.regenStatus = RegenStatus.PAUSED;
+            FactionRegenTask.getFactionPausedRegenCooldown().put(this, regenDelayTime);
+        }
     }
 
     public void increaseDTR(double amount) {
@@ -179,8 +244,11 @@ public class PlayerFaction extends Faction {
     }
 
     public String getFormattedCurrentDTR() {
-        // TODO: 2/6/2022 If the faction is raidable set dtr string color to red
         return regenStatus.getColor() + regenStatus.getUnicode() + " " + decimalFormat.format(currentDTR);
+    }
+
+    public String getRaidableCurrentDTR() {
+        return ChatColor.RED + regenStatus.getUnicode() + " " + decimalFormat.format(currentDTR);
     }
 
     public boolean isRaidable() {
@@ -215,7 +283,7 @@ public class PlayerFaction extends Faction {
         if (user.getFaction() == null || !user.getFaction().getName().equalsIgnoreCase(getName())) {
             return Role.NONE;
         }
-        return roleMap.get(user.getUuid());
+        return roleMap.get(user.getUniqueID());
     }
 
     public Role getRole(UUID uuid) {
@@ -226,7 +294,30 @@ public class PlayerFaction extends Faction {
         if (user.getFaction() == null || !user.getFaction().getName().equalsIgnoreCase(getName())) {
             return;
         }
-        roleMap.put(user.getUuid(), role);
+        roleMap.put(user.getUniqueID(), role);
+    }
+
+    public void setRole(UUID uuid, Role role) {
+        if (!this.hasMember(uuid)) {
+            return;
+        }
+        roleMap.put(uuid, role);
+    }
+
+    public double getInvestment() {
+        return investment;
+    }
+
+    public void addInvestment(double amount) {
+        this.investment += amount;
+        if (!FactionInvestmentTask.isGainingIntrest(this)) {
+            FactionInvestmentTask task = new FactionInvestmentTask(this);
+            task.runTaskTimerAsynchronously(HCF.getPlugin(), 0L, 20L);
+        }
+    }
+
+    public void setInvestment(double investment) {
+        this.investment = investment;
     }
 
     public void depositBalance(double balance) {
@@ -243,17 +334,32 @@ public class PlayerFaction extends Faction {
         if (event.isCancelled()) {
             return false;
         }
-        factionMembers.add(user.getUuid());
-        roleMap.put(user.getUuid(), Role.MEMBER);
+        factionMembers.add(user.getUniqueID());
+        roleMap.put(user.getUniqueID(), Role.MEMBER);
         user.setFaction(this);
+
+        if (user.toPlayer() != null) {
+            HCF.getPlugin().getTeamManager().loadPlayer(user.toPlayer());
+        }
+
         return true;
     }
 
-    public boolean removeUserFromFaction(User user) {
-        // TODO: 2/5/2022 Add custom event
-        factionMembers.remove(user.getUuid());
-        roleMap.remove(user.getUuid());
+    public boolean removeUserFromFaction(User user, boolean forced) {
+        if (!forced) {
+            PlayerFactionLeaveEvent event = new PlayerFactionLeaveEvent(this, user.toPlayer());
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return false;
+            }
+        }
+        factionMembers.remove(user.getUniqueID());
+        roleMap.remove(user.getUniqueID());
         user.setFaction(null);
+
+        if (user.toPlayer() != null) {
+            HCF.getPlugin().getTeamManager().loadPlayer(user.toPlayer());
+        }
         return true;
     }
 
@@ -279,20 +385,26 @@ public class PlayerFaction extends Faction {
         return members;
     }
 
-    public void promoteUser(User user) {
+    public int getTotalOnlineMembers() {
+        return getOnlineMembers().size();
+    }
+
+    public void promoteUser(Player player, User user) {
         if (getRole(user) == Role.MEMBER) {
             setRole(user, Role.CAPTAIN);
         } else if (getRole(user) == Role.CAPTAIN) {
             setRole(user, Role.COLEADER);
         }
+        broadcast(CC.translate("&7[&4" + getName().toUpperCase() + "&7] &c" + player.getName() + " &7has &aPROMOTED &e" + user.getName() + " &7to &6" + getRole(user).name()));
     }
 
-    public void demoteUser(User user) {
+    public void demoteUser(Player player, User user) {
         if (getRole(user) == Role.COLEADER) {
             setRole(user, Role.CAPTAIN);
         } else if (getRole(user) == Role.CAPTAIN) {
             setRole(user, Role.MEMBER);
         }
+        broadcast(CC.translate("&7[&4" + getName().toUpperCase() + "&7] &c" + player.getName() + " &7has &cDEMOTED &e" + user.getName() + " &7to &6" + getRole(user).name()));
     }
 
     public boolean sendInvite(Player inviter, User user) {
@@ -301,8 +413,6 @@ public class PlayerFaction extends Faction {
 
         if (user.toPlayer() != null) {
             Player player = user.toPlayer();
-            // TODO: 1/30/2022 Make the message clickable to execute the join  command
-            // player.sendMessage(CC.translate("&aYou have been invited to &b" + getName() + "&a. /f join <" + getName() + ">"));
             TextComponent part1 = new TextComponent("You have been invited to ");
             part1.setColor(ChatColor.GREEN);
             TextComponent part2 = new TextComponent(getName() + " ");
@@ -326,7 +436,45 @@ public class PlayerFaction extends Faction {
         }
     }
 
+    public RegenStatus getRegenStatus() {
+        return regenStatus;
+    }
+
     public void setRegenStatus(RegenStatus status) {
         this.regenStatus = status;
+    }
+
+    public long getRegenDelayTime() {
+        return regenDelayTime;
+    }
+
+    public void setRegenDelayTime(long regenDelayTime) {
+        this.regenDelayTime = regenDelayTime;
+    }
+
+    public Collection<UUID> getFactionAllies() {
+        return factionAllies;
+    }
+
+    public void addAlly(PlayerFaction faction) {
+        HCF.getPlugin().getTeamManager().setAlly(this, faction, true);
+        factionAllies.add(faction.getUniqueID());
+    }
+
+    public void removeAlly(PlayerFaction faction) {
+        HCF.getPlugin().getTeamManager().setAlly(this, faction, false);
+        factionAllies.remove(faction.getUniqueID());
+    }
+
+    public boolean hasAlly(Faction faction) {
+        return hasAlly(faction.getUniqueID());
+    }
+
+    public boolean hasAlly(UUID uuid) {
+        return factionAllies.contains(uuid);
+    }
+
+    public Scoreboard getScoreboard() {
+        return scoreboard;
     }
 }

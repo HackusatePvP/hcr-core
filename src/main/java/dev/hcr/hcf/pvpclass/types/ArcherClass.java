@@ -1,11 +1,12 @@
 package dev.hcr.hcf.pvpclass.types;
 
+import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.pvpclass.PvPClass;
+import dev.hcr.hcf.pvpclass.events.ClassUnequippedEvent;
 import dev.hcr.hcf.pvpclass.events.archer.ArcherTagPlayerEvent;
 import dev.hcr.hcf.pvpclass.structure.Abilities;
-import dev.hcr.hcf.pvpclass.tasks.objects.Effect;
+import dev.hcr.hcf.pvpclass.types.bard.objects.Effect;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
-import dev.hcr.hcf.timers.events.TimerStartEvent;
 import dev.hcr.hcf.timers.events.TimerStopEvent;
 import dev.hcr.hcf.timers.types.player.ArcherTagTimer;
 import dev.hcr.hcf.users.User;
@@ -26,11 +27,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class ArcherClass extends PvPClass implements Listener {
     private final Effect[] effects;
     private final Map<Player, Float> arrowForceTracker = new HashMap<>();
-    private final Collection<Player> archerTagged = new HashSet<>();
+    private final Collection<UUID> archerTagged = new HashSet<>();
 
     public ArcherClass() {
         super("archer");
@@ -54,10 +56,16 @@ public class ArcherClass extends PvPClass implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         User user = User.getUser(player.getUniqueId());
-        if (user.getCurrentClass() == this) {
-            unequip(player);
+        if (user.getCurrentClass() != null) {
+            for (Effect effect : user.getCurrentClass().getEffects(player)) {
+                player.removePotionEffect(effect.getType());
+            }
+            ClassUnequippedEvent unequippedEvent = new ClassUnequippedEvent(this, player);
+            Bukkit.getPluginManager().callEvent(unequippedEvent);
+            user.setCurrentClass(null);
         }
     }
+
 
     @EventHandler
     public void onBowShootEvent(EntityShootBowEvent event) {
@@ -95,7 +103,9 @@ public class ArcherClass extends PvPClass implements Listener {
         Player player = event.getTagged();
         User user = User.getUser(player.getUniqueId());
         user.setTimer("archer_tag", true);
-        archerTagged.add(player);
+        archerTagged.add(player.getUniqueId());
+
+        HCF.getPlugin().getTeamManager().setArcherTag(player, true);
     }
 
     @EventHandler
@@ -104,7 +114,8 @@ public class ArcherClass extends PvPClass implements Listener {
         ArcherTagTimer timer = (ArcherTagTimer) event.getTimer();
         if (timer == null) return;
         Player player = event.getAffected()[0];
-        archerTagged.remove(player);
+        archerTagged.remove(player.getUniqueId());
+        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
     }
 
     @EventHandler
@@ -113,7 +124,8 @@ public class ArcherClass extends PvPClass implements Listener {
         ArcherTagTimer timer = (ArcherTagTimer) event.getTimer();
         if (timer == null) return;
         Player player = event.getAffected()[0];
-        archerTagged.remove(player);
+        archerTagged.remove(player.getUniqueId());
+        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
     }
 
 
@@ -131,22 +143,26 @@ public class ArcherClass extends PvPClass implements Listener {
         switch (itemType) {
             case SUGAR:
                 ability = Abilities.ARCHER_SPEED;
-                if (user.hasEffectCooldown(ability)) {
-                    player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getEffectCooldown(ability).getTimerDisplay());
+                if (user.hasActiveTimer(ability)) {
+                    player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getActiveTimer(ability).getTimerDisplay());
+                  //  player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getEffectCooldown(ability).getTimerDisplay());
                     return;
                 }
-                getPlayerEffectTask(player).addEffect(new Effect(new PotionEffect(PotionEffectType.SPEED, 100, 5), false, true));
-                user.addEffectCooldown(ability);
+                applyEffect(player, new PotionEffect(PotionEffectType.SPEED, ability.getDuration(), ability.getAmplifier()));
+                user.setTimer(ability, true);
+               // user.addEffectCooldown(ability);
                 item.setAmount(item.getAmount() - 1);
                 break;
             case IRON_INGOT:
                 ability = Abilities.ARCHER_RESISTANCE;
-                if (user.hasEffectCooldown(ability)) {
-                    player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getEffectCooldown(ability).getTimerDisplay());
+                if (user.hasActiveTimer(ability)) {
+                    player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getActiveTimer(ability).getTimerDisplay());
+                    //player.sendMessage(ChatColor.RED + "You are still on cooldown for " + user.getEffectCooldown(ability).getTimerDisplay());
                     return;
                 }
-                getPlayerEffectTask(player).addEffect(new Effect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 200, 4), false, true));
-                user.addEffectCooldown(ability);
+                applyEffect(player, new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, ability.getDuration(), ability.getAmplifier()));
+                user.setTimer(ability, true);
+                //user.addEffectCooldown(ability);
                 item.setAmount(item.getAmount() - 1);
         }
     }

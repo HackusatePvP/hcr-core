@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,7 @@ public class FactionDisbandCommand extends FactionCommand {
             }
             playerFaction.disband();
             player.sendMessage(ChatColor.DARK_RED + "You have disbanded your faction.");
+            confirmDisbandSet.remove(user);
             return;
         }
         player.sendMessage(ChatColor.RED + "Please type the command again to confirm disband.");
@@ -48,6 +50,6 @@ public class FactionDisbandCommand extends FactionCommand {
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return null;
+        return new ArrayList<>();
     }
 }

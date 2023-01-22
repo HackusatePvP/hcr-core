@@ -3,6 +3,7 @@ package dev.hcr.hcf.commands.admin;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -35,8 +36,9 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
             if (args[0].equalsIgnoreCase("reset")) {
                 String name = args[1];
                 User user = User.getUser(name);
-                // TODO: 1/30/2022 Get Default balance upon first join from configuration file
-                user.setBalance(500);
+                PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties");
+                double balance = configuration.getDouble("default-balance");
+                user.setBalance(balance);
                 sender.sendMessage(ChatColor.GREEN + "You have reset &b" + name + " &abalance!");
             } else {
                 sender.sendMessage(ChatColor.RED + "Unknown argument, did you mean reset?");

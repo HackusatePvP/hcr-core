@@ -4,6 +4,8 @@ import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.commands.coleader.FactionClaimCommand;
 import dev.hcr.hcf.listeners.factions.FactionClaimingListener;
+import dev.hcr.hcf.listeners.factions.data.FactionClaimingData;
+import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,6 +25,7 @@ public class FactionClaimForCommand extends FactionCommand {
     public void execute(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return;
         Player player = (Player) sender;
+        User user = User.getUser(player.getUniqueId());
         if (args.length == 1) {
             sender.sendMessage(ChatColor.RED + "Usage: /" + label + " claimfor <faction>");
         }
@@ -37,8 +40,12 @@ public class FactionClaimForCommand extends FactionCommand {
                 player.sendMessage(ChatColor.RED + "You need to empty one slot in your hotbar.");
                 return;
             }
+            if (FactionClaimingListener.claiming.containsKey(user)) {
+                player.sendMessage(ChatColor.RED + "You are already claiming for a faction.");
+                return;
+            }
             player.getInventory().addItem(FactionClaimingListener.getClaimingWand());
-            FactionClaimingListener.startClaiming(player, faction);
+            FactionClaimingListener.startClaiming(player, new FactionClaimingData(user, faction, true));
         }
     }
 

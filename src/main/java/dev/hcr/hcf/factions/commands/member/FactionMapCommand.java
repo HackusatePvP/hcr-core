@@ -1,8 +1,8 @@
 package dev.hcr.hcf.factions.commands.member;
 
 import dev.hcr.hcf.factions.commands.FactionCommand;
-import dev.hcr.hcf.factions.events.packets.RemoveFactionMapPillarPacketsEvent;
-import dev.hcr.hcf.factions.events.packets.SendFactionMapPacketsEvent;
+import dev.hcr.hcf.packets.RemoveFactionMapPillarPacketsEvent;
+import dev.hcr.hcf.packets.SendFactionMapPacketsEvent;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.TaskUtils;
 import org.bukkit.Bukkit;
@@ -26,7 +26,6 @@ public class FactionMapCommand extends FactionCommand {
         Player player = (Player) sender;
         User user = User.getUser(player.getUniqueId());
         if (user.hasFactionMap()) {
-            // TODO: 2/9/2022 Remove existing pillar claims
             player.sendMessage(ChatColor.RED + "Removing pillars...");
             RemoveFactionMapPillarPacketsEvent packetsEvent = new RemoveFactionMapPillarPacketsEvent(player);
             TaskUtils.runAsync(() -> {

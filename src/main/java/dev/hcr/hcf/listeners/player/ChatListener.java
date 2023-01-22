@@ -36,10 +36,16 @@ public class ChatListener implements Listener {
                     if (other.getChannel() == ChatChannel.TOGGLED) continue;
                     String prefix = core.getPrefix(core.getRankByPlayer(player));
                     String suffix = core.getSuffix(core.getRankByPlayer(player));
+                    if (suffix == null || suffix.isEmpty()) {
+                        suffix = "";
+                    }
+                    if (prefix == null || prefix.isEmpty()) {
+                        prefix = "";
+                    }
                     ChatColor rankColor = core.getRankColor(core.getRankByPlayer(player));
-                    String format = CC.translate((prefix.isEmpty() ? "" : prefix + " ") + rankColor + player.getName() + ChatColor.RESET + " " + (suffix.isEmpty() ? "" : suffix) + "&f");
+                    String format = CC.translate((prefix.isEmpty() ? "" : prefix + " ") + rankColor + player.getName() + ChatColor.RESET  + (suffix.isEmpty() ? "" : suffix) + "&f");
                     if (playerFaction == null) {
-                        recipient.sendMessage(format + ": " + ChatColor.WHITE + event.getMessage());
+                        recipient.sendMessage(CC.translate("&7[&c-&7]") + " " + format + ": " + ChatColor.WHITE + event.getMessage());
                     } else {
                         recipient.sendMessage(CC.translate("&7[" + Relation.getFactionRelationship(playerFaction, recipient).getColor() + playerFaction.getName() + "&7] " + format + ChatColor.WHITE + ": ") + event.getMessage());
                     }

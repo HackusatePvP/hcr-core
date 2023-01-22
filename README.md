@@ -2,6 +2,14 @@
 This core is designed and made by me. Any utils or public code will be credited in the [changelog](https://github.com/HackusatePvP/hcr-core/blob/main/CHANGELOG.md)
 This is not a fork of any kind and any similarities between this and another core are just coincidental.
 
+## 2023.01.a7
+This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and maybe far in between.
+A7 brought many new features, and many bug fixes. To keep updated with the project changes please check out the [changelog](https://github.com/HackusatePvP/hcr-core/blob/main/CHANGELOG.md).
+
+**WARNING**
+This version of the core removed support for Cove and added support for [Yuni](https://github.com/HackusatePvP/Yuni). Yuni's public version is not currently updated. The only other support is for [Aqua](https://builtbybit.com/resources/aquacore-core-manager-for-your-server.11118/).
+Alternatively you could add your own support for other rank core plugins. View [YuniHook](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/hooks/YuniHook.java) to see how.
+
 # Warning
 This core is unfinished and untested. This core is not meant to be put into production until its fully completed.
 Any and all issues you encounter will have to be fixed by you or another third party developer. Please do not create issues
@@ -33,7 +41,9 @@ A: Not recommended as it's not finished. If you do end up using this for your se
 You have exclusive permission to modify use and redistribute the jar with restrictions. You are not allowed to re-sell this core whether it be modified or a fork. You are not allowed to claim any work that you did not do or create as your own.
 
 # Compile a JAR
-Run the command `mvn clean install` in the project directory. The jar will be outputted to the "target" directory.
+Locate and enter the directory `local` and run either `load.sh` or `load.bat` to compile dependencies into your local m2 repository. It is highly recommended reviewing any bat or sh file before executing the commands inside them.
+Once the operation is completed simply run `mvn clean install` in the projects main directory where the pom.xml file is located. You will find the jar file in the `target` directory.
+
 
 # Contact
 If you have any questions you can contact me on discord. I have friend requests disable, but my dms are opened you can join my [discord](https://discord.gg/damKnGaqjK) server to send me a message.

@@ -18,5 +18,10 @@ public class WildernessFaction extends Faction implements SystemFaction {
         load(document);
     }
 
+    @Override
+    public double getDTRMultiplier() {
+        return 1;
+    }
+
 
 }
