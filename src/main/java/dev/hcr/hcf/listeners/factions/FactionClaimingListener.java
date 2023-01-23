@@ -35,6 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
@@ -75,20 +76,20 @@ public class FactionClaimingListener implements Listener {
             if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
                 if (position1ClaimingMap.containsKey(user)) {
-                    handlePacketEvents(user, faction, false);
+                    handlePacketEvents(user, faction, false, false);
                 }
                 position1ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 1 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
-                handlePacketEvents(user, faction, true);
+                handlePacketEvents(user, faction, true, true);
             }
             if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 Location location = event.getClickedBlock().getLocation();
                 if (position2ClaimingMap.containsKey(user)) {
-                    handlePacketEvents(user, faction, false);
+                    handlePacketEvents(user, faction, false, false);
                 }
                 position2ClaimingMap.put(user, location);
                 player.sendMessage(CC.translate("&7Set position 2 at (&c" + location.getBlockX() + "," + location.getBlockZ() + "&7)"));
-                handlePacketEvents(user, faction, true);
+                handlePacketEvents(user, faction, true, true);
             }
             if (player.isSneaking()) {
                 if (event.getAction() == Action.LEFT_CLICK_AIR) {
@@ -101,7 +102,7 @@ public class FactionClaimingListener implements Listener {
                     }
                     faction.addClaim(new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
                     player.sendMessage(ChatColor.GREEN + "Successfully claimed land!");
-                    handlePacketEvents(user, faction, false);
+                    handlePacketEvents(user, faction, false, false);
                     player.getInventory().remove(player.getItemInHand());
                     claiming.remove(user);
                     position1ClaimingMap.remove(user);
@@ -110,7 +111,7 @@ public class FactionClaimingListener implements Listener {
                 if (event.getAction() == Action.RIGHT_CLICK_AIR) {
                     player.sendMessage(ChatColor.RED + "Removing claiming selection...");
                     if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
-                        handlePacketEvents(user, faction, false);
+                        handlePacketEvents(user, faction, false, false);
                     }
                     position1ClaimingMap.remove(user);
                     position2ClaimingMap.remove(user);
@@ -123,21 +124,34 @@ public class FactionClaimingListener implements Listener {
         }
      }
 
-    private void handlePacketEvents(User user, Faction faction, boolean add) {
+    private void handlePacketEvents(User user, Faction faction, boolean add, boolean refresh) {
         Player player = user.toPlayer();
-        if (add) {
-            if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
-                SendClaimingPillarPacketsEvent pillarPacketsEvent = new SendClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
+        if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
+            SendClaimingPillarPacketsEvent sendClaimingPillarPacketsEvent = new SendClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
+            RemoveClaimingPillarPacketsEvent removeClaimingPillarPacketsEvent = new RemoveClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
+
+            TaskUtils.runAsync(() -> {
+                if (add) {
+                    if (position1ClaimingMap.containsKey(user) && position2ClaimingMap.containsKey(user)) {
+                        Bukkit.getPluginManager().callEvent(sendClaimingPillarPacketsEvent);
+                        player.sendMessage(CC.translate("&7The land will cost you &c" + HCF.getPlugin().getFormat().format(faction.getClaimingLandPrice(position1ClaimingMap.get(user), position2ClaimingMap.get(user)))));
+                    }
+                } else {
+                    Bukkit.getPluginManager().callEvent(removeClaimingPillarPacketsEvent);
+                }
+            });
+
+            if (refresh) {
                 TaskUtils.runAsync(() -> {
-                    Bukkit.getPluginManager().callEvent(pillarPacketsEvent);
+                    Bukkit.getPluginManager().callEvent(removeClaimingPillarPacketsEvent);
                 });
-                player.sendMessage(CC.translate("&7The land will cost you &c" + HCF.getPlugin().getFormat().format(faction.getClaimingLandPrice(position1ClaimingMap.get(user), position2ClaimingMap.get(user)))));
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Bukkit.getPluginManager().callEvent(sendClaimingPillarPacketsEvent);
+                    }
+                }.runTaskLaterAsynchronously(HCF.getPlugin(), 10L);
             }
-        } else {
-                RemoveClaimingPillarPacketsEvent pillarPacketsEvent = new RemoveClaimingPillarPacketsEvent(player, new Cuboid(position1ClaimingMap.get(user), position2ClaimingMap.get(user)));
-                TaskUtils.runAsync(() -> {
-                    Bukkit.getPluginManager().callEvent(pillarPacketsEvent);
-                });
         }
     }
 

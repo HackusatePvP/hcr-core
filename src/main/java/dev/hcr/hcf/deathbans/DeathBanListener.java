@@ -4,7 +4,7 @@ import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.utils.CC;
-import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

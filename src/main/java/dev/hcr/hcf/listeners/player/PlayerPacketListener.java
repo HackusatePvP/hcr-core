@@ -35,8 +35,10 @@ public class PlayerPacketListener implements Listener {
     public void onSendClaimingPillars(SendClaimingPillarPacketsEvent event) {
         Player player = event.getPlayer();
         Cuboid cuboid = event.getCuboid();
+
+        // BUG FIX: Corners bug out when claiming, this is caused by both RemoveClaimingPillarsEvent and SendClaimingPillarsEvent being called at the same time.
+
         for (int corner = 1; corner < 5; corner++) {
-            // TODO: 12/2/2022 Corner 2 no work
             player.sendMessage("Calculating corner: " + corner);
             Location location = cuboid.getCorner(corner);
             player.sendMessage("Corner " + corner + ": " + location.getBlockX() + "," + location.getBlockZ());
@@ -55,9 +57,10 @@ public class PlayerPacketListener implements Listener {
                 return Material.EMERALD_BLOCK;
             case 3:
                 return Material.GOLD_BLOCK;
-            default:
+            case 4:
                 return Material.LAPIS_BLOCK;
         }
+        return Material.DIRT;
     }
 
     @EventHandler

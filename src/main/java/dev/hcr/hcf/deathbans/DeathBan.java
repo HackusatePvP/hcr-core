@@ -3,7 +3,7 @@ package dev.hcr.hcf.deathbans;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.utils.CC;
 import dev.hcr.hcf.utils.backend.ConfigFile;
-import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -83,6 +83,7 @@ public class DeathBan {
         return activeDeathbans.get(uuid);
     }
 
+    // Hyful rank1
     public static long getRankDuration(String rank) {
         ConfigFile config = HCF.getPlugin().getConfiguration("config");
         int minutes;

@@ -5,6 +5,10 @@ not published.
 **DISCLAIMER**
 This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and maybe far in between.
 
+- Dependency fixes
+  - Removed imanity spigot from pom.xml.
+  - Fixed issues where java classes would use apache lang3 instead of apache commons.
+  
 - TODO:
   - Still some issues with the claiming pillars, sometimes not all four pillars will show when claiming.
   - Fix combat tag issues with double messages.
@@ -23,6 +27,12 @@ This is not a finished product **THERE WILL BE BUGS** this is a project that I w
   - When a player leaves a Faction, they will now be removed from the members stored in the database.
   - Players will no longer take damage in safezones.
   - Fixed error when using the faction home command when no faction home was set.
+  - Fixed issue when using switching claiming positions where the claiming pillars did not display on all four corners.
+- Implemented scoreboard teams into Assemble.
+  - Invis has major bugs
+  - Archer tag has minor bugs
+  - Ally is not implemented.
+  - Focus is not implemented.
 - Improved configuration stability.
   - All properties' configuration will write a preset file if one doesn't exist.
   - Started implementation of different properties files for better organization.
@@ -39,20 +49,20 @@ This is not a finished product **THERE WILL BE BUGS** this is a project that I w
     - Added [KothFaction](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/koths/KothFaction.java).
     - Added [KothCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/koths/commands/KothCommand.java)
        - Added basic subcommands.
+  - Added faction display color to [GlowStoneMountain](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/GlowStoneMountainFaction.java)
 - PvP class system improvement.
   - Fixed kit detection task when a player un-equips a class.
   - Fixed issues when a clickable effect would not override a passive effect.
   - Re-wrote the potion effect restore task.
   - Fixed issue when players would disconnect with class would spawn in with the permanent class effects.
-  - Added RougeClass[](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/types/RogueClass.java).
+  - Added [RougeClass](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/types/RogueClass.java).
   - Added more functionality for the [BardClass](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/pvpclass/types/BardClass.java).
     - Bards can now give holdable effects not just click effects.
 - Removed support for Cove and added support for [Yuni](https://github.com/HackusatePvP/Yuni)
 - Removed support for iHCF events.  
 - Added more features.
-  - Added Glowstone Mountain.
+  - Added [GlowstoneMountain](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/types/GlowStoneMountainFaction.java).
     - Instead of setting cubes for glowstone mountain it uses a scanner system similar to HCTeams.
-- Add lives functionality and commands.
 - You can now easily compile the projects' dependencies by running load.bat or load.sh.
 
 # Changelog 2022.03.a6 (3/22/2022)

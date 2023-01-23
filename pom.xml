@@ -103,13 +103,6 @@
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!--This is the spigot which I use to handle iHCF events. Delete this dependency and replace with your own (if you use iHCF events) to resolve the issue.-->
-        <dependency>
-            <groupId>org.imanity.imanityspigot</groupId>
-            <artifactId>server</artifactId>
-            <version>2022.08.1b2</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- Reflection dependency fix -->
         <dependency>
             <groupId>org.reflections</groupId>

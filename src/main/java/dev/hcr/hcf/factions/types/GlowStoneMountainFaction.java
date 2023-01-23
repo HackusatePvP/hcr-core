@@ -6,6 +6,7 @@ import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
 import dev.hcr.hcf.utils.LocationUtils;
 import org.bson.Document;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,6 +21,7 @@ public class GlowStoneMountainFaction extends Faction implements SystemFaction {
 
     public GlowStoneMountainFaction() {
         super(UUID.randomUUID(), "GlowstoneMountain", true);
+        this.setColor(ChatColor.YELLOW);
         initiate();
     }
 
