@@ -20,7 +20,7 @@ This project is made to minimize as many dependencies as possible. The only requ
 There are other dependency like core plugins to handle rank data, however these are completely optional.
 - [Assemble](https://github.com/ThatKawaiiSam/Assemble) This is a really nice scoreboard api and gets the job done. Full credit the original creator.
 - [AquaAPI](https://github.com/FaceSlap02/AquaCoreAPI) This is only needed if you plan on using AquaCore to handle rank data.
-- [ProtocolLib]() Currently, only being used in [PacketController]() which is not implemented yet.
+- [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) This handles server to client packets.
 
 # Style of HCF
 This core is made for "hardcore" hcf servers. I never thought I would have to emphasize hardcore in a game-mode which is meant to be hardcore.
@@ -41,6 +41,9 @@ A: Not recommended as it's not finished. If you do end up using this for your se
 You have exclusive permission to modify use and redistribute the jar with restrictions. You are not allowed to re-sell this core whether it be modified or a fork. You are not allowed to claim any work that you did not do or create as your own.
 
 # Compile a JAR
+First you need to create a folder called `lib` in the projects main directory where the `pom.xml` file is located. Once the folder is created you need to download [ProtocolLib-4.6.jar](https://www.spigotmc.org/resources/protocollib.1997/) and [AquaCoreAPI.jar](https://github.com/FaceSlap02/AquaCoreAPI/tree/master/release) and place those jars inside the `lib` folder.
+
+
 Locate and enter the directory `local` and run either `load.sh` or `load.bat` to compile dependencies into your local m2 repository. It is highly recommended reviewing any bat or sh file before executing the commands inside them.
 Once the operation is completed simply run `mvn clean install` in the projects main directory where the pom.xml file is located. You will find the jar file in the `target` directory.
 
