@@ -56,7 +56,7 @@ public abstract class FactionCommand {
     }
 
     public String getPermission() {
-        return "hcf.faction.commands." + permission;
+        return permission;
     }
 
     public String[] getAliases() {

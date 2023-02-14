@@ -4,6 +4,7 @@ import dev.hcr.hcf.factions.Faction;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class WildernessFaction extends Faction implements SystemFaction {
@@ -13,9 +14,9 @@ public class WildernessFaction extends Faction implements SystemFaction {
         this.setColor(ChatColor.DARK_GREEN);
     }
 
-    public WildernessFaction(Document document) {
-        super(document);
-        load(document);
+    public WildernessFaction(Map<String, Object> map) {
+        super(map);
+        super.load(map);
     }
 
     @Override

@@ -32,9 +32,9 @@ public abstract class Timer extends BukkitRunnable {
         if (this instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) this, HCF.getPlugin());
         }
-        this.pause = false;
         timers.add(this);
-        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
+        this.pause = false;
+        this.runTaskTimerAsynchronously(HCF.getPlugin(), 5L, 20L);
     }
 
 
@@ -205,23 +205,10 @@ public abstract class Timer extends BukkitRunnable {
     public static Timer createTimer(Map<String, Object> map) {
         String type = (String) map.get("type");
         switch (type.toLowerCase()) {
-         /*   case "class_warmup":
-                return new ClassWarmupTimer(map);
-            case "combat":
-                return new CombatTimer(player);
-            case "enderpearl":
-                return new EnderPearlTimer(player); */
             case "pvp":
                 UUID uuid = UUID.fromString((String) map.get("uuid"));
                 Player player = Bukkit.getPlayer(uuid);
                 return new PvPTimer(uuid, map);
-           /* case "faction_home":
-                return new FactionHomeTimer(player);
-            case "archer_resistance":
-            case "archer_speed":
-                return new EffectTimer(player, Abilities.getAbility(timer));
-            case "archer_tag":
-                return new ArcherTagTimer(player); */
         }
         return null;
     }

@@ -12,6 +12,7 @@ import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.users.faction.ChatChannel;
 import dev.hcr.hcf.users.statistics.UserStatistics;
 import dev.hcr.hcf.utils.TaskUtils;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -28,6 +29,7 @@ public class User {
     private boolean claimedChest;
     private boolean factionMap = false;
     private boolean bypass = false;
+    private boolean sotw = false;
     private UserStatistics userStatistics;
     private PvPClass currentClass = null;
     private ChatChannel channel = ChatChannel.PUBLIC;
@@ -36,6 +38,8 @@ public class User {
 
     private final static ConcurrentHashMap<UUID, User> users = new ConcurrentHashMap<>();
     private final static Map<UUID, BukkitTask> wallBorderTask = new HashMap<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public User(UUID uuid, String name) {
         this.uuid = uuid;
@@ -97,7 +101,9 @@ public class User {
             builder.append(s).append("&").append(statsMap.get(s)).append("%");
         }
         map.put("statsMap", builder.toString());
-        System.out.println("Stats Map: " + builder);
+        if (debug) {
+            System.out.println("Stats Map: " + builder);
+        }
         return map;
     }
 
@@ -207,7 +213,9 @@ public class User {
         Timer currentTimer = activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(type.getName())).findAny().orElse(null);
         if (add) {
             if (currentTimer != null) {
-                System.out.println("Ending...");
+                if (debug) {
+                    System.out.println(currentTimer.getName() + "timer ending...");
+                }
                 currentTimer.end(true);
             }
             Timer.createEffectTimer(player, type);
@@ -274,6 +282,13 @@ public class User {
         return Bukkit.getPlayer(uuid);
     }
 
+    public boolean hasSotw() {
+        return sotw;
+    }
+
+    public void setSotw(boolean sotw) {
+        this.sotw = sotw;
+    }
 
     /**
      * Attempt to get a user form the cached mappings. Or attempt to unsafely load the user.

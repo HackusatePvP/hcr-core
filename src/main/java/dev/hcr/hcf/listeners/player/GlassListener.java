@@ -43,7 +43,7 @@ public class GlassListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        User.getWallBorderTask().put(player.getUniqueId(), new WarpTimerRunnable(this, player).runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L));
+        User.getWallBorderTask().put(player.getUniqueId(), new WarpTimerRunnable(this, player).runTaskTimerAsynchronously(HCF.getPlugin(), 10L, 10L));
     }
 
     @EventHandler
@@ -90,6 +90,10 @@ public class GlassListener implements Listener {
                 
                 for (Faction faction : nearby) {
                     if (hasPvpTimer && faction instanceof PlayerFaction) {
+                        // If its the players own faction skip
+                        if (((PlayerFaction) faction).hasMember(player.getUniqueId())) {
+                            continue;
+                        }
                         Faction factionTo = Faction.getByLocation(to), factionFrom = Faction.getByLocation(from);
                         TaskUtils.runSync(() -> {
                             if (factionTo != factionFrom && factionTo == faction) {

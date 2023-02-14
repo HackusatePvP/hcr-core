@@ -35,9 +35,7 @@ public class PlayerPacketListener implements Listener {
     public void onSendClaimingPillars(SendClaimingPillarPacketsEvent event) {
         Player player = event.getPlayer();
         Cuboid cuboid = event.getCuboid();
-
         // BUG FIX: Corners bug out when claiming, this is caused by both RemoveClaimingPillarsEvent and SendClaimingPillarsEvent being called at the same time.
-
         for (int corner = 1; corner < 5; corner++) {
             player.sendMessage("Calculating corner: " + corner);
             Location location = cuboid.getCorner(corner);
@@ -74,7 +72,6 @@ public class PlayerPacketListener implements Listener {
                     location1.setY(y);
                     player.sendBlockChange(location1, location1.getBlock().getType(), location1.getBlock().getData());
                     location1.add(0, 1, 0);
-
                 }
             }
         }
@@ -124,7 +121,18 @@ public class PlayerPacketListener implements Listener {
                         player.sendBlockChange(location1, location1.getBlock().getType(), location1.getBlock().getData());
                         location1.add(0, 1, 0);
                     } else {
-                        player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
+                        if (faction instanceof PlayerFaction) {
+                            PlayerFaction playerFaction = (PlayerFaction) faction;
+                            if (playerFaction.hasMember(player.getUniqueId())) {
+                                player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
+                            } else {
+                                player.sendBlockChange(location1, Material.REDSTONE_BLOCK, (byte) 0);
+                            }
+                        } else if (faction instanceof SafeZoneFaction) {
+                            player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
+                        } else {
+                            player.sendBlockChange(location1, Material.REDSTONE_BLOCK, (byte) 0);
+                        }
                     }
                 }
             }

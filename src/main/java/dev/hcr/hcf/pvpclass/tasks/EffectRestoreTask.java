@@ -24,9 +24,9 @@ public class EffectRestoreTask extends BukkitRunnable {
             PotionEffect effect = player.getActivePotionEffects().stream()
                     .filter(potionEffect -> potionEffect.getType() == before.getType())
                     .findFirst().orElse(null);
-            if (effect == null)
+            if (effect == null) {
                 return;
-
+            }
             if (effect.getAmplifier() == before.getAmplifier()) {
                 if (before.getDuration() > effect.getDuration())
                     player.addPotionEffect(before, true);

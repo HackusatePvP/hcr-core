@@ -7,8 +7,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,7 +84,14 @@ public class LivesSendCommand extends LivesCommand {
 
     @Override
     public List<String> tabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return new ArrayList<>();
+        List<String> completions = new ArrayList<>();
+        List<String> players = new ArrayList<>();
+        Bukkit.getOnlinePlayers().forEach(player -> players.add(player.getName()));
+        if (args.length == 2) {
+            StringUtil.copyPartialMatches(args[1], players, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 
 }

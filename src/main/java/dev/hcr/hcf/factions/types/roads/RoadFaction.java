@@ -4,6 +4,7 @@ import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.types.SystemFaction;
 import org.bson.Document;
 
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class RoadFaction extends Faction implements SystemFaction {
@@ -14,9 +15,9 @@ public abstract class RoadFaction extends Faction implements SystemFaction {
         this.name = name;
     }
 
-    public RoadFaction(Document document) {
-        super(document);
-        this.name = document.getString("name");
+    public RoadFaction(Map<String, Object> map) {
+        super(map);
+        this.name = (String) map.get("name");
     }
 
     @Override

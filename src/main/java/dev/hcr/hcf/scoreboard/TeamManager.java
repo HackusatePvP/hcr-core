@@ -2,6 +2,7 @@ package dev.hcr.hcf.scoreboard;
 
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -12,6 +13,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.Collection;
 
 public class TeamManager {
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public void registerTeams(Scoreboard scoreboard) {
         Team friendly = (scoreboard.getTeam("friendly") == null ? scoreboard.registerNewTeam("friendly") : scoreboard.getTeam("friendly"));
@@ -27,7 +29,9 @@ public class TeamManager {
         User user = User.getUser(player.getUniqueId());
 
         // Setup teams for players scoreboard
-        System.out.println("Creating and registering teams for " + player.getName());
+        if (debug) {
+            System.out.println("Creating and registering teams for " + player.getName());
+        }
         Scoreboard scoreboard = player.getScoreboard();
         Team friendly = scoreboard.getTeam("friendly");
         Team enemy = scoreboard.getTeam("enemy");
@@ -37,29 +41,41 @@ public class TeamManager {
         Team archertag = scoreboard.getTeam("archertag");
 
         // Check to see if player has friendlies
-        System.out.println("Adding " + player.getName() + " to friendlies");
+        if (debug) {
+            System.out.println("Adding " + player.getName() + " to friendlies");
+        }
         friendly.addPlayer(player);
         boolean inFaction = user.hasFaction();
-        System.out.println("Creating relations for online players...");
+        if (debug) {
+            System.out.println("Creating relations for online players...");
+        }
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (online.getUniqueId() == player.getUniqueId()) {
                 System.out.println(online.getName() + " same player as " + player.getName() + " skipping...");
                 continue;
             }
-            System.out.println("Updating " + online.getName() + "...");
+            if (debug) {
+                System.out.println("Updating " + online.getName() + "...");
+            }
             // Update teams for player
             if (inFaction) {
-                System.out.println(player.getName() + " is in a faction.");
+                if (debug) {
+                    System.out.println(player.getName() + " is in a faction.");
+                }
                 PlayerFaction faction = (PlayerFaction) user.getFaction();
                 if (faction.hasMember(online.getUniqueId()) && online.getUniqueId() != player.getUniqueId()) {
-                    System.out.println(online.getName() + " is in the faction and is not " + player.getName());
-                    System.out.println("Adding " + online.getName() + " to friendlies for " + player.getName());
+                    if (debug) {
+                        System.out.println(online.getName() + " is in the faction and is not " + player.getName());
+                        System.out.println("Adding " + online.getName() + " to friendlies for " + player.getName());
+                    }
                     friendly.addPlayer(online);
                     if (enemy.hasPlayer(online)) {
                         enemy.removePlayer(online);
                     }
                 } else {
-                    System.out.println("Adding " + online.getName() + " to enemies for " + player.getName());
+                    if (debug) {
+                        System.out.println("Adding " + online.getName() + " to enemies for " + player.getName());
+                    }
                     enemy.addPlayer(online);
                     if (friendly.hasPlayer(online)) {
                         friendly.removePlayer(online);
@@ -67,12 +83,18 @@ public class TeamManager {
                 }
                 // TODO: 12/16/2022 scan for allies and any focused player
             } else {
-                System.out.println(player.getName() + " is not in a faction.");
+                if (debug) {
+                    System.out.println(player.getName() + " is not in a faction.");
+                }
                 if (online.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    System.out.println(online.getName() + " is invisible adding to invis team.");
+                    if (debug) {
+                        System.out.println(online.getName() + " is invisible adding to invis team.");
+                    }
                     invis.addPlayer(online);
                 }
-                System.out.println("Adding " + online.getName() + " to enemies.");
+                if (debug) {
+                    System.out.println("Adding " + online.getName() + " to enemies.");
+                }
                 enemy.addPlayer(online);
                 if (friendly.hasPlayer(online)) {
                     friendly.removePlayer(online);
@@ -80,8 +102,10 @@ public class TeamManager {
             }
 
             // Update teams for all other online players and redefine vars
-            System.out.println("Updating online players relation for " + player.getName());
-            System.out.println("Redefining local vars...");
+            if (debug) {
+                System.out.println("Updating online players relation for " + player.getName());
+                System.out.println("Redefining local vars...");
+            }
             scoreboard = online.getScoreboard();
             friendly = scoreboard.getTeam("friendly");
             enemy = scoreboard.getTeam("enemy");
@@ -97,18 +121,24 @@ public class TeamManager {
             user = User.getUser(online.getUniqueId());
             inFaction = user.hasFaction();
             if (inFaction) {
-                System.out.println(online.getName() + " is in a faction.");
+                if (debug) {
+                    System.out.println(online.getName() + " is in a faction.");
+                }
                 PlayerFaction faction = (PlayerFaction) user.getFaction();
                 // Online player is in a faction see if the player is in the faction.
                 if (faction.hasMember(player.getUniqueId())) {
-                    System.out.println(player.getName() + " is in the same faction as " + online.getName());
-                    System.out.println("Adding " + player.getName() + " to friendlies for " + online.getName());
+                    if (debug) {
+                        System.out.println(player.getName() + " is in the same faction as " + online.getName());
+                        System.out.println("Adding " + player.getName() + " to friendlies for " + online.getName());
+                    }
                     friendly.addPlayer(player);
                     if (enemy.hasPlayer(player)) {
                         enemy.removePlayer(player);
                     }
                 } else {
-                    System.out.println("Adding " + player.getName() + " to enemies for " + online.getName());
+                    if (debug) {
+                        System.out.println("Adding " + player.getName() + " to enemies for " + online.getName());
+                    }
                     enemy.addPlayer(player);
                     if (friendly.hasPlayer(player)) {
                         friendly.removePlayer(player);
@@ -117,13 +147,19 @@ public class TeamManager {
 
                 // TODO: 12/16/2022 Check to see if the player is an ally
             } else {
-                System.out.println(online.getName() + " is not in a faction.");
+                if (debug) {
+                    System.out.println(online.getName() + " is not in a faction.");
+                }
                 // Check to see if the player is invis
                 if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    System.out.println(player.getName() + " is invisible adding to invis team for " + online.getName());
+                    if (debug) {
+                        System.out.println(player.getName() + " is invisible adding to invis team for " + online.getName());
+                    }
                     invis.addPlayer(player);
                 }
-                System.out.println("Adding " + player.getName() + " to enemies for " + online.getName());
+                if (debug) {
+                    System.out.println("Adding " + player.getName() + " to enemies for " + online.getName());
+                }
                 enemy.addPlayer(player);
                 if (friendly.hasPlayer(player)) {
                     friendly.removePlayer(player);
@@ -140,15 +176,15 @@ public class TeamManager {
         archertag = (scoreboard.getTeam("archertag") == null ? scoreboard.registerNewTeam("archertag") : scoreboard.getTeam("archertag"));
 
         applyPrefix(friendly, enemy, ally, invis, focus, archertag);
-
-        System.out.println("Validation: ");
-        System.out.println("Friendlies: " + friendly.getEntries());
-        System.out.println("Enemies: " + enemy.getEntries());
-        System.out.println("Allies: " + ally.getEntries());
-        System.out.println("Invis: " + invis.getEntries());
-        System.out.println("Focus: " + focus.getEntries());
-        System.out.println("Archer Tags: " + archertag.getEntries());
-
+        if (debug) {
+            System.out.println("Validation: ");
+            System.out.println("Friendlies: " + friendly.getEntries());
+            System.out.println("Enemies: " + enemy.getEntries());
+            System.out.println("Allies: " + ally.getEntries());
+            System.out.println("Invis: " + invis.getEntries());
+            System.out.println("Focus: " + focus.getEntries());
+            System.out.println("Archer Tags: " + archertag.getEntries());
+        }
         if (friendly.getPrefix().isEmpty()) {
             applyPrefix(friendly, enemy, ally, invis, focus, archertag);
         }
@@ -156,7 +192,9 @@ public class TeamManager {
 
     private void applyPrefix(Team friendly, Team enemy, Team ally, Team invis, Team focus, Team archertag) {
         friendly.setPrefix("§a");
-        System.out.println("Prefix: " + friendly.getPrefix());
+        if (debug) {
+            System.out.println("Prefix: " + friendly.getPrefix());
+        }
         enemy.setPrefix("§c");
         ally.setPrefix("§9");
         focus.setPrefix("§d");

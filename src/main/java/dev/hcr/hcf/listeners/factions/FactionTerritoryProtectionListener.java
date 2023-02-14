@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class FactionTerritoryProtectionListener implements Listener {
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
@@ -62,7 +63,9 @@ public class FactionTerritoryProtectionListener implements Listener {
         PlayerFaction playerFaction = (PlayerFaction) user.getFaction();
         if (playerFaction != null) {
             if (faction.getUniqueID() == playerFaction.getUniqueID()) {
-                System.out.println("PlayerFaction == LocationFaction");
+                if (debug) {
+                    System.out.println("PlayerFaction == LocationFaction");
+                }
                 // If the player is placing a bucket in there own claim ignore.
                 return;
             }
@@ -134,11 +137,15 @@ public class FactionTerritoryProtectionListener implements Listener {
     }
 
     private boolean handleWaterPlacement(PlayerBucketEmptyEvent event, Player player, Location location, PlayerFaction playerFaction, int x, int z) {
-        System.out.println("Scanning: (" + x + "," + z + ")");
+        if (debug) {
+            System.out.println("Scanning: (" + x + "," + z + ")");
+        }
         Faction scannedFaction;
         scannedFaction = Faction.getByLocation(location.add(x, 0, z));
         if (scannedFaction != null && scannedFaction.getUniqueID() != playerFaction.getUniqueID() && scannedFaction instanceof PlayerFaction) {
-            System.out.println("Faction found: " + scannedFaction.getName());
+            if (debug) {
+                System.out.println("Faction found: " + scannedFaction.getName());
+            }
             player.sendMessage(ChatColor.RED + "You cannot place buckets here. This action would impact other faction territory. Be sure to place buckets 16 blocks away from faction.");
             event.setCancelled(true);
             return true;
@@ -164,8 +171,10 @@ public class FactionTerritoryProtectionListener implements Listener {
                     toReturn = false;
                 } else {
                     int buildRadius = PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getInteger("warzone-build-radius");
-                    System.out.println(location);
-                    System.out.println("Prevent build: " + (Math.abs(location.getBlockX()) <= buildRadius && Math.abs(location.getBlockZ()) <= buildRadius));
+                    if (debug) {
+                        System.out.println(location);
+                        System.out.println("Prevent build: " + (Math.abs(location.getBlockX()) <= buildRadius && Math.abs(location.getBlockZ()) <= buildRadius));
+                    }
                     toReturn = Math.abs(location.getBlockX()) <= buildRadius && Math.abs(location.getBlockZ()) <= buildRadius;
                 }
             } else if (factionAtLocation instanceof GlowStoneMountainFaction) {

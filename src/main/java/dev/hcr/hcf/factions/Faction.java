@@ -7,7 +7,6 @@ import dev.hcr.hcf.factions.types.*;
 import dev.hcr.hcf.factions.types.roads.*;
 import dev.hcr.hcf.utils.LocationUtils;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
-import org.bson.Document;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -29,6 +28,8 @@ public abstract class Faction extends Claim {
     private static GlowStoneMountainFaction glowStoneMountainFaction;
     private static final ConcurrentHashMap<UUID, Faction> factionUUIDMap = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Faction> factionNameMap = new ConcurrentHashMap<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public Faction(UUID uuid, String name, Claim claim, boolean deathban) {
         super(name, claim.getCuboid());
@@ -70,15 +71,11 @@ public abstract class Faction extends Claim {
         }
     }
 
-    /**
-     * Loads faction from database implementation.
-     * @param document - Document from MongoDB database.
-     */
-    public Faction(Document document) {
-        super(document.getString("name"));
-        this.uniqueID = UUID.fromString(document.getString("uuid"));
-        this.name = document.getString("name");
-        this.deathban = document.getBoolean("deathban");
+    public Faction(Map<String, Object> map) {
+        super((String) map.get("name"));
+        this.uniqueID = UUID.fromString((String) map.get("uuid"));
+        this.name = (String) map.get("name");
+        this.deathban = (Boolean) map.get("deathban");
         factionUUIDMap.put(uniqueID, this);
         factionNameMap.put(name.toLowerCase(), this);
         if (this instanceof WildernessFaction) {
@@ -127,19 +124,25 @@ public abstract class Faction extends Claim {
         HCF.getPlugin().getStorage().appendFactionData(map);
     }
 
-    public void load(Document document) {
-        if (document.containsKey("claims")) {
-            List<String> claims = document.get("claims", ArrayList.class);
+    public void load(Map<String, Object> map) {
+        if (map.containsKey("claims")) {
+            List<String> claims = (ArrayList<String>) map.get("claims");
+            if (claims == null || claims.isEmpty()) {
+                if (debug) {
+                    System.out.println("Claims is null or empty skipping: " + name);
+                }
+                return;
+            }
             for (String s : claims) {
                 //System.out.println("Found Claim: " + s);
                 this.claims.add(new Claim(name, LocationUtils.parseCuboid(s)));
             }
         }
-        if (document.containsKey("color")) {
-            this.color = ChatColor.valueOf(document.getString("color"));
+        if (map.containsKey("color")) {
+            this.color = ChatColor.valueOf((String) map.get("color"));
         }
-        if (document.containsKey("home")) {
-            this.home = LocationUtils.parseLocation(document.getString("home"));
+        if (map.containsKey("home")) {
+            this.home = LocationUtils.parseLocation((String) map.get("home"));
         }
     }
 
@@ -207,9 +210,14 @@ public abstract class Faction extends Claim {
         PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("claims.properties");
         double distance = location.distance(location2);
         double total = 0D;
-        for (int block = 0; block < distance; block++) {
-            total += block * configuration.getDouble("claim-price-per-block");
-        }
+        int point1x = location.getBlockX();
+        int point1z = location.getBlockZ();
+        int point2x = location2.getBlockX();
+        int point2z = location2.getBlockZ();
+
+        int xCalc = Math.abs(point1x - point2x);
+        int zCalc = Math.abs(point1z - point2z);
+        total = (xCalc + zCalc) * configuration.getDouble("unclaim-price-per-block");
         return total;
     }
 
@@ -218,9 +226,15 @@ public abstract class Faction extends Claim {
         double total = 0D;
         Claim claim = claims.stream().findFirst().orElse(null);
         if (claim != null) {
-            for (int block = 0; block < claim.getCuboid().getDistance(); block++) {
-                total += block * configuration.getDouble("unclaim-price-per-block");
-            }
+            int point1x = claim.getCuboid().getPoint1().getBlockX();
+            int point1z = claim.getCuboid().getPoint1().getBlockZ();
+            int point2x = claim.getCuboid().getPoint2().getBlockX();
+            int point2z = claim.getCuboid().getPoint2().getBlockZ();
+
+            int xCalc = Math.abs(point1x - point2x);
+            int zCalc = Math.abs(point1z - point2z);
+            total = (xCalc + zCalc) * configuration.getDouble("unclaim-price-per-block");
+
         }
         return total;
     }

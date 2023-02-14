@@ -83,7 +83,6 @@ public class DeathBan {
         return activeDeathbans.get(uuid);
     }
 
-    // Hyful rank1
     public static long getRankDuration(String rank) {
         ConfigFile config = HCF.getPlugin().getConfiguration("config");
         int minutes;

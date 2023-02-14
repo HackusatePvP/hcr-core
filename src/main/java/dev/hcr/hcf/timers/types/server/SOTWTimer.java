@@ -1,6 +1,5 @@
 package dev.hcr.hcf.timers.types.server;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.timers.events.TimerStopEvent;
@@ -21,7 +20,6 @@ public class SOTWTimer extends Timer implements Listener {
         super("sotw", TimerType.SERVER);
         this.active = true;
         this.delay = System.currentTimeMillis() + delay;
-        this.runTaskTimerAsynchronously(HCF.getPlugin(), 20L, 20L);
     }
 
     public boolean isActive() {
@@ -32,6 +30,7 @@ public class SOTWTimer extends Timer implements Listener {
         TimerStopEvent event = new TimerStopEvent(this);
         Bukkit.getPluginManager().callEvent(event);
         this.active = enabled;
+
     }
 
     public void setDelay(long delay) {
@@ -63,7 +62,9 @@ public class SOTWTimer extends Timer implements Listener {
 
     public void end(boolean forced) {
         if (forced) {
-            TimerStopEvent event = new TimerStopEvent(this, (Player[]) Bukkit.getOnlinePlayers().toArray());
+            Player[] array = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+
+            TimerStopEvent event = new TimerStopEvent(this, array);
             Bukkit.getPluginManager().callEvent(event);
         } else {
             TimerExpireEvent event = new TimerExpireEvent(this);

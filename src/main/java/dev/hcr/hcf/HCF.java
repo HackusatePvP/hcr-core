@@ -6,6 +6,7 @@ import dev.hcr.hcf.commands.donor.ClaimBonusChestCommand;
 import dev.hcr.hcf.commands.players.BalanceCommand;
 import dev.hcr.hcf.commands.players.PayCommand;
 import dev.hcr.hcf.commands.players.PvPTimerCommand;
+import dev.hcr.hcf.commands.players.SOTWEnableCommand;
 import dev.hcr.hcf.commands.players.lives.DefaultLivesCommand;
 import dev.hcr.hcf.commands.players.lives.LivesCommandManager;
 import dev.hcr.hcf.commands.staff.GlowstoneScannerCommand;
@@ -27,6 +28,7 @@ import dev.hcr.hcf.factions.types.roads.WestRoad;
 import dev.hcr.hcf.hooks.AquaCoreHook;
 import dev.hcr.hcf.hooks.PluginHook;
 import dev.hcr.hcf.hooks.YuniHook;
+import dev.hcr.hcf.koths.KothListener;
 import dev.hcr.hcf.koths.commands.KothCommandManager;
 import dev.hcr.hcf.koths.commands.player.DefaultKothCommand;
 import dev.hcr.hcf.listeners.entities.ZombieListener;
@@ -43,14 +45,13 @@ import dev.hcr.hcf.scoreboard.HCFBoardAdapter;
 import dev.hcr.hcf.scoreboard.TeamManager;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.ConfigFile;
-import dev.hcr.hcf.utils.backend.ConfigurationType;
+import dev.hcr.hcf.utils.backend.ItemDatabase;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import io.github.thatkawaiisam.assemble.Assemble;
 import io.github.thatkawaiisam.assemble.AssembleStyle;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,18 +78,20 @@ public final class HCF extends JavaPlugin {
         loadPvPClasses();
         registerEvents();
         loadUI();
+        getLogger().info(plugin.getDescription().getVersion() + " finished loading.");
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
         saveFactions();
-        // Runtime.getRuntime().exec("mongoexport --host host_name --port port_number --db myDatabase --collection Page --out Page.json");
+
         User.getUsers().forEach(user -> getStorage().appendUserDataSync(user.save()));
         Bukkit.getOnlinePlayers().forEach(player -> FactionClaimingListener.removeWand(player.getInventory()));
     }
 
     private void loadConfigurationFiles() {
+        getLogger().info("Loading configuration files...");
         files.addAll(Arrays.asList(
                 new ConfigFile("config", this)
         ));
@@ -100,6 +103,13 @@ public final class HCF extends JavaPlugin {
         new PropertiesConfiguration("faction.properties", "factions");
         new PropertiesConfiguration("claims.properties", "factions");
         new PropertiesConfiguration("pvpclass.properties", "factions");
+
+        new ItemDatabase();
+
+        if (PropertiesConfiguration.canUpdate()) {
+            getLogger().warning("New update: Updating configuration files. (Note: This will not overwrite or reset any configuration you have altered.)");
+            PropertiesConfiguration.update();
+        }
     }
 
     public ConfigFile getConfiguration(String file) {
@@ -107,6 +117,7 @@ public final class HCF extends JavaPlugin {
     }
 
     private void registerCommands() {
+        getLogger().info("Registering all commands...");
         new FactionCommandManager();
         new KothCommandManager();
         new LivesCommandManager();
@@ -120,16 +131,19 @@ public final class HCF extends JavaPlugin {
         getCommand("pay").setExecutor(new PayCommand());
         getCommand("pvptimer").setExecutor(new PvPTimerCommand());
         getCommand("sotw").setExecutor(new SOTWCommand());
+        getCommand("sotwenable").setExecutor(new SOTWEnableCommand());
     }
 
     private void implementDatabases() {
+        getLogger().info("Connecting to database...");
         // To prevent NPE errors start the regen task before loading factions.
         regenTask = new FactionRegenTask();
         regenTask.runTaskTimerAsynchronously(this, 0L, 20L * PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getInteger("regen-delay-time"));
-        PropertiesConfiguration configuration = (PropertiesConfiguration) PropertiesConfiguration.getPropertiesConfiguration("database.properties");
+        PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("database.properties");
         switch (configuration.getString("main-loader").toLowerCase()) {
             case "mongo":
             case "mongodb":
+                getLogger().info("MongoDB connection started.");
                 storage = new MongoStorage();
                 break;
             case "mysql":
@@ -145,16 +159,20 @@ public final class HCF extends JavaPlugin {
     }
 
     private void loadHooks() {
+        getLogger().info("Looking for plugin hooks...");
         if (new AquaCoreHook().isHooked()) {
+            getLogger().info("AquaCore hook found.");
             core = new AquaCoreHook();
         } else if (new YuniHook().isHooked()) {
+            getLogger().info("Yuni hook found.");
             core = new YuniHook();
         } else {
-            HCF.getPlugin().getLogger().severe("Could not find core hook. Please add support to a plugin or use a plugin that already has support.");
+            getLogger().severe("Could not find core hook. Please add support to a plugin or use a plugin that already has support.");
         }
     }
 
     private void loadFactions() {
+        getLogger().info("Validating system factions...");
         if (Faction.getWilderness() == null) {
             getLogger().warning("Wilderness not found, creating...");
             new WildernessFaction();
@@ -190,6 +208,7 @@ public final class HCF extends JavaPlugin {
     }
 
     private void loadPvPClasses() {
+        getLogger().info("Registering PvP Classes...");
         KitDetectionTask detectionTask = new KitDetectionTask();
         detectionTask.runTaskTimerAsynchronously(this, 20L, 5L);
         new ArcherClass();
@@ -199,20 +218,23 @@ public final class HCF extends JavaPlugin {
     }
 
     private void saveFactions() {
+        getLogger().info("Saving all faction data...");
         for (Faction faction : Faction.getFactions()) {
             faction.save();
         }
     }
 
     private void registerEvents() {
+        getLogger().info("Registering all listeners...");
         // Handle packet managers
         Arrays.asList(new UserListener(), new ChatListener(this), new FactionListener(), new FactionTerritoryProtectionListener(), new FactionClaimingListener(),
                 new PlayerListener(), new GlassListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener(), new HCFBoardAdapter(), new DeathBanListener(),
-                new PvPClassListener(), new ZombieListener()
+                new PvPClassListener(), new ZombieListener(), new KothListener(), new SignListener()
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 
     private void loadUI() {
+        getLogger().info("Loading scoreboard and tab...");
         Assemble assemble = new Assemble(this, new HCFBoardAdapter());
         assemble.setAssembleStyle(AssembleStyle.KOHI);
         teamManager = new TeamManager();

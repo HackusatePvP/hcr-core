@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class SafeZoneFaction extends Faction implements SystemFaction {
@@ -17,9 +18,9 @@ public class SafeZoneFaction extends Faction implements SystemFaction {
         this.setColor(ChatColor.GREEN);
     }
 
-    public SafeZoneFaction(Document document) {
-        super(document);
-        super.load(document);
+    public SafeZoneFaction(Map<String, Object> map) {
+        super(map);
+        super.load(map);
     }
 
     @Override

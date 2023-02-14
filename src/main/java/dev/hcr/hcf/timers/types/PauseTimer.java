@@ -22,6 +22,8 @@ public abstract class PauseTimer extends Timer {
         setPauseMillis(((Number) map.get("pauseMillis")).longValue());
     }
 
+    public abstract void reset();
+
     public abstract long getPauseMillis();
 
     public abstract void setPauseMillis(long time);

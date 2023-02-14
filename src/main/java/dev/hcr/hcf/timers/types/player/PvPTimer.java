@@ -3,6 +3,7 @@ package dev.hcr.hcf.timers.types.player;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.timers.types.PauseTimer;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -33,21 +34,37 @@ public class PvPTimer extends PauseTimer implements Listener {
 
     public PvPTimer(UUID uuid, Map<String, Object> map) {
         super(uuid, map);
-        System.out.println("Creating PvPTimer for " + uuid);
+        boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
+        if (debug) {
+            System.out.println("Creating PvPTimer for " + uuid);
+        }
         this.uuid = uuid;
         this.active = (Boolean) map.get("active");
-        System.out.println("Active: " + active);
+        if (debug) {
+            System.out.println("Active: " + active);
+        }
         this.delay = (Long) map.get("delay");
-        System.out.println("Delay: " + delay);
-        System.out.println("Display: " + DurationFormatUtils.formatDuration(delay, "hh:mm:ss"));
+        if (debug) {
+            System.out.println("Delay: " + delay);
+            System.out.println("Display: " + DurationFormatUtils.formatDuration(delay, "hh:mm:ss"));
+        }
         this.timeLeft = ((Number) map.get("timeLeft")).longValue(); // This has the current display
-        System.out.println("Time-Left: " + timeLeft);
-        System.out.println("Display: " + DurationFormatUtils.formatDuration(timeLeft, "hh:mm:ss"));
+        if (debug) {
+            System.out.println("Time-Left: " + timeLeft);
+            System.out.println("Display: " + DurationFormatUtils.formatDuration(timeLeft, "hh:mm:ss"));
+        }
         this.delay = timeLeft + System.currentTimeMillis();
         this.pauseMillis = ((Number) map.get("pauseMillis")).longValue();
         setPause(false);
-        System.out.println("Validating...");
-        System.out.println("Display: " + getTimerDisplay());
+        if (debug) {
+            System.out.println("Validating...");
+            System.out.println("Display: " + getTimerDisplay());
+        }
+    }
+
+    @Override
+    public void reset() {
+
     }
 
     @Override

@@ -17,7 +17,9 @@ public class KothCreateCommand extends KothCommand {
 
     @Override
     public void execute(CommandSender sender, String label, String[] args) {
-        if (args.length == 2) {
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.RED + "/koth create <name>");
+        } else if (args.length == 2) {
             if (Faction.getFactionByName(args[1]) != null) {
                 sender.sendMessage(ChatColor.RED + "Faction already exists.");
                 return;

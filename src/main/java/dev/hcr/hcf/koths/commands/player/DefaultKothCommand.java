@@ -6,8 +6,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class DefaultKothCommand implements CommandExecutor, TabCompleter {
@@ -27,7 +30,7 @@ public class DefaultKothCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.RED + "Could not find argument \"" + args[0] + "\". /" + label + " help");
             return true;
         }
-        if (!command.getPermission().replace("hcf.koth.commands.", "").equalsIgnoreCase("")) {
+        if (command.getPermission() != null && !command.getPermission().contains("hcf.faction.commands.null")) {
             if (!sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(ChatColor.RED + "No permission.");
                 return true;
@@ -39,6 +42,10 @@ public class DefaultKothCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return new ArrayList<>();
+        List<String> completions = new ArrayList<>();
+        List<String> commandArgs = Arrays.asList("create", "schedule", "setcenterzone");
+        StringUtil.copyPartialMatches(args[0], commandArgs, completions);
+        Collections.sort(completions);
+        return completions;
     }
 }

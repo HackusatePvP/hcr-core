@@ -7,6 +7,7 @@ import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.pvpclass.types.bard.BardClass;
 import dev.hcr.hcf.timers.Timer;
+import dev.hcr.hcf.timers.types.server.SOTWTimer;
 import dev.hcr.hcf.users.User;
 import io.github.thatkawaiisam.assemble.AssembleAdapter;
 import io.github.thatkawaiisam.assemble.events.AssembleBoardCreatedEvent;
@@ -26,16 +27,27 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
 
     @Override
     public String getTitle(Player player) {
-        // I will ne bot doing configuration at this time, everything will be hard coded in.
+        // I will not be doing configuration at this time, everything will be hard coded in.
         // Thank god you are seeing this and have source to make the changes you need right?
         return "&4&lHCR &7[Map I]";
     }
 
     @Override
     public List<String> getLines(Player player) {
+        User user = User.getUser(player.getUniqueId());
         List<String> lines = new ArrayList<>();
         lines.add("----------------");
-        User user = User.getUser(player.getUniqueId());
+        for (Timer timer : Timer.getTimers()) {
+            if (timer instanceof SOTWTimer) {
+                if (user.hasSotw()) {
+                    lines.add("| " + timer.getDisplayName() + ": " + timer.getTimerDisplay());
+                } else {
+                    lines.add("| &m" + timer.getDisplayName() + ": " + timer.getTimerDisplay());
+                }
+            } else {
+                lines.add(timer.getDisplayName() + ": " + timer.getTimerDisplay());
+            }
+        }
         List<Timer> kitTimers = new ArrayList<>();
         if (user.getActiveTimers() != null) {
             for (Timer timer : user.getActiveTimers()) {
@@ -69,9 +81,6 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
                 }
             }
         }
-        for (Timer timer : Timer.getTimers()) {
-            lines.add(timer.getDisplayName() + ": " + timer.getTimerDisplay());
-        }
         lines.add("| ");
         lines.add("|     &cplay.hcr.dev      ");
         lines.add("----------------");
@@ -89,6 +98,4 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
         User user = User.getUser(event.getBoard().getUuid());
         HCF.getPlugin().getTeamManager().loadPlayer(user.toPlayer());
     }
-
-
 }

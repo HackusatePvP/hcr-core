@@ -25,9 +25,7 @@ public class KitDetectionTask extends BukkitRunnable {
             if (pvPClass != null) {
                 // If they have a class equipped lets check to make sure its still applicable.
                 if (PvPClass.getApplicableClass(player) == null ) {
-                   // System.out.println("User should have a class but one was not found.");
                     // If the class is not applicable unequip the class.
-                   // System.out.println("Calling event to remove class");
                     ClassUnequippedEvent event = new ClassUnequippedEvent(pvPClass, player);
                     Bukkit.getPluginManager().callEvent(event);
                     user.setCurrentClass(null);

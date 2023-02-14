@@ -2,9 +2,9 @@
 This core is designed and made by me. Any utils or public code will be credited in the [changelog](https://github.com/HackusatePvP/hcr-core/blob/main/CHANGELOG.md)
 This is not a fork of any kind and any similarities between this and another core are just coincidental.
 
-## 2023.01.a7
+## 2023.02.a8
 This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and maybe far in between.
-A7 brought many new features, and many bug fixes. To keep updated with the project changes please check out the [changelog](https://github.com/HackusatePvP/hcr-core/blob/main/CHANGELOG.md).
+To keep updated with the project changes please check out the [changelog](https://github.com/HackusatePvP/hcr-core/blob/main/CHANGELOG.md).
 
 **WARNING**
 This version of the core removed support for Cove and added support for [Yuni](https://github.com/HackusatePvP/Yuni). Yuni's public version is not currently updated. The only other support is for [Aqua](https://builtbybit.com/resources/aquacore-core-manager-for-your-server.11118/).
@@ -14,6 +14,13 @@ Alternatively you could add your own support for other rank core plugins. View [
 This core is unfinished and untested. This core is not meant to be put into production until its fully completed.
 Any and all issues you encounter will have to be fixed by you or another third party developer. Please do not create issues
 within GitHub as they will most likely be ignored. This may change as the core comes closer to completion.
+
+# Installation
+To start the installation process you will need a working 1.8.x minecraft server. You will then need to download the [latest](https://github.com/HackusatePvP/hcr-core/releases/tag/alpha) version of the core and be sure you have all the dependencies' setup.
+This also includes a working MongoDB server. In total you need to have ProtocolLib and either Yuni or AquaCore installed. Next start up the server you may get warnings regarding factions not existing or configuration updates. You can ignore all warnings however if you get an error be sure
+you have all the dependencies' setup properly.
+
+If you get an error regarding `File not found`. Try to see if the file that it's trying to locate exists. If not create it.
 
 # Dependencies
 This project is made to minimize as many dependencies as possible. The only required dependency will be for design only like a scoreboard/tab library. 

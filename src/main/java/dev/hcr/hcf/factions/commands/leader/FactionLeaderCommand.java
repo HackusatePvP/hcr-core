@@ -53,10 +53,7 @@ public class FactionLeaderCommand extends FactionCommand {
                 player.sendMessage(ChatColor.RED + "You can only transfer ownership to members in your own faction.");
                 return;
             }
-
-
-            // TODO: 1/23/2023  
-            
+            // TODO: 1/23/2023
         }
     }
 

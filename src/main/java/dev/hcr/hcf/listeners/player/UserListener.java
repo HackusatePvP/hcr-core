@@ -5,6 +5,7 @@ import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.timers.types.player.PvPTimer;
+import dev.hcr.hcf.timers.types.server.SOTWTimer;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.entity.Player;
@@ -20,6 +21,8 @@ import java.util.UUID;
 
 public class UserListener implements Listener {
     private final Collection<UUID> newPlayers = new HashSet<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     @EventHandler
     public void onAsyncJoin(AsyncPlayerPreLoginEvent event) {
@@ -51,6 +54,10 @@ public class UserListener implements Listener {
                 user.setBalance(balance);
             }
         }
+        SOTWTimer timer = (SOTWTimer) Timer.getTimer("sotw");
+        if (timer != null && timer.isActive()) {
+            user.setSotw(true);
+        }
     }
 
     @EventHandler
@@ -64,8 +71,10 @@ public class UserListener implements Listener {
         HCF.getPlugin().getStorage().appendUserDataSync(user.save());
         for (Timer timer : user.getActiveTimers()) {
             if (timer instanceof PvPTimer) {
-                ((PvPTimer) timer).setPause(true);
-                System.out.println("Paused PVPTimer!");
+                timer.setPause(true);
+                if (debug) {
+                    System.out.println("Paused PVPTimer!");
+                }
             }
             if (timer instanceof PauseTimer) {
                 timer.save();

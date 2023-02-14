@@ -3,10 +3,9 @@ package dev.hcr.hcf.listeners.factions;
 import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.events.members.FactionTerritoryEnterEvent;
 import dev.hcr.hcf.factions.events.members.FactionTerritoryLeaveEvent;
+import dev.hcr.hcf.factions.events.members.FactionTerritoryMoveEvent;
 import dev.hcr.hcf.factions.structure.Relation;
-import dev.hcr.hcf.factions.types.SafeZoneFaction;
-import dev.hcr.hcf.factions.types.SystemFaction;
-import dev.hcr.hcf.factions.types.PlayerFaction;
+import dev.hcr.hcf.factions.types.*;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
 import dev.hcr.hcf.utils.backend.ConfigurationType;
@@ -87,6 +86,21 @@ public class FactionListener implements Listener {
                 } else {
                     player.sendMessage(CC.translate("&7Entering: " + Relation.getFactionRelationship(factionTo, player).getColor() + factionTo.getName()));
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onFactionTerritoryMoveEvent(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        Location to = event.getTo();
+        Location from = event.getFrom();
+        if (to.getBlockX() != from.getBlockX() || to.getBlockZ() != from.getBlockZ()) {
+            Faction fromFaction = Faction.getByLocation(to);
+            Faction toFaction = Faction.getByLocation(from);
+            if (fromFaction == toFaction && (!(fromFaction instanceof WildernessFaction)) && (!(fromFaction instanceof WarzoneFaction))) {
+                FactionTerritoryMoveEvent moveEvent = new FactionTerritoryMoveEvent(toFaction, player);
+                Bukkit.getPluginManager().callEvent(moveEvent);
             }
         }
     }

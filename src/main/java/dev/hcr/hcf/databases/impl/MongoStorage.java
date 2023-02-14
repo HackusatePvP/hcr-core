@@ -15,6 +15,7 @@ import dev.hcr.hcf.factions.types.roads.EastRoad;
 import dev.hcr.hcf.factions.types.roads.NorthRoad;
 import dev.hcr.hcf.factions.types.roads.SouthRoad;
 import dev.hcr.hcf.factions.types.roads.WestRoad;
+import dev.hcr.hcf.koths.KothFaction;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.users.User;
@@ -22,6 +23,7 @@ import dev.hcr.hcf.utils.TaskUtils;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bukkit.Material;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -186,7 +188,6 @@ public class MongoStorage implements IStorage {
         Bson update = new Document("$set", document);
         UpdateOptions options = new UpdateOptions().upsert(true);
         timerCooldown.updateOne(Filters.and(uuidFilter, typeFilter), update, options);
-        System.out.println("Saved Timer data...");
     }
 
     public void appendTimerDataSync(Map<String, Object> map) {
@@ -212,7 +213,6 @@ public class MongoStorage implements IStorage {
         Bson typeFilter = Filters.eq("type", timer.getName());
         Document document = timerCooldown.find(Filters.and(uuidFilter, typeFilter)).first();
         if (document == null) {
-            System.out.println("Timer not found.");
             return;
         }
         timerCooldown.deleteOne(document);
@@ -235,17 +235,14 @@ public class MongoStorage implements IStorage {
                 continue;
             }
             String name = document.getString("name");
-            if (name.toLowerCase().contains("safe") || name.toLowerCase().contains("spawn")) {
-                new SafeZoneFaction(document);
-            }
             if (name.toLowerCase().contains("wilderness")) {
                 new WildernessFaction(document);
             }
             if (name.toLowerCase().contains("warzone")) {
                 new WarzoneFaction(document);
             }
-            if (name.toLowerCase().contains("glowstone")) {
-                new GlowStoneMountainFaction(document);
+            if (name.toLowerCase().contains("safe") || name.toLowerCase().contains("spawn")) {
+                new SafeZoneFaction(document);
             }
             if (name.toLowerCase().contains("road")) {
                 String[] split = name.toLowerCase().split("road");
@@ -253,6 +250,12 @@ public class MongoStorage implements IStorage {
                     split[0] = split[0].replace("_", "");
                 }
                 loadRoadFaction(split[0], document);
+            }
+            if (name.toLowerCase().contains("glowstone")) {
+                new GlowStoneMountainFaction(document);
+            }
+            if (name.toLowerCase().contains("koth")) {
+                new KothFaction(document);
             }
         }
     }
@@ -277,7 +280,6 @@ public class MongoStorage implements IStorage {
             long executionTime = document.getLong("executionTime");
             long duration = document.getLong("duration");
             long expiredTime = document.getLong("expiredTime");
-            System.out.println(document.entrySet());
             Map<String, Object> map = new HashMap<>();
             map.put("uuid", uuid);
             map.put("executionTime", executionTime);
@@ -306,7 +308,7 @@ public class MongoStorage implements IStorage {
     @Override
     public void saveUsers() {
         for (User user : User.getUsers()) {
-
+            appendUserData(user.save());
         }
     }
 

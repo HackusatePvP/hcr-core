@@ -8,6 +8,7 @@ import dev.hcr.hcf.pvpclass.tasks.PassiveEffectApplyTask;
 import dev.hcr.hcf.pvpclass.types.bard.BardClass;
 import dev.hcr.hcf.pvpclass.types.bard.objects.Effect;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +24,8 @@ public abstract class PvPClass {
     private static final Map<String, PvPClass> classes = new HashMap<>();
     private static final Map<UUID, PvPClass> classTracker = new HashMap<>();
     private static final Map<UUID, EnergyBuildTask> energyTracker = new HashMap<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public PvPClass(String name) {
         classes.put(name, this);
@@ -83,9 +86,11 @@ public abstract class PvPClass {
     public abstract String getDisplayName();
 
     public void equip(Player player) {
-        System.out.println("Created tracker for " + player.getName());
         classTracker.put(player.getUniqueId(), this);
-        System.out.println("Creating Effect task...");
+        if (debug) {
+            System.out.println("Created tracker for " + player.getName());
+            System.out.println("Creating Effect task...");
+        }
 
         PassiveEffectApplyTask applyTask = new PassiveEffectApplyTask(player, this);
         applyTask.runTaskTimer(HCF.getPlugin(), 20L, 5L);
@@ -103,45 +108,57 @@ public abstract class PvPClass {
         }
         User user = User.getUser(player.getUniqueId());
         user.setCurrentClass(null);
-        System.out.println("Removed tracker for " + player.getName());
 
         classTracker.remove(player.getUniqueId());
 
-        System.out.println("Ending effect task...");
-        System.out.println("Removing task tracker");
+        System.out.println("Removed tracker for " + player.getName());
     }
 
     public void applyEffect(Player player, PotionEffect effect) {
-        System.out.println("Applying effect " + effect.getType().getName() + " to " + player.getName());
+        if (debug) {
+            System.out.println("Applying effect " + effect.getType().getName() + " to " + player.getName());
+        }
         Faction otherFaction = Faction.getByLocation(player.getLocation());
         if (otherFaction != null && !otherFaction.isDeathBan()) {
-            System.out.println("Could not validate skipping.");
+            if (debug) {
+                System.out.println("Could not validate skipping.");
+            }
             return;
         }
 
         if (canOverrideLevel(player, effect) && player.hasPotionEffect(effect.getType())) {
-            System.out.println("Attempting to override effect...");
+            if (debug) {
+                System.out.println("Attempting to override effect...");
+            }
             PotionEffect temp = player.getActivePotionEffects().stream()
                     .filter(potionEffect -> potionEffect.getType().getName().equals(effect.getType().getName()))
                     .findFirst()
                     .orElse(null);
             if (temp == null) {
-                System.out.println("Returned null skipping effect...");
+                if (debug) {
+                    System.out.println("Returned null skipping effect...");
+                }
                 return;
             }
 
             if (temp.getDuration() > 100) {
-                System.out.println("Duration is greater then 100 scheduling task...");
+                if (debug) {
+                    System.out.println("Duration is greater then 100 scheduling task...");
+                }
                 PotionEffect pre = new PotionEffect(temp.getType(), temp.getDuration(), temp.getAmplifier(), temp.isAmbient());
                 new EffectRestoreTask(player, pre).runTaskLater(HCF.getPlugin(), effect.getDuration() - 5);
             }
         }
 
         if (canOverrideLevel(player, effect)) {
-            System.out.println("Effect can override again?");
+            if (debug) {
+                System.out.println("Effect can override again?");
+            }
             player.addPotionEffect(effect, true);
         }
-        System.out.println("Done!");
+        if (debug) {
+            System.out.println("Done!");
+        }
     }
 
     public boolean canOverrideLevel(Player player, PotionEffect effect) {

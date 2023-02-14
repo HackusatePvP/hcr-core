@@ -1,18 +1,58 @@
+# Changelog 2023.xx.a8
+This is a minor update aimed to fix important issues from the a7 release. 
+
+- Important
+  - Configuration files will now automatically update without overwriting existing values or changes.
+- Bug fixes
+  - Fixed claiming pillar display issues.
+  - Fixed SOTW command stop and start errors.
+- Maven dependency changes
+  - Added [java-ordered-properties](https://github.com/etiennestuder/java-ordered-properties).
+  - Added [apache-commons-io](https://commons.apache.org/proper/commons-io/).
+- Added
+  - KOTH implementation has been added on.
+    - Note: Koths are not fully implemented and do not fully work.
+  - Lives have been fully implemented into deathbans. You can now use lives to remove a deathban.
+  - GlowstoneMountain now runs on a task which will regenerate glowstone every hour.
+  - Added [SignListener]()
+    - The sign listener will handle all sign events within HCF. For example this includes shop, elevators, subclaims, ect.
+    - For the sign shop refer to the [items.txt]() which is a database for every item in 1.8. You can add and modify this list to your likings. Note that every entry works like a map.
+      First you want to include the alias for the item. For example if you want to make diamonds with an "s" as an alias you would add "diamonds&". After the "&" you wll have to add the item id.
+      For this example the id for diamonds would be 264 so the final result would be "diamonds&264".
+  - Added item database which will load from the jar.    
+  - Completed [MongoStorage]() [saveUsers]() function.
+  - Added [FactionSetColorCommand]().
+  - Added [FactionTerritoryMoveEvent](). This is called everytime a player is moving inside a factions' territory which is not Warzone or Wilderness.
+- Changes
+  - Added a debug toggle inside of [hcf.properties](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/hcf.properties). If toggled off most console debug messages will be turned off.
+  - Configuration files will now automatically update new values without overwriting existing values.
+  - Players can now enter their own territory with an active PvPTimer.
+  - Fully removed all document (MongoDb mapping object) to a generic mapping.
+- Fixes
+  - Properties files are now ordered alphabetically instead of being in a random order.
+  - Fixed issue where a bard would hold effect while player tries to equip a class. The bard effect would override the class effects.
+  - Fixed issue when a class passive effect would override a clicked effect from a bard.
+  - [PvPTimerCommand]() no longer requires the UUIDUtils from Yuni.
+  - Fixed minor scoreboard display issues.
+  - Fixed unclaim pricing. Note I have updated the price of claiming and unclaiming from to 9.75
+  - Fixed mountain.txt file not creating.
+  - Fixed issues with glass wall teleporting player to far back or teleporting them to a different side entirely.
+  
 # Changelog 2023.01.a7
 This is a merge between two updates 2022.8.15 and 2022.11.30 some change logs may have fixes for the previous update which was 
 not published. 
 
 **DISCLAIMER**
-This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and maybe far in between.
+This is not a finished product **THERE WILL BE BUGS** this is a project that I work on my free time. Updates may not be frequent and may be far in between.
 
 - Dependency fixes
   - Removed imanity spigot from pom.xml.
   - Fixed issues where java classes would use apache lang3 instead of apache commons.
-  
 - TODO:
-  - Still some issues with the claiming pillars, sometimes not all four pillars will show when claiming.
   - Fix combat tag issues with double messages.
 - Massive bug fixes.
+  - You can now use lives to remove a deathban.
+  - Fixed faction command no permission bug.  
   - Fixed [LivesCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/players/lives/LiveCommand.java) array out of bounds error.
   - Fixed multiple tab completion errors for faction commands.
   - Fixed issue when loading a PlayerFactions' members.

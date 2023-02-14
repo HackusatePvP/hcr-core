@@ -1,5 +1,7 @@
 package dev.hcr.hcf.users.statistics;
 
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -9,6 +11,8 @@ public class UserStatistics {
     private int kills, deaths;
 
     private final Map<String, Integer> oreStats = new HashMap<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public UserStatistics(UUID uuid) {
         this.uuid = uuid;
@@ -45,10 +49,14 @@ public class UserStatistics {
         map.put("deaths", deaths);
         StringBuilder builder = new StringBuilder();
         for (String s : oreStats.keySet()) {
-            System.out.println("S: " + s);
+            if (debug) {
+                System.out.println("S: " + s);
+            }
             builder.append(oreStats.get(s)).append("@");
         }
-        System.out.println("Ore Stats: " + builder);
+        if (debug) {
+            System.out.println("Ore Stats: " + builder);
+        }
         map.put("oreStats", builder.toString());
         return map;
     }

@@ -5,7 +5,6 @@ import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.claims.Claim;
 import dev.hcr.hcf.factions.events.members.PlayerFactionLeaveEvent;
 import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
-import dev.hcr.hcf.factions.structure.FactionInvestmentTask;
 import dev.hcr.hcf.factions.structure.regen.FactionRegenTask;
 import dev.hcr.hcf.factions.structure.regen.RegenStatus;
 import dev.hcr.hcf.users.User;
@@ -44,6 +43,9 @@ public class PlayerFaction extends Faction {
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
     private final HCF plugin = HCF.getPlugin();
 
+    // Debug switch
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
+
     public PlayerFaction(String name, UUID leader) {
         super(UUID.randomUUID(), name, new Claim(name), true);
         this.leader = leader;
@@ -57,38 +59,31 @@ public class PlayerFaction extends Faction {
         scoreboard.registerNewTeam(name);
     }
 
-    public PlayerFaction(Document document) {
-        super(document);
-        this.leader = UUID.fromString(document.getString("leader"));
-        load(document);
+    public PlayerFaction(Map<String, Object> map) {
+        super(map);
+        this.leader = UUID.fromString((String) map.get("leader"));
+        load(map);
         this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         scoreboard.registerNewTeam("friendly");
         scoreboard.registerNewTeam("enemy");
     }
 
     @Override
-    public void load(Document document) {
-        if (document.containsKey("balance")) {
-            this.balance = document.getDouble("balance");
+    public void load(Map<String, Object> map) {
+        if (map.containsKey("balance")) {
+            this.balance = (Double) map.get("balance");
         }
-        if (document.containsKey("investment")) {
-            this.investment = document.getDouble("investment");
-            if (investment > 0) {
-                FactionInvestmentTask task = new FactionInvestmentTask(this);
-                task.runTaskTimerAsynchronously(HCF.getPlugin(), 0, 20L);
-            }
+        if (map.containsKey("points")) {
+            this.points = (Integer) map.get("points");
         }
-        if (document.containsKey("points")) {
-            this.points = document.getInteger("points");
-        }
-        if (document.containsKey("members")) {
-            List<String> members = document.get("members", ArrayList.class);
+        if (map.containsKey("members")) {
+            List<String> members = (List<String>) map.get("members");
             for (String s : members) {
                 factionMembers.add(UUID.fromString(s));
             }
         }
-        if (document.containsKey("roles")) {
-            List<String> roles = document.get("roles", ArrayList.class);
+        if (map.containsKey("roles")) {
+            List<String> roles = (List<String>) map.get("roles");
             for (String s : roles) {
                 // Some crackhead loading
                 // Roles are appended as String that contains both uuid and role
@@ -105,7 +100,7 @@ public class PlayerFaction extends Faction {
                         System.out.println("Loading MEMBER: " + sub);
                         // Left with just the role which can get the Enum Role from the string using value of.
 
-                        // Since the uuid isn't saved in hexadecimal format (no dashes) we must add them before we can get the UUID object.
+                        // Since the uuid isn't saved in hexadecimal format (no dashes) must add them before to get the UUID object.
                         String uuidToHexString = sub.replaceAll(
                                 "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})",
                                 "$1-$2-$3-$4-$5");
@@ -121,14 +116,14 @@ public class PlayerFaction extends Faction {
                 }
             }
         }
-        if (document.containsKey("currentDTR")) {
+        if (map.containsKey("currentDTR")) {
             this.maxDTR = getMaxDTR();
-            this.currentDTR = document.getDouble("currentDTR");
+            this.currentDTR = (Double) map.get("currentDTR");
             // Check if the faction is suppose to be on regen.
             if (currentDTR < maxDTR) {
                 System.out.println("Passed!");
-                if (document.containsKey("regenDelayTime")) {
-                    this.regenDelayTime = document.getLong("regenDelayTime");
+                if (map.containsKey("regenDelayTime")) {
+                    this.regenDelayTime = (Long) map.get("regenDelayTime");
                     loadRegenTask(false);
                 } else {
                     loadRegenTask(true);
@@ -136,19 +131,21 @@ public class PlayerFaction extends Faction {
             }
         }
 
-        if (document.containsKey("allies")) {
+        if (map.containsKey("allies")) {
             // Allies - allyuuid@allyuuid@allyuuid
-            String allyString = document.getString("allies");
+            String allyString = (String) map.get("allies");
             if (!allyString.isEmpty()) {
                 for (String uuid : allyString.split("@")) {
-                    System.out.println("Ally: " + uuid);
+                    if (debug) {
+                        System.out.println("Ally: " + uuid);
+                    }
                     factionAllies.add(UUID.fromString(uuid));
                 }
             }
         }
 
         // Call the super method for loading claims and other basic faction data.
-        super.load(document);
+        super.load(map);
     }
 
     @Override
@@ -223,13 +220,19 @@ public class PlayerFaction extends Faction {
     }
 
     private void loadRegenTask(boolean instant) {
-        System.out.println(getName() + " is regenerating...");
+        if (debug) {
+            System.out.println(getName() + " is regenerating...");
+        }
         if (instant) {
-            System.out.println("True!");
+            if (debug) {
+                System.out.println("True!");
+            }
             this.regenStatus = RegenStatus.REGENERATING;
             plugin.getRegenTask().instantRegen(this);
         } else {
-            System.out.println("False!");
+            if (debug) {
+                System.out.println("False!");
+            }
             this.regenStatus = RegenStatus.PAUSED;
             FactionRegenTask.getFactionPausedRegenCooldown().put(this, regenDelayTime);
         }
@@ -306,14 +309,6 @@ public class PlayerFaction extends Faction {
 
     public double getInvestment() {
         return investment;
-    }
-
-    public void addInvestment(double amount) {
-        this.investment += amount;
-        if (!FactionInvestmentTask.isGainingIntrest(this)) {
-            FactionInvestmentTask task = new FactionInvestmentTask(this);
-            task.runTaskTimerAsynchronously(HCF.getPlugin(), 0L, 20L);
-        }
     }
 
     public void setInvestment(double investment) {

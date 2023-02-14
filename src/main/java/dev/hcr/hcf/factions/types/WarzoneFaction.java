@@ -4,6 +4,7 @@ import dev.hcr.hcf.factions.Faction;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class WarzoneFaction extends Faction implements SystemFaction {
@@ -13,9 +14,9 @@ public class WarzoneFaction extends Faction implements SystemFaction {
         this.setColor(ChatColor.RED);
     }
 
-    public WarzoneFaction(Document document) {
-        super(document);
-        load(document);
+    public WarzoneFaction(Map<String, Object> map) {
+        super(map);
+        super.load(map);
     }
 
     @Override

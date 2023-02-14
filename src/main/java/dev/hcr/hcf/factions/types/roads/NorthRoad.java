@@ -3,6 +3,8 @@ package dev.hcr.hcf.factions.types.roads;
 import org.bson.Document;
 import org.bukkit.ChatColor;
 
+import java.util.Map;
+
 public class NorthRoad extends RoadFaction {
 
     public NorthRoad() {
@@ -10,8 +12,8 @@ public class NorthRoad extends RoadFaction {
         setColor(ChatColor.GOLD);
     }
 
-    public NorthRoad(Document document) {
-        super(document);
+    public NorthRoad(Map<String, Object> map) {
+        super(map);
     }
 
     @Override

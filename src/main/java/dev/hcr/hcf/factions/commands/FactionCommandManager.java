@@ -52,6 +52,7 @@ public class FactionCommandManager {
         new FactionForceLeaderCommand();
         new FactionResetClaimsCommand();
         new FactionForceSetHomeCommand();
+        new FactionSetColorCommand();
         new FactionTestCommand();
 
         // Register last for pagination

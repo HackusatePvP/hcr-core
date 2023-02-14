@@ -2,25 +2,40 @@ package dev.hcr.hcf.utils.backend.types;
 
 
 import dev.hcr.hcf.utils.backend.ConfigurationType;
+import nu.studer.java.util.OrderedProperties;
 
 import java.io.*;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
-import java.util.Properties;
 
 public class PropertiesConfiguration extends ConfigurationType {
-    private Properties properties;
+    private OrderedProperties properties;
+
+    private static boolean update = false;
 
     private static final Collection<PropertiesConfiguration> configurations = new HashSet<>();
 
     public PropertiesConfiguration(String fileName) {
         super(fileName);
-        this.properties = new Properties();
+        OrderedProperties.OrderedPropertiesBuilder builder = new OrderedProperties.OrderedPropertiesBuilder();
+        builder.withOrdering(String.CASE_INSENSITIVE_ORDER);
+        builder.withSuppressDateInComment(true);
+        this.properties = builder.build();
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(getFile());
             try {
                 properties.load(inputStream);
+                if (fileName.toLowerCase().contains("hcf")) {
+                    if (properties.containsProperty("version")) {
+                        if (getDouble("version") < 8.0) {
+                            update = true;
+                        }
+                    } else {
+                        update = true;
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -41,12 +56,24 @@ public class PropertiesConfiguration extends ConfigurationType {
 
     public PropertiesConfiguration(String fileName, String directory) {
         super(fileName, directory);
-        this.properties = new Properties();
+        OrderedProperties.OrderedPropertiesBuilder builder = new OrderedProperties.OrderedPropertiesBuilder();
+        builder.withOrdering(String.CASE_INSENSITIVE_ORDER);
+        builder.withSuppressDateInComment(true);
+        this.properties = builder.build();
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(getFile());
             try {
                 properties.load(inputStream);
+                if (fileName.toLowerCase().contains("hcf")) {
+                    if (properties.containsProperty("version")) {
+                        if (getDouble("version") < 8.0) {
+                            update = true;
+                        }
+                    } else {
+                        update = true;
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -67,7 +94,7 @@ public class PropertiesConfiguration extends ConfigurationType {
 
     @Override
     public String getString(String key) {
-        return (String) properties.get(key);
+        return properties.getProperty(key);
     }
 
     @Override
@@ -87,23 +114,26 @@ public class PropertiesConfiguration extends ConfigurationType {
 
     @Override
     public Float getFloat(String key) {
-        return (Float) properties.get(key);
+        return Float.parseFloat(properties.getProperty(key));
     }
 
     @Override
     public Long getLong(String key) {
-        return (Long) properties.get(key);
+        return Long.parseLong(properties.getProperty(key));
     }
 
     @Override
     public Object get(String key) {
-        return properties.get(key);
+        return properties.getProperty(key);
     }
 
     @Override
     public void write(String key, Object object) {
         if (properties == null) {
-            properties = new Properties();
+            OrderedProperties.OrderedPropertiesBuilder builder = new OrderedProperties.OrderedPropertiesBuilder();
+            builder.withOrdering(String.CASE_INSENSITIVE_ORDER);
+            builder.withSuppressDateInComment(true);
+            properties = builder.build();
         }
         try {
             OutputStream outputStream = new FileOutputStream(getFile());
@@ -119,7 +149,12 @@ public class PropertiesConfiguration extends ConfigurationType {
     @Override
     public void preset(File file) {
         if (file.getName().toLowerCase().contains("hcf")) {
+            write("version", 8.0);
+            write("debug", false);
             write("default-balance", 500);
+            write("koth-pearl-allowed", false);
+            write("conquest-pearl-allowed", false);
+            write("citadel-pearl-allowed", false);
         }
         if (file.getName().toLowerCase().contains("faction")) {
             write("max-team-size", 6);
@@ -139,8 +174,8 @@ public class PropertiesConfiguration extends ConfigurationType {
         }
         if (file.getName().toLowerCase().contains("claim")) {
             write("max-claims-in-chunks", 16);
-            write("claim-price-per-block", 3);
-            write("unclaim-price-per-block", 3);
+            write("claim-price-per-block", 9.75);
+            write("unclaim-price-per-block", 9.75);
         }
         if (file.getName().toLowerCase().contains("pvpclass")) {
             System.out.println("Overwritting");
@@ -179,6 +214,20 @@ public class PropertiesConfiguration extends ConfigurationType {
             write("db-auth-user", "admin");
             write("db-auth-password", "password");
         }
+    }
+
+    public static boolean canUpdate() {
+        return update;
+    }
+
+    public static void update() {
+        // Method for automatically updating files without overwriting all entries.
+        PropertiesConfiguration configuration = getPropertiesConfiguration("hcf.properties");
+        configuration.write("version", 8.0);
+        configuration.write("koth-pearl-allowed", false);
+        configuration.write("conquest-pearl-allowed", false);
+        configuration.write("citadel-pearl-allowed", false);
+        configuration.write("debug", false);
     }
 
     public static PropertiesConfiguration getPropertiesConfiguration(String fileName) {

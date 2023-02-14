@@ -11,6 +11,7 @@ import dev.hcr.hcf.pvpclass.tasks.EnergyBuildTask;
 import dev.hcr.hcf.pvpclass.types.bard.objects.Effect;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.CC;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,6 +33,8 @@ import java.util.UUID;
 
 public class BardClass extends PvPClass implements Listener {
     private final Map<UUID, EnergyBuildTask> energyTask = new HashMap<>();
+
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
     public BardClass() {
         super("bard");
@@ -225,25 +228,26 @@ public class BardClass extends PvPClass implements Listener {
     }
 
     private boolean applyEffectWithEnergy(Player player, ItemStack item, Abilities ability) {
-        System.out.println("Applying effect!");
+        if (debug) {
+            System.out.println("Applying effect!");
+        }
         if (item != null) {
             if (ability == null) return false;
-            //System.out.println("Passed first validation...");
             int energyToConsume = ability.getEnergy();
             EnergyBuildTask energyBuildTask = getEnergyTracker(player);
             int energy = energyBuildTask.getEnergy();
             if (energy < energyToConsume) {
-                //System.out.println("Player does not have enough energy!");
                 player.sendMessage(CC.translate("&cYou do not have enough energy: " + energy + "&7/&c" + energyToConsume));
                 return false;
             }
-            //System.out.println(ability.getName());
             Effect effect = getAbilityEffect(ability);
             if (effect == null) {
-                //System.out.println("Could not translate an effect given the ability!");
+                if (debug) {
+                    System.out.println(ability.getName());
+                    System.out.println("Could not translate an effect given the ability!");
+                }
                 return false;
             }
-            //System.out.println("applying effects again?");
             applyEffects(player, effect);
             energyBuildTask.removeEnergy(energyToConsume);
             player.sendMessage("You have used: " + effect.getEffect().getType().getName() + " Costing you: " + energyToConsume + " energy.");
@@ -346,8 +350,9 @@ public class BardClass extends PvPClass implements Listener {
                 }
                 Player p = (Player) entity;
                 User target = User.getUser(player.getUniqueId());
-                if (!target.hasFaction())
+                if (!target.hasFaction()) {
                     continue;
+                }
                 if (!(target.getFaction().getUniqueID() == faction.getUniqueID()) && !faction.hasAlly(target.getFaction())) {
                     continue;
                 }

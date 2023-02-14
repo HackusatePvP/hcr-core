@@ -1,6 +1,7 @@
 package dev.hcr.hcf.factions.commands.member;
 
 import dev.hcr.hcf.factions.commands.FactionCommand;
+import dev.hcr.yuni.ranks.Rank;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -28,9 +29,12 @@ public class DefaultFactionCommand implements CommandExecutor, TabExecutor {
             sender.sendMessage(ChatColor.RED + "Could not find argument \"" + args[0] + "\". /" + label + " help");
             return true;
         }
-        if (!command.getPermission().replace("hcf.faction.commands.", "").equalsIgnoreCase("")) {
+        if (command.getPermission() != null && !command.getPermission().contains("hcf.faction.commands.null")) {
             if (!sender.hasPermission(command.getPermission())) {
                 sender.sendMessage(ChatColor.RED + "No permission.");
+                sender.sendMessage(ChatColor.RED + "Needed Permissions: " + command.getPermission());
+                sender.sendMessage(ChatColor.RED + "Current Permissions: " );
+                sender.getEffectivePermissions().forEach(permissionAttachmentInfo -> sender.sendMessage(permissionAttachmentInfo.getPermission()));
                 return true;
             }
         }

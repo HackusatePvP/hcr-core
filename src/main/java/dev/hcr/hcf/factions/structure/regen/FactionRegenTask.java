@@ -15,11 +15,16 @@ public class FactionRegenTask extends BukkitRunnable {
     private static final Map<PlayerFaction, Long> factionRegenTime = new HashMap<>();
     private static final PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("faction.properties");
 
+    // Debug switch
+    private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
+
     @Override
     public void run() {
         for (PlayerFaction faction : factionPausedRegenCooldown.keySet()) {
             long timeLeft = factionPausedRegenCooldown.get(faction) - System.currentTimeMillis();
-            System.out.println(faction.getName() + ": " + DurationFormatUtils.formatDurationWords(timeLeft, true ,true));
+            if (debug) {
+                System.out.println(faction.getName() + ": " + DurationFormatUtils.formatDurationWords(timeLeft, true, true));
+            }
             if (timeLeft <= 0L) {
                 // set the faction to be no longer paused and setup regen
                 factionPausedRegenCooldown.remove(faction);
@@ -28,7 +33,9 @@ public class FactionRegenTask extends BukkitRunnable {
             }
         }
         for (PlayerFaction faction : factionRegenTime.keySet()) {
-            System.out.println("Regen task running!");
+            if (debug) {
+                System.out.println("Regen task running!");
+            }
             long timeLeft = factionRegenTime.get(faction);
             if (timeLeft <= 0L || faction.getCurrentDTR() >= faction.getMaxDTR()) {
                 // If the dtr is greater than the max lets correct it

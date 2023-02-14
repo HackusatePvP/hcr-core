@@ -1,8 +1,9 @@
 package dev.hcr.hcf.commands.players;
 
 import dev.hcr.hcf.users.User;
-import dev.hcr.yuni.utils.UUIDUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,18 +18,27 @@ public class PvPTimerCommand implements CommandExecutor {
             if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("give")) {
                     String name = args[1];
-                    UUID uuid = UUIDUtils.getUUID(name);
-                    if (uuid == null) {
-                        sender.sendMessage("Invalid target.");
-                        return true;
-                    }
-                    User target = User.getUser(uuid, name);
+                    Player target = Bukkit.getPlayer(args[1]);
+                    UUID targetUUID;
                     if (target == null) {
-                        sender.sendMessage("Invalid target.");
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        if (offlinePlayer == null) {
+                            sender.sendMessage(ChatColor.RED + "Could not find player \"" + args[1] + "\".");
+                            return true;
+                        }
+                        targetUUID = offlinePlayer.getUniqueId();
+                    } else {
+                        targetUUID = target.getUniqueId();
+                    }
+
+                    User userTarget = User.getUser(targetUUID, name);
+                    if (userTarget == null) {
+                        sender.sendMessage(ChatColor.RED + "Failed to create User for \"" + name + "\".");
                         return true;
                     }
-                    target.setTimer("pvp", true);
+                    userTarget.setTimer("pvp", true);
                 }
+                return true;
             }
             return true;
         }
@@ -55,17 +65,25 @@ public class PvPTimerCommand implements CommandExecutor {
             if (args[0].equalsIgnoreCase("give")) {
                 if (player.hasPermission("hcf.commands.pvptimer.give")) {
                     String name = args[1];
-                    UUID uuid = UUIDUtils.getUUID(name);
-                    if (uuid == null) {
-                        player.sendMessage(ChatColor.RED + "Could not find a valid with the name \"" + name + "\".");
-                        return true;
-                    }
-                    User target = User.getUser(uuid, name);
+                    Player target = Bukkit.getPlayer(args[1]);
+                    UUID targetUUID;
                     if (target == null) {
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                        if (offlinePlayer == null) {
+                            sender.sendMessage(ChatColor.RED + "Could not find player \"" + args[1] + "\".");
+                            return true;
+                        }
+                        targetUUID = offlinePlayer.getUniqueId();
+                    } else {
+                        targetUUID = target.getUniqueId();
+                    }
+
+                    User userTarget = User.getUser(targetUUID, name);
+                    if (userTarget == null) {
                         player.sendMessage(ChatColor.RED + "Failed to create User for \"" + name + "\".");
                         return true;
                     }
-                    target.setTimer("pvp", true);
+                    userTarget.setTimer("pvp", true);
                 }
             }
         }

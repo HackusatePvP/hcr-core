@@ -71,7 +71,7 @@ public class SOTWCommand implements CommandExecutor {
                 }
                 player.sendMessage(ChatColor.GREEN + "Successfully started SOTW.");
             } else if (args[0].equalsIgnoreCase("extend")) {
-
+                // TODO: 2/3/2023
             } else {
                 player.sendMessage(ChatColor.RED + "\"" + args[0] + "\" is not a valid argument. Did you mean (start,extend)?");
             }
