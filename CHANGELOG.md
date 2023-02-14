@@ -14,15 +14,15 @@ This is a minor update aimed to fix important issues from the a7 release.
     - Note: Koths are not fully implemented and do not fully work.
   - Lives have been fully implemented into deathbans. You can now use lives to remove a deathban.
   - GlowstoneMountain now runs on a task which will regenerate glowstone every hour.
-  - Added [SignListener]()
+  - Added [SignListener](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/listeners/player/SignListener.java)
     - The sign listener will handle all sign events within HCF. For example this includes shop, elevators, subclaims, ect.
-    - For the sign shop refer to the [items.txt]() which is a database for every item in 1.8. You can add and modify this list to your likings. Note that every entry works like a map.
+    - For the sign shop refer to the [items.txt](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/items.txt) which is a database for every item in 1.8. You can add and modify this list to your likings. Note that every entry works like a map.
       First you want to include the alias for the item. For example if you want to make diamonds with an "s" as an alias you would add "diamonds&". After the "&" you wll have to add the item id.
       For this example the id for diamonds would be 264 so the final result would be "diamonds&264".
   - Added item database which will load from the jar.    
-  - Completed [MongoStorage]() [saveUsers]() function.
-  - Added [FactionSetColorCommand]().
-  - Added [FactionTerritoryMoveEvent](). This is called everytime a player is moving inside a factions' territory which is not Warzone or Wilderness.
+  - Completed [MongoStorage](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/databases/impl/MongoStorage.java) [saveUsers](https://github.com/HackusatePvP/hcr-core/blob/02c1dd4c5a0b009328cd528fbca487ae8ed8aa92/src/main/java/dev/hcr/hcf/databases/impl/MongoStorage.java#L309) function.
+  - Added [FactionSetColorCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/staff/FactionSetColorCommand.java).
+  - Added [FactionTerritoryMoveEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/events/members/FactionTerritoryMoveEvent.java). This is called everytime a player is moving inside a factions' territory which is not Warzone or Wilderness.
 - Changes
   - Added a debug toggle inside of [hcf.properties](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/resources/hcf.properties). If toggled off most console debug messages will be turned off.
   - Configuration files will now automatically update new values without overwriting existing values.
@@ -32,7 +32,7 @@ This is a minor update aimed to fix important issues from the a7 release.
   - Properties files are now ordered alphabetically instead of being in a random order.
   - Fixed issue where a bard would hold effect while player tries to equip a class. The bard effect would override the class effects.
   - Fixed issue when a class passive effect would override a clicked effect from a bard.
-  - [PvPTimerCommand]() no longer requires the UUIDUtils from Yuni.
+  - [PvPTimerCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/PvPTimerCommand.java) no longer requires the UUIDUtils from Yuni.
   - Fixed minor scoreboard display issues.
   - Fixed unclaim pricing. Note I have updated the price of claiming and unclaiming from to 9.75
   - Fixed mountain.txt file not creating.
