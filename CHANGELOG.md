@@ -1,4 +1,4 @@
-# Changelog 2023.xx.a8
+# Changelog 2023.02.a8
 This is a minor update aimed to fix important issues from the a7 release. 
 
 - Important
