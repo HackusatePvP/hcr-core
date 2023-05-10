@@ -67,7 +67,7 @@ public class PropertiesConfiguration extends ConfigurationType {
                 properties.load(inputStream);
                 if (fileName.toLowerCase().contains("hcf")) {
                     if (properties.containsProperty("version")) {
-                        if (getDouble("version") < 8.0) {
+                        if (getDouble("version") < 9.0) {
                             update = true;
                         }
                     } else {
@@ -119,7 +119,11 @@ public class PropertiesConfiguration extends ConfigurationType {
 
     @Override
     public Long getLong(String key) {
-        return Long.parseLong(properties.getProperty(key));
+        try {
+            return Long.parseLong(properties.getProperty(key));
+        } catch (NumberFormatException ignored) {
+            return Long.valueOf(properties.getProperty(key));
+        }
     }
 
     @Override
@@ -155,6 +159,7 @@ public class PropertiesConfiguration extends ConfigurationType {
             write("koth-pearl-allowed", false);
             write("conquest-pearl-allowed", false);
             write("citadel-pearl-allowed", false);
+            write("kitmap", false);
         }
         if (file.getName().toLowerCase().contains("faction")) {
             write("max-team-size", 6);
@@ -223,11 +228,14 @@ public class PropertiesConfiguration extends ConfigurationType {
     public static void update() {
         // Method for automatically updating files without overwriting all entries.
         PropertiesConfiguration configuration = getPropertiesConfiguration("hcf.properties");
-        configuration.write("version", 8.0);
-        configuration.write("koth-pearl-allowed", false);
-        configuration.write("conquest-pearl-allowed", false);
-        configuration.write("citadel-pearl-allowed", false);
-        configuration.write("debug", false);
+        if (configuration.getDouble("version") < 8) {
+            configuration.write("koth-pearl-allowed", false);
+            configuration.write("conquest-pearl-allowed", false);
+            configuration.write("citadel-pearl-allowed", false);
+            configuration.write("debug", false);
+        }
+        configuration.write("version", 9.0);
+        configuration.write("kitmap", false);
     }
 
     public static PropertiesConfiguration getPropertiesConfiguration(String fileName) {

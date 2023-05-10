@@ -21,6 +21,7 @@ public class KothFaction extends Faction implements SystemFaction {
     private Cuboid capZone;
     private boolean active;
     private Player capper;
+    private KothTimer timer;
 
     private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
     private final HCF plugin = HCF.getPlugin();
@@ -90,15 +91,15 @@ public class KothFaction extends Faction implements SystemFaction {
             if (debug) {
                 System.out.println("Creating Timer...");
             }
-            KothTimer kothTimer = new KothTimer(this);
+            timer = new KothTimer(this);
             if (debug) {
                 System.out.println("Running timer...");
             }
-            kothTimer.run();
+            timer.run();
             if (debug) {
                 System.out.println("Creating Task...");
             }
-            KothTask task = new KothTask(this, kothTimer);
+            KothTask task = new KothTask(this, timer);
             if (debug) {
                 System.out.println("Running task...");
             }
@@ -106,9 +107,9 @@ public class KothFaction extends Faction implements SystemFaction {
             setActive(true);
         } else {
             if (Timer.getTimer(getName()) == null) {
-                KothTimer kothTimer = new KothTimer(this);
-                kothTimer.run();
-                KothTask task = new KothTask(this, kothTimer);
+                timer = new KothTimer(this);
+                timer.run();
+                KothTask task = new KothTask(this, timer);
                 task.runTaskTimer(HCF.getPlugin(), 0L, 20L);
                 setActive(true);
             }
@@ -153,5 +154,9 @@ public class KothFaction extends Faction implements SystemFaction {
 
     public void setCapper(Player capper) {
         this.capper = capper;
+    }
+
+    public KothTimer getTimer() {
+        return timer;
     }
 }

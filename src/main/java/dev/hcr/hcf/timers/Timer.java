@@ -168,12 +168,12 @@ public abstract class Timer extends BukkitRunnable {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(duration - TimeUnit.HOURS.toMillis(hours));
         if (hours <= 0L) {
             if (minutes <= 0L) {
-                return DurationFormatUtils.formatDuration(duration, "ss", true);
+                return DurationFormatUtils.formatDuration(duration, "ss", false);
             } else {
-                return DurationFormatUtils.formatDuration(duration, "mm:ss", true);
+                return DurationFormatUtils.formatDuration(duration, "mm:ss", false);
             }
         } else {
-            return DurationFormatUtils.formatDuration(duration, "hh:mm:ss", true);
+            return DurationFormatUtils.formatDuration(duration, "hh:mm:ss", false);
         }
     }
 

@@ -208,7 +208,6 @@ public class User {
     }
 
     public void setTimer(Abilities type, boolean add) {
-        System.out.println("Created timer for " + name);
         Player player = toPlayer();
         Timer currentTimer = activeTimers.stream().filter(timer1 -> timer1.getName().equalsIgnoreCase(type.getName())).findAny().orElse(null);
         if (add) {
@@ -322,6 +321,9 @@ public class User {
     }
 
     public static User getOfflineUser(String name) {
+        if (getUser(name) != null) {
+            return getUser(name);
+        }
         Player target = Bukkit.getPlayer(name);
         UUID targetUUID;
         if (target == null) {

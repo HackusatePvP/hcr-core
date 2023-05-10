@@ -70,9 +70,9 @@ public class ClassWarmupTimer extends Timer implements Listener {
 
     @EventHandler
     public void onTimerExpireEvent(TimerExpireEvent event) {
-        Player player = event.getAffected()[0];
         Timer timer = event.getTimer();
         if (timer != this) return;
+        Player player = event.getAffected()[0];
         User user = User.getUser(player.getUniqueId());
         PvPClass pvPClass = PvPClass.getApplicableClass(player);
         if (user.getCurrentClass() == null) {

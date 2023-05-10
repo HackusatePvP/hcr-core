@@ -295,3 +295,17 @@ redsandstone&179
 stoneslab2&182
 stone_slab2&182
 182&182
+iron_shovel&256
+ironshovel&256
+ishovel&256
+256&256
+iron_pickaxe&257
+iron_pick&257
+ironpickaxe&257
+ironpick&257
+257&257
+iron_axe&258
+ironaxe&258
+258&258
+flintsteel&259
+259&259

@@ -11,11 +11,20 @@ commands:
   claimbonuschest:
     description: Claim donator items.
     permission: hcf.commands.donor.claimbonuschest
+  eat:
+    description: Fills up your hunger bar.
+    permission: hcf.commands.feed
   economy:
     aliases: [eco]
     description: Economy management command.
     permission: hcf.commands.admin.economy
   glowstonescanner:
+  iambard:
+    description: Sets enegery to max.
+    permission: hcf.commands.admin.iambard
+  killall:
+    description: Kills all mobs.
+    permission: hcf.commands.admin.killall
   koth:
     description: Main koth command.
   faction:
@@ -30,6 +39,4 @@ commands:
     description: View and set your pvp status.
   sotw:
     aliases: [startoftheworld]
-    description: Managers the SOTW event.
-    permission: hcf.commands.admin.sotw
-  sotwenable:
+    description: Main sotw command.

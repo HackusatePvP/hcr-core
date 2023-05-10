@@ -33,4 +33,8 @@ public class EnergyBuildTask extends BukkitRunnable {
     public void removeEnergy(int amount) {
         this.energy = energy - amount;
     }
+
+    public void setEnergy(int amount) {
+        energy = Math.min(amount, 120);
+    }
 }

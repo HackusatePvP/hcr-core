@@ -1,6 +1,5 @@
 package dev.hcr.hcf.timers.types.player;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.users.User;

@@ -1,14 +1,16 @@
 package dev.hcr.hcf;
 
 import dev.hcr.hcf.commands.admin.EconomyCommand;
-import dev.hcr.hcf.commands.admin.SOTWCommand;
+import dev.hcr.hcf.commands.admin.IamBardCommand;
+import dev.hcr.hcf.commands.admin.KillAllCommand;
 import dev.hcr.hcf.commands.donor.ClaimBonusChestCommand;
 import dev.hcr.hcf.commands.players.BalanceCommand;
 import dev.hcr.hcf.commands.players.PayCommand;
 import dev.hcr.hcf.commands.players.PvPTimerCommand;
-import dev.hcr.hcf.commands.players.SOTWEnableCommand;
 import dev.hcr.hcf.commands.players.lives.DefaultLivesCommand;
 import dev.hcr.hcf.commands.players.lives.LivesCommandManager;
+import dev.hcr.hcf.commands.players.sotw.SOTWCommandManager;
+import dev.hcr.hcf.commands.players.sotw.players.DefaultSOTWCommand;
 import dev.hcr.hcf.commands.staff.GlowstoneScannerCommand;
 import dev.hcr.hcf.databases.IStorage;
 import dev.hcr.hcf.databases.impl.MongoStorage;
@@ -44,6 +46,7 @@ import dev.hcr.hcf.pvpclass.types.MinerClass;
 import dev.hcr.hcf.scoreboard.HCFBoardAdapter;
 import dev.hcr.hcf.scoreboard.TeamManager;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.users.UserSaveTask;
 import dev.hcr.hcf.utils.backend.ConfigFile;
 import dev.hcr.hcf.utils.backend.ItemDatabase;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
@@ -84,10 +87,15 @@ public final class HCF extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        saveFactions();
+        if (storage != null) {
+            storage.saveUsers();
+            saveFactions();
+        }
 
         User.getUsers().forEach(user -> getStorage().appendUserDataSync(user.save()));
         Bukkit.getOnlinePlayers().forEach(player -> FactionClaimingListener.removeWand(player.getInventory()));
+
+        plugin = null;
     }
 
     private void loadConfigurationFiles() {
@@ -121,25 +129,30 @@ public final class HCF extends JavaPlugin {
         new FactionCommandManager();
         new KothCommandManager();
         new LivesCommandManager();
+        new SOTWCommandManager();
         getCommand("balance").setExecutor(new BalanceCommand());
         getCommand("claimbonuschest").setExecutor(new ClaimBonusChestCommand());
         getCommand("economy").setExecutor(new EconomyCommand());
         getCommand("glowstonescanner").setExecutor(new GlowstoneScannerCommand());
+        getCommand("iambard").setExecutor(new IamBardCommand());
+        getCommand("killall").setExecutor(new KillAllCommand());
         getCommand("koth").setExecutor(new DefaultKothCommand());
         getCommand("faction").setExecutor(new DefaultFactionCommand());
         getCommand("lives").setExecutor(new DefaultLivesCommand());
         getCommand("pay").setExecutor(new PayCommand());
         getCommand("pvptimer").setExecutor(new PvPTimerCommand());
-        getCommand("sotw").setExecutor(new SOTWCommand());
-        getCommand("sotwenable").setExecutor(new SOTWEnableCommand());
+        getCommand("sotw").setExecutor(new DefaultSOTWCommand());
     }
 
     private void implementDatabases() {
         getLogger().info("Connecting to database...");
         // To prevent NPE errors start the regen task before loading factions.
         regenTask = new FactionRegenTask();
-        regenTask.runTaskTimerAsynchronously(this, 0L, 20L * PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getInteger("regen-delay-time"));
+        regenTask.runTaskTimerAsynchronously(this, 0L, 20L * PropertiesConfiguration.getPropertiesConfiguration("faction.properties").getLong("regen-delay-time"));
+
         PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("database.properties");
+        getLogger().info("Loader: " + configuration.getString("main-loader").toLowerCase());
+
         switch (configuration.getString("main-loader").toLowerCase()) {
             case "mongo":
             case "mongodb":
@@ -155,7 +168,13 @@ public final class HCF extends JavaPlugin {
                 getLogger().severe("Unsupported database provided.");
                 Bukkit.shutdown();
                 break;
+            default:
+                storage = new MongoStorage();
         }
+
+        UserSaveTask saveTask = new UserSaveTask();
+        saveTask.runTaskTimerAsynchronously(this, 0L, 20L * PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getLong("user-autosave-delay"));
+
     }
 
     private void loadHooks() {
@@ -226,11 +245,17 @@ public final class HCF extends JavaPlugin {
 
     private void registerEvents() {
         getLogger().info("Registering all listeners...");
-        // Handle packet managers
         Arrays.asList(new UserListener(), new ChatListener(this), new FactionListener(), new FactionTerritoryProtectionListener(), new FactionClaimingListener(),
-                new PlayerListener(), new GlassListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener(), new HCFBoardAdapter(), new DeathBanListener(),
-                new PvPClassListener(), new ZombieListener(), new KothListener(), new SignListener()
+                new PlayerListener(), new GlassListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener(), new HCFBoardAdapter(),
+                new PvPClassListener(), new ZombieListener(), new KothListener(), new SignListener(), new PortalListener()
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
+        // Load kitmap stuff separately
+        if (PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("kitmap")) {
+            // Kitmap is on
+
+        } else {
+            Bukkit.getPluginManager().registerEvents(new DeathBanListener(), this);
+        }
     }
 
     private void loadUI() {

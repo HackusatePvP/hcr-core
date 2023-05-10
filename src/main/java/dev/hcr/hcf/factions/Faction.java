@@ -41,7 +41,6 @@ public abstract class Faction extends Claim {
         this.deathban = deathban;
         factionUUIDMap.put(uniqueID, this);
         factionNameMap.put(name.toLowerCase(), this);
-
         if (this instanceof WildernessFaction) {
             wilderness = (WildernessFaction) this;
         }
@@ -187,7 +186,6 @@ public abstract class Faction extends Claim {
         //  2. The claim is not in WarZone (if playerfacion)
         //  3. The faction is not raidble or on regen
 
-
         // If its a player faction claiming, lets remove all other claims
         if (this instanceof PlayerFaction) {
             claims.clear();
@@ -200,6 +198,7 @@ public abstract class Faction extends Claim {
     public void unclaim() {
         this.claims.clear();
         this.home = null;
+        save();
     }
 
     public void clearClaims() {

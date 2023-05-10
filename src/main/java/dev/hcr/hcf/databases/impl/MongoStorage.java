@@ -6,6 +6,7 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.databases.IStorage;
@@ -57,7 +58,9 @@ public class MongoStorage implements IStorage {
         }
         MongoDatabase database = mongoClient.getDatabase(configuration.getString("database"));
         this.factions = database.getCollection("factions");
+        this.factions.createIndex(Indexes.descending("uuid"));
         this.users = database.getCollection("users");
+        this.factions.createIndex(Indexes.descending("uuid"));
         this.timerCooldown = database.getCollection("timers");
         this.deathbans = database.getCollection("deathbans");
         this.lives = database.getCollection("lives");
@@ -174,7 +177,7 @@ public class MongoStorage implements IStorage {
 
     private void appendUserLives(User user) {
         Bson filter = Filters.eq("uuid", user.getUniqueID().toString());
-        Bson update = new Document("$set", new BasicDBObject("uuid", user.getUniqueID()).append("lives", user.getLives()));
+        Bson update = new Document("$set", new BasicDBObject("uuid", user.getUniqueID().toString()).append("lives", user.getLives()));
         UpdateOptions options = new UpdateOptions().upsert(true);
         lives.updateOne(filter, update, options);
     }

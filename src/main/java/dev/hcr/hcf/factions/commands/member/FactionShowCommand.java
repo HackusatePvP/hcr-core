@@ -5,6 +5,7 @@ import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.commands.FactionCommand;
 import dev.hcr.hcf.factions.types.*;
 import dev.hcr.hcf.factions.types.roads.RoadFaction;
+import dev.hcr.hcf.koths.KothFaction;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.faction.Role;
 import dev.hcr.hcf.utils.CC;
@@ -89,6 +90,16 @@ public class FactionShowCommand extends FactionCommand {
             message.add("&2&lWilderness");
             message.add("");
             message.add("&7Claimable land.");
+        } else if (faction instanceof KothFaction) {
+            KothFaction kothFaction = (KothFaction) faction;
+            message.add(kothFaction.getColor() + kothFaction.getDisplayName());
+            message.add("&7Active: " + (kothFaction.isActive() ? "&aTrue" : "&cFalse"));
+            // TODO: 2/16/2023 list previous capper
+            if (faction.getHome() != null) {
+                message.add("&7Location: &c[&7" + faction.getHome().getBlockX() + "&7," + faction.getHome().getBlockZ() + "&c]");
+            } else {
+                message.add("&7Location: &cN/A");
+            }
         }  else {
             message.add(faction.getColor() + faction.getName());
             message.add("");

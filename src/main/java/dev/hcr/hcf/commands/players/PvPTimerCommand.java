@@ -18,20 +18,10 @@ public class PvPTimerCommand implements CommandExecutor {
             if (args.length == 2) {
                 if (args[0].equalsIgnoreCase("give")) {
                     String name = args[1];
-                    Player target = Bukkit.getPlayer(args[1]);
-                    UUID targetUUID;
-                    if (target == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        if (offlinePlayer == null) {
-                            sender.sendMessage(ChatColor.RED + "Could not find player \"" + args[1] + "\".");
-                            return true;
-                        }
-                        targetUUID = offlinePlayer.getUniqueId();
-                    } else {
-                        targetUUID = target.getUniqueId();
+                    User userTarget = User.getUser(args[1]);
+                    if (userTarget == null) {
+                        userTarget = User.getOfflineUser(args[1]);
                     }
-
-                    User userTarget = User.getUser(targetUUID, name);
                     if (userTarget == null) {
                         sender.sendMessage(ChatColor.RED + "Failed to create User for \"" + name + "\".");
                         return true;
@@ -65,20 +55,10 @@ public class PvPTimerCommand implements CommandExecutor {
             if (args[0].equalsIgnoreCase("give")) {
                 if (player.hasPermission("hcf.commands.pvptimer.give")) {
                     String name = args[1];
-                    Player target = Bukkit.getPlayer(args[1]);
-                    UUID targetUUID;
-                    if (target == null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-                        if (offlinePlayer == null) {
-                            sender.sendMessage(ChatColor.RED + "Could not find player \"" + args[1] + "\".");
-                            return true;
-                        }
-                        targetUUID = offlinePlayer.getUniqueId();
-                    } else {
-                        targetUUID = target.getUniqueId();
+                    User userTarget = User.getUser(args[1]);
+                    if (userTarget == null) {
+                        userTarget = User.getOfflineUser(args[1]);
                     }
-
-                    User userTarget = User.getUser(targetUUID, name);
                     if (userTarget == null) {
                         player.sendMessage(ChatColor.RED + "Failed to create User for \"" + name + "\".");
                         return true;

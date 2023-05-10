@@ -1,6 +1,5 @@
 package dev.hcr.hcf.utils.client.lunar;
 
-import com.lunarclient.bukkitapi.LunarClientAPI;
 import com.lunarclient.bukkitapi.nethandler.shared.LCPacketWaypointAdd;
 import com.lunarclient.bukkitapi.nethandler.shared.LCPacketWaypointRemove;
 import dev.hcr.hcf.utils.client.ClientPlayerPacket;

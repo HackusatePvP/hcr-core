@@ -1,3 +1,32 @@
+# Changelog 2023.05.a9
+- Current Bugs (TODO)
+  - Sign shop may not work properly.
+  - NameTags are still bugged for invis and archer tag.
+  - Koths are still not functional
+- Bug fixes
+  - Lives will now save and load properly.
+  - Claiming pillars no longer disappear if the claim event is cancelled.
+  - Mobs will now take damage whilst SOTW is active.
+  - Fixed issue when a server time would expire all other timers would also expire.
+  - Fixed issue when selling items you don't have in the sign shop.
+  - Configuration files will now load from the jar rather than always presetting themselves.
+  - SystemFactions can now have multiple claims which makes nether spawn and roads possible. 
+- Added
+  - Implemented SOTW enable.
+  - Implemented HCR Portal travel.  
+  - Added [KillAllCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/IamBardCommand.java).
+  - Added [IamBardCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/KillAllCommand.java).
+  - Factions
+    - Added [FactionAllyCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionAllyCommand.java).
+    - Added [FactionAllyEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/coleaders/FactionAllyEvent.java).
+    - Added [FactionAllyAttackEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/members/FactionAllyAttackEvent.java).
+  - Added [UserSaveTask](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/users/UserSaveTask.java)
+- Changes
+  - SOTW commands now work on the same system as faction commands.
+  - Removed sign shop debuggers.
+  - Created database indexes which should increase database query performance.
+  
+
 # Changelog 2023.02.a8
 This is a minor update aimed to fix important issues from the a7 release. 
 
@@ -6,6 +35,14 @@ This is a minor update aimed to fix important issues from the a7 release.
 - Bug fixes
   - Fixed claiming pillar display issues.
   - Fixed SOTW command stop and start errors.
+  - Properties files are now ordered alphabetically instead of being in a random order.
+  - Fixed issue where a bard would hold effect while player tries to equip a class. The bard effect would override the class effects.
+  - Fixed issue when a class passive effect would override a clicked effect from a bard.
+  - [PvPTimerCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/PvPTimerCommand.java) no longer requires the UUIDUtils from Yuni.
+  - Fixed minor scoreboard display issues.
+  - Fixed unclaim pricing. Note I have updated the price of claiming and unclaiming from to 9.75
+  - Fixed mountain.txt file not creating.
+  - Fixed issues with glass wall teleporting player to far back or teleporting them to a different side entirely.
 - Maven dependency changes
   - Added [java-ordered-properties](https://github.com/etiennestuder/java-ordered-properties).
   - Added [apache-commons-io](https://commons.apache.org/proper/commons-io/).
@@ -28,15 +65,6 @@ This is a minor update aimed to fix important issues from the a7 release.
   - Configuration files will now automatically update new values without overwriting existing values.
   - Players can now enter their own territory with an active PvPTimer.
   - Fully removed all document (MongoDb mapping object) to a generic mapping.
-- Fixes
-  - Properties files are now ordered alphabetically instead of being in a random order.
-  - Fixed issue where a bard would hold effect while player tries to equip a class. The bard effect would override the class effects.
-  - Fixed issue when a class passive effect would override a clicked effect from a bard.
-  - [PvPTimerCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/commands/players/PvPTimerCommand.java) no longer requires the UUIDUtils from Yuni.
-  - Fixed minor scoreboard display issues.
-  - Fixed unclaim pricing. Note I have updated the price of claiming and unclaiming from to 9.75
-  - Fixed mountain.txt file not creating.
-  - Fixed issues with glass wall teleporting player to far back or teleporting them to a different side entirely.
   
 # Changelog 2023.01.a7
 This is a merge between two updates 2022.8.15 and 2022.11.30 some change logs may have fixes for the previous update which was 

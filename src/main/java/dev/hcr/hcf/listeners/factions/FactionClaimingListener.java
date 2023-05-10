@@ -197,15 +197,11 @@ public class FactionClaimingListener implements Listener {
             // calc claim size
             int xAxis = (Math.max(event.getLocation1().getBlockX(), event.getLocation2().getBlockX()) - Math.min(event.getLocation1().getBlockX(), event.getLocation2().getBlockX()) + 1);
             int zAxis = (Math.max(event.getLocation1().getBlockZ(), event.getLocation2().getBlockZ()) - Math.min(event.getLocation1().getBlockZ(), event.getLocation2().getBlockZ()) + 1);
-            player.sendMessage("X-Axis: " + xAxis);
-            player.sendMessage("Z-Axis: " + zAxis);
             if (xAxis < 5 || zAxis < 5) {
                 player.sendMessage(ChatColor.RED + "Claim size must be at least 5x5.");
                 event.setCancelled(true);
             }
             playerFaction.removeFromBalance(cost);
-        } else if (faction instanceof SystemFaction) {
-            faction.clearClaims();
         }
     }
 

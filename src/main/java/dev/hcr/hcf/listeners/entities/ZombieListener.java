@@ -15,7 +15,7 @@ public class ZombieListener implements Listener {
         if (event.getDamager() instanceof Zombie && event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             // Hardcore additions: When a player is attacked by a zombie they will gain poison hunger and weakness.
-            // HCR is deigned to have mobs enabled on most servers they are disabled. Having mobs enabled adds more of a
+            // HCR is deigned to have mobs enabled. On most servers they are disabled. Having mobs enabled adds more of a
             // survival mechanic and adds a little bit of difficulty for early game.
             player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 20 * 10, 0));
             player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 20 * 30, 0));

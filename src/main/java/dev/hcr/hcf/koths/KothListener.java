@@ -4,6 +4,8 @@ import dev.hcr.hcf.factions.Faction;
 import dev.hcr.hcf.factions.claims.cuboid.Cuboid;
 import dev.hcr.hcf.factions.events.members.FactionTerritoryEnterEvent;
 import dev.hcr.hcf.factions.events.members.FactionTerritoryMoveEvent;
+import dev.hcr.hcf.timers.Timer;
+import dev.hcr.hcf.timers.types.server.KothTimer;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,12 +20,12 @@ public class KothListener implements Listener {
     @EventHandler
     public void onFactionTerritoryMoveEvent(FactionTerritoryMoveEvent event) {
         Player player = event.getPlayer();
-        Faction fac = event.getFaction();
-        if (fac instanceof KothFaction) {
+        Faction faction = event.getFaction();
+        if (faction instanceof KothFaction) {
             // Player entered the koth fac, maybe change scoreboard or something idk
-
             // See if they are in the capzone.
-            KothFaction kothFaction = (KothFaction) fac;
+            KothFaction kothFaction = (KothFaction) faction;
+            if (!kothFaction.isActive()) return;
             if (kothFaction.getCapZone() == null) return;
             if (kothFaction.getCapZone().isIn(player)) {
                 // Check if the koth is active
@@ -32,6 +34,14 @@ public class KothListener implements Listener {
                         kothFaction.setCapper(player);
                         player.sendMessage(ChatColor.GREEN + "You are now controlling " + kothFaction.getDisplayName());
                     }
+                }
+            } else {
+                // Check if they were the capper
+                if (kothFaction.getCapper() != null && kothFaction.getCapper().getUniqueId() == player.getUniqueId()) {
+                    // They were a capper reset koth
+                    KothTimer timer = kothFaction.getTimer();
+                    timer.reset();
+                    // Display that they got knocked or somthin
                 }
             }
         }

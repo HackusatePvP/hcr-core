@@ -53,7 +53,8 @@ public class FactionLeaderCommand extends FactionCommand {
                 player.sendMessage(ChatColor.RED + "You can only transfer ownership to members in your own faction.");
                 return;
             }
-            // TODO: 1/23/2023
+            playerFaction.setLeader(player.getUniqueId(), usr.getUniqueID());
+            playerFaction.broadcast("&7[&4" + playerFaction.getName().toUpperCase() + "&7] &c" + player.getName() + " &7has transferred &a&lOWNERSHIP &7to &6" + usr.getName());
         }
     }
 

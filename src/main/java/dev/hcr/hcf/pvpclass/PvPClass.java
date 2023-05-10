@@ -130,10 +130,7 @@ public abstract class PvPClass {
             if (debug) {
                 System.out.println("Attempting to override effect...");
             }
-            PotionEffect temp = player.getActivePotionEffects().stream()
-                    .filter(potionEffect -> potionEffect.getType().getName().equals(effect.getType().getName()))
-                    .findFirst()
-                    .orElse(null);
+            PotionEffect temp = player.getActivePotionEffects().stream().filter(potionEffect -> potionEffect.getType().getName().equals(effect.getType().getName())).findFirst().orElse(null);
             if (temp == null) {
                 if (debug) {
                     System.out.println("Returned null skipping effect...");

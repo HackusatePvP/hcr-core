@@ -26,7 +26,7 @@ import java.util.*;
 
 public class PlayerFaction extends Faction {
     private UUID leader;
-    private double balance, investment;
+    private double balance;
     private int points;
     private double currentDTR, maxDTR;
     private RegenStatus regenStatus = RegenStatus.FULL;
@@ -34,6 +34,7 @@ public class PlayerFaction extends Faction {
     private final Collection<UUID> factionMembers = new HashSet<>();
     private final Map<UUID, Role> roleMap = new HashMap<>();
     private final Collection<UUID> factionAllies = new HashSet<>();
+    private final Collection<UUID> pendingAllies = new HashSet<>();
 
     private long regenDelayTime;
 
@@ -45,6 +46,8 @@ public class PlayerFaction extends Faction {
 
     // Debug switch
     private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
+    // Kitmap boolean
+    private final boolean kitmap = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("kitmap");
 
     public PlayerFaction(String name, UUID leader) {
         super(UUID.randomUUID(), name, new Claim(name), true);
@@ -159,7 +162,6 @@ public class PlayerFaction extends Faction {
         document.append("name", this.getName());
         document.append("leader", this.leader.toString());
         document.append("balance", this.balance);
-        document.append("investment", this.investment);
         document.append("points", this.points);
         document.append("currentDTR", this.currentDTR);
         document.append("members", new ArrayList<>(factionMembers));
@@ -213,6 +215,10 @@ public class PlayerFaction extends Faction {
     }
 
     public void decreaseDTR(double amount) {
+        // In kitmap factions will not be able to lose dtr
+        if (kitmap) {
+            return;
+        }
         this.currentDTR -= amount;
         // Setup regen task
         this.regenStatus = RegenStatus.PAUSED;
@@ -220,6 +226,11 @@ public class PlayerFaction extends Faction {
     }
 
     private void loadRegenTask(boolean instant) {
+        // If kitmap is enabled cancel the regen task. In kitmap factions will not lose dtr
+        if (kitmap) {
+            return;
+        }
+
         if (debug) {
             System.out.println(getName() + " is regenerating...");
         }
@@ -255,6 +266,9 @@ public class PlayerFaction extends Faction {
     }
 
     public boolean isRaidable() {
+        if (kitmap) {
+            return false;
+        }
         return getCurrentDTR() < 0;
     }
 
@@ -305,14 +319,6 @@ public class PlayerFaction extends Faction {
             return;
         }
         roleMap.put(uuid, role);
-    }
-
-    public double getInvestment() {
-        return investment;
-    }
-
-    public void setInvestment(double investment) {
-        this.investment = investment;
     }
 
     public void depositBalance(double balance) {
@@ -452,6 +458,7 @@ public class PlayerFaction extends Faction {
     }
 
     public void addAlly(PlayerFaction faction) {
+        broadcast("&7[&4" + getName() + "&7] &7You are now allies with: &c" + faction.getName());
         HCF.getPlugin().getTeamManager().setAlly(this, faction, true);
         factionAllies.add(faction.getUniqueID());
     }
@@ -468,6 +475,27 @@ public class PlayerFaction extends Faction {
     public boolean hasAlly(UUID uuid) {
         return factionAllies.contains(uuid);
     }
+
+    public void addPendingAlly(UUID uuid) {
+        addPendingAlly(Faction.getByUniqueID(uuid));
+    }
+
+    public void addPendingAlly(Faction faction) {
+        broadcast("&7[&4" + getName() + "&7] &c" + faction.getName() + " &7wishes to be allied with you. Co-Leaders and above can &e'/f accept " + faction.getName() + "' &7to accept the alliegence.");
+        pendingAllies.add(faction.getUniqueID());
+    }
+
+    public void removePendingAlly(Faction faction) {
+        pendingAllies.remove(faction.getUniqueID());
+    }
+
+    public boolean hasPendingAlly(UUID uuid) {
+        return pendingAllies.contains(uuid);
+    }
+    public boolean hasPendingAlly(Faction faction) {
+        return pendingAllies.contains(faction.getUniqueID());
+    }
+
 
     public Scoreboard getScoreboard() {
         return scoreboard;

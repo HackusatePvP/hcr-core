@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -77,8 +78,11 @@ public class PlayerPacketListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onFactionClaim(FactionClaimLandEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         Player player = event.getPlayer();
         Cuboid cuboid = new Cuboid(event.getLocation1(), event.getLocation2());
         TaskUtils.runAsync(() -> {
@@ -110,7 +114,10 @@ public class PlayerPacketListener implements Listener {
             player.sendMessage(ChatColor.RED + "No claims found near you.");
             return;
         }
+        Map<Integer, Material> materialMap = generateMaterialRandomList();
         for (Faction faction : factionsNearby) {
+            Random rand = new Random();
+            int random = rand.nextInt(10);
             Claim claim = faction.getClaims().stream().findFirst().orElse(faction.getClaims().stream().findFirst().orElse(null));
             if (claim == null) continue;
             for (int corner = 1; corner < 5; corner++) {
@@ -124,9 +131,15 @@ public class PlayerPacketListener implements Listener {
                         if (faction instanceof PlayerFaction) {
                             PlayerFaction playerFaction = (PlayerFaction) faction;
                             if (playerFaction.hasMember(player.getUniqueId())) {
+                                // Make blocks glass and random material every 10 blocks
                                 player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
                             } else {
-                                player.sendBlockChange(location1, Material.REDSTONE_BLOCK, (byte) 0);
+                                if (location.getBlockY() % 10 == 0) {
+                                    player.sendBlockChange(location1, materialMap.get(random), (byte) 0);
+                                    player.sendMessage(ChatColor.RED + "Displaying " + playerFaction.getDisplayName() + " as " + materialMap.get(random).name());
+                                } else {
+                                    player.sendBlockChange(location1, Material.GLASS, (byte) 0);
+                                }
                             }
                         } else if (faction instanceof SafeZoneFaction) {
                             player.sendBlockChange(location1, Material.EMERALD_BLOCK, (byte) 0);
@@ -139,6 +152,22 @@ public class PlayerPacketListener implements Listener {
         }
         playerXMoveTracker.put(player, location.getBlockX());
         playerZMoveTracker.put(player, location.getBlockZ());
+    }
+
+    private Map<Integer, Material> generateMaterialRandomList() {
+        Map<Integer, Material> random = new HashMap<>();
+        random.put(0, Material.DIRT);
+        random.put(1, Material.GLOWSTONE);
+        random.put(2, Material.EMERALD_BLOCK);
+        random.put(3, Material.DIAMOND_BLOCK);
+        random.put(4, Material.GOLD_BLOCK);
+        random.put(5, Material.IRON_BLOCK);
+        random.put(6, Material.REDSTONE_BLOCK);
+        random.put(7, Material.LAPIS_BLOCK);
+        random.put(8, Material.COAL_BLOCK);
+        random.put(9, Material.COBBLESTONE);
+        random.put(10, Material.BEDROCK);
+        return random;
     }
 
     @EventHandler

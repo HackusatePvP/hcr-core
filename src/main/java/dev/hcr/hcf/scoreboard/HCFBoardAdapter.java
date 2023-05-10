@@ -1,25 +1,16 @@
 package dev.hcr.hcf.scoreboard;
 
 import dev.hcr.hcf.HCF;
-import dev.hcr.hcf.factions.Faction;
-import dev.hcr.hcf.factions.events.members.PlayerFactionLeaveEvent;
-import dev.hcr.hcf.factions.events.members.PlayerJoinFactionEvent;
-import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.pvpclass.types.bard.BardClass;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.types.server.SOTWTimer;
 import dev.hcr.hcf.users.User;
 import io.github.thatkawaiisam.assemble.AssembleAdapter;
 import io.github.thatkawaiisam.assemble.events.AssembleBoardCreatedEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 

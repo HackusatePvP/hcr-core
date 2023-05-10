@@ -1,6 +1,5 @@
 package dev.hcr.hcf.timers.types.player.faction;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
@@ -75,7 +74,6 @@ public class FactionHomeTimer extends Timer implements Listener {
         User user = User.getUser(player.getUniqueId());
         PlayerFaction playerFaction = (PlayerFaction) user.getFaction();
         if (playerFaction == null) {
-            player.sendMessage(ChatColor.RED + "Error occurred contact staff.");
             return;
         }
         player.teleport(playerFaction.getHome());

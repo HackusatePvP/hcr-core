@@ -16,7 +16,7 @@ public class ArcherTagTimer extends Timer implements Listener {
     private Player player;
     private boolean active;
     private long delay;
-    private long timeLeft;
+    private final long timeLeft;
 
     public ArcherTagTimer(Player player) {
         super(player, "archer_tag");

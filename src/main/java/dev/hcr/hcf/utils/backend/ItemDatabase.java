@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ItemDatabase {
-    private File file;
+    private final File file;
     private static final Map<String, Material> items = new HashMap<>();
 
     public ItemDatabase() {
@@ -29,18 +29,18 @@ public class ItemDatabase {
             return;
         }
         try {
-            FileUtils.copyInputStreamToFile(inputStream, file);
+            if (!file.exists()) {
+                FileUtils.copyInputStreamToFile(inputStream, file);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-
         init();
     }
 
     public void init() {
-
-        try(BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] split = line.split("&");
