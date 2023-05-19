@@ -42,7 +42,6 @@ public abstract class ConfigurationType {
             FileUtils.copyInputStreamToFile(inputStream, file);
         } catch (IOException e) {
             e.printStackTrace();
-            return;
         }
     }
 
@@ -59,8 +58,9 @@ public abstract class ConfigurationType {
         }
         try {
             plugin.getLogger().warning("File: \"" + fileName + "\" does not exist. Creating and presetting the file...");
-            file.createNewFile();
-            file.mkdir();
+            if (!file.createNewFile()) {
+                return;
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -74,7 +74,6 @@ public abstract class ConfigurationType {
             FileUtils.copyInputStreamToFile(inputStream, file);
         } catch (IOException e) {
             e.printStackTrace();
-            return;
         }
     }
 
@@ -91,6 +90,8 @@ public abstract class ConfigurationType {
     public abstract Long getLong(String path);
 
     public abstract Object get(String path);
+
+    public abstract boolean has(String key);
 
     public abstract void write(String path, Object value);
 

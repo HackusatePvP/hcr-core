@@ -4,10 +4,7 @@ import dev.hcr.hcf.factions.commands.captain.FactionInviteCommand;
 import dev.hcr.hcf.factions.commands.captain.FactionKickCommand;
 import dev.hcr.hcf.factions.commands.captain.FactionSetHomeCommand;
 import dev.hcr.hcf.factions.commands.captain.FactionWithdrawCommand;
-import dev.hcr.hcf.factions.commands.coleader.FactionClaimCommand;
-import dev.hcr.hcf.factions.commands.coleader.FactionDemoteCommand;
-import dev.hcr.hcf.factions.commands.coleader.FactionPromoteCommand;
-import dev.hcr.hcf.factions.commands.coleader.FactionUnclaimCommand;
+import dev.hcr.hcf.factions.commands.coleader.*;
 import dev.hcr.hcf.factions.commands.leader.FactionCreateCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionDisbandCommand;
 import dev.hcr.hcf.factions.commands.leader.FactionLeaderCommand;
@@ -34,6 +31,7 @@ public class FactionCommandManager {
         new FactionSetHomeCommand();
 
         // COLEADER COMMANDS
+        new FactionAllyCommand();
         new FactionClaimCommand();
         new FactionDemoteCommand();
         new FactionPromoteCommand();

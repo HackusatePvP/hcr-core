@@ -1,9 +1,11 @@
 package dev.hcr.hcf.timers.types.player;
 
 import dev.hcr.hcf.HCF;
+import dev.hcr.hcf.pvpclass.events.archer.ArcherTagExpireEvent;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.users.User;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,7 +37,7 @@ public class ArcherTagTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return "&eArcher Tagged";
     }
 
@@ -79,7 +81,8 @@ public class ArcherTagTimer extends Timer implements Listener {
     @EventHandler
     public void onTimerExpireEvent(TimerExpireEvent event) {
         Player player = event.getAffected()[0];
-        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
+        ArcherTagExpireEvent event1 = new ArcherTagExpireEvent(player);
+        Bukkit.getPluginManager().callEvent(event1);
     }
 
     @EventHandler

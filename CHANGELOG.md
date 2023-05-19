@@ -1,4 +1,31 @@
+# Changelog 2023.05.a9.01
+Minor update which fixes a few bugs and changes configuration layout.
+- Bugs (todo)
+  - Archer tagged when invisible still has display issues with name tags.
+  - Archer Tag damage multiplier needs more testing.
+  - Koths are still not functional
+  - Sign shop is not functional
+- Bug fixes
+  - Fixed an issue when loading ConfigurationFile's in a different directory.
+  - Asynchronous calls to the database are now asynchronous (yes I forgot to add the async part)
+  - [AsyncUserLoadEvent](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/users/events/AsyncUserLoadEvent.java) has been fixed.
+  - Removed redundant json conversion when parsing a map to the database.
+  - Fixed minor issues with SOTW enable (untested)
+  - Fixed issues casting UUID to string when loading faction members
+  - Fixed invisibility bugs with scoreboard teams.
+  - Fixed SOTW enabled timer displayed on scoreboard.
+- Changes
+  - Deathbans are now configured in [deathbans.properties](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/resources/game/deathbans.properties)
+  - Removed `config.yml` everything has been migrated to properties configurations.
+  - Removed a lot of functions from [TeamManager]() and converted them into events.
+- Added
+  - [FactionAllyCommand](https://github.com/HackusatePvP/hcr-core/blob/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionAllyCommand.java)
+  - [ArcherTagExpireEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/pvpclass/events/archer/ArcherTagExpireEvent.java)
+  - [PlayerInvisibilityEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/scoreboard/events/PlayerInvisibilityEvent.java) - Called everytime a player goes invisible.
+  - [PlayerVisibilityEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/scoreboard/events/PlayerVisibilityEvent.java) - Called when a player becomes visible.
+  
 # Changelog 2023.05.a9
+Minor update to introduce alpha 9.
 - Current Bugs (TODO)
   - Sign shop may not work properly.
   - NameTags are still bugged for invis and archer tag.
@@ -14,8 +41,8 @@
 - Added
   - Implemented SOTW enable.
   - Implemented HCR Portal travel.  
-  - Added [KillAllCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/IamBardCommand.java).
-  - Added [IamBardCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/KillAllCommand.java).
+  - Added [KillAllCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/KillAllCommand.java).
+  - Added [IamBardCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/commands/admin/IamBardCommand.java).
   - Factions
     - Added [FactionAllyCommand](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/commands/coleader/FactionAllyCommand.java).
     - Added [FactionAllyEvent](https://github.com/HackusatePvP/hcr-core/tree/main/src/main/java/dev/hcr/hcf/factions/events/coleaders/FactionAllyEvent.java).
@@ -26,7 +53,6 @@
   - Removed sign shop debuggers.
   - Created database indexes which should increase database query performance.
   
-
 # Changelog 2023.02.a8
 This is a minor update aimed to fix important issues from the a7 release. 
 

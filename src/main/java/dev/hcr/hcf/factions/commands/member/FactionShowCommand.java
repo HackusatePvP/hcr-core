@@ -94,7 +94,7 @@ public class FactionShowCommand extends FactionCommand {
             KothFaction kothFaction = (KothFaction) faction;
             message.add(kothFaction.getColor() + kothFaction.getDisplayName());
             message.add("&7Active: " + (kothFaction.isActive() ? "&aTrue" : "&cFalse"));
-            // TODO: 2/16/2023 list previous capper
+            message.add("&7Previous Capper: " + kothFaction.getPreviousCapper());
             if (faction.getHome() != null) {
                 message.add("&7Location: &c[&7" + faction.getHome().getBlockX() + "&7," + faction.getHome().getBlockZ() + "&c]");
             } else {
@@ -153,7 +153,7 @@ public class FactionShowCommand extends FactionCommand {
         builder.append("&7]");
         message.add(builder.toString());
         message.add("  &7Current DTR: " + (playerFaction.isRaidable() ? playerFaction.getRaidableCurrentDTR() : playerFaction.getFormattedCurrentDTR()));
-        message.add("  &7Points: &c" + playerFaction.getPoints()); //TODO implement faction points
+        message.add("  &7Points: &c" + playerFaction.getPoints());
         message.add("&7&m-----------------------------------------------------");
         message.forEach(msg -> sender.sendMessage(CC.translate(msg)));
     }

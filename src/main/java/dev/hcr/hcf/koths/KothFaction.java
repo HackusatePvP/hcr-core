@@ -21,6 +21,7 @@ public class KothFaction extends Faction implements SystemFaction {
     private Cuboid capZone;
     private boolean active;
     private Player capper;
+    private String previousCapper = "NA";
     private KothTimer timer;
 
     private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
@@ -43,6 +44,9 @@ public class KothFaction extends Faction implements SystemFaction {
         }
         if (map.containsKey("radius")) {
             this.radius = (Integer) map.get("radius");
+        }
+        if (map.containsKey("previousCapper")) {
+            this.previousCapper = (String) map.get("previousCapper");
         }
         Location corner1 = center.add(-radius, 0, -radius);
         Location corner2 = center.add(radius, 255, radius);
@@ -146,6 +150,14 @@ public class KothFaction extends Faction implements SystemFaction {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getPreviousCapper() {
+        return previousCapper;
+    }
+
+    public void setPreviousCapper(String previousCapper) {
+        this.previousCapper = previousCapper;
     }
 
     public Player getCapper() {

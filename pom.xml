@@ -6,7 +6,7 @@
 
     <groupId>dev.hcr</groupId>
     <artifactId>HCF</artifactId>
-    <version>2023.02.a8-SNAPSHOT</version>
+    <version>2023.05.a9.01-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>HCF</name>
@@ -82,6 +82,7 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <!--Database Dependency -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
@@ -124,6 +125,7 @@
             <version>1.0.4</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Dependency for the scoreboard -->
         <dependency>
             <groupId>io.github.thatkawaiisam</groupId>
             <artifactId>assemble</artifactId>

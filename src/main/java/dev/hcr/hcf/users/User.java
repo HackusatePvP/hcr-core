@@ -282,7 +282,7 @@ public class User {
     }
 
     public boolean hasSotw() {
-        return sotw;
+        return this.sotw;
     }
 
     public void setSotw(boolean sotw) {
@@ -335,7 +335,7 @@ public class User {
         } else {
             targetUUID = target.getUniqueId();
         }
-        User user = User.getUser(targetUUID);;
+        User user = getUser(targetUUID);;
         return user;
     }
 

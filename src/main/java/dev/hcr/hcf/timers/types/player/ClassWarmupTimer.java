@@ -45,7 +45,7 @@ public class ClassWarmupTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return "&bClass-Warmup";
     }
 

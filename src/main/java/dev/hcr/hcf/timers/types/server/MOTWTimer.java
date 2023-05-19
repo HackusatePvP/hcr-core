@@ -5,6 +5,8 @@ import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.timers.events.TimerStopEvent;
 import dev.hcr.hcf.timers.structure.TimerType;
+import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -43,8 +45,12 @@ public class MOTWTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
-        return "&a&lMOTW";
+    public String getDisplayName(User user) {
+        if (user.hasSotw()) {
+            return "&a&lMOTW";
+        } else {
+            return "&m&a&lMOTW";
+        }
     }
 
     @Override
@@ -77,19 +83,35 @@ public class MOTWTimer extends Timer implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
-        // TODO: 2/12/2022 Implement SOTW enable
         if (!active) return;
-        event.setCancelled(true);
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            User user = User.getUser(player.getUniqueId());
+            if (user.hasSotw()) {
+                event.setCancelled(true);
+            }
+        } else {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onEntityAttack(EntityDamageByEntityEvent event) {
-        // TODO: 2/12/2022 Implement SOTW enable
         if (!active) return;
-        event.setCancelled(true);
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
-            Player entity = (Player) event.getEntity();
-            entity.sendMessage(ChatColor.RED + "You cannot attack players whilst MOTW is enabled.");
+            Player player = (Player) event.getEntity();
+            Player damager = (Player) event.getDamager();
+            User user = User.getUser(player.getUniqueId());
+            User target = User.getUser(damager.getUniqueId());
+            boolean cancelled = false;
+            if (target.hasSotw()) {
+                damager.sendMessage(ChatColor.RED + "You cannot pvp whilst MOTW is active. /motw enable");
+                cancelled = true;
+            } else if (user.hasSotw()) {
+                damager.sendMessage(ChatColor.RED + player.getName() + " has an active MOTW Timer.");
+                cancelled = true;
+            }
+            event.setCancelled(cancelled);
         }
     }
 }

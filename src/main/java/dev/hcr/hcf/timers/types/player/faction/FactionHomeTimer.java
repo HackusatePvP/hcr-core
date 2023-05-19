@@ -26,7 +26,7 @@ public class FactionHomeTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return "&9Faction Home";
     }
 

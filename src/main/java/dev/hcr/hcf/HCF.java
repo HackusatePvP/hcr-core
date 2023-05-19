@@ -44,10 +44,10 @@ import dev.hcr.hcf.pvpclass.types.RogueClass;
 import dev.hcr.hcf.pvpclass.types.bard.BardClass;
 import dev.hcr.hcf.pvpclass.types.MinerClass;
 import dev.hcr.hcf.scoreboard.HCFBoardAdapter;
+import dev.hcr.hcf.scoreboard.ScoreboardListener;
 import dev.hcr.hcf.scoreboard.TeamManager;
 import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.users.UserSaveTask;
-import dev.hcr.hcf.utils.backend.ConfigFile;
 import dev.hcr.hcf.utils.backend.ItemDatabase;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import io.github.thatkawaiisam.assemble.Assemble;
@@ -56,9 +56,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public final class HCF extends JavaPlugin {
     private static HCF plugin;
@@ -67,8 +65,6 @@ public final class HCF extends JavaPlugin {
     private FactionRegenTask regenTask;
     private PluginHook core;
     private TeamManager teamManager;
-
-    private final List<ConfigFile> files = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -100,9 +96,6 @@ public final class HCF extends JavaPlugin {
 
     private void loadConfigurationFiles() {
         getLogger().info("Loading configuration files...");
-        files.addAll(Arrays.asList(
-                new ConfigFile("config", this)
-        ));
         new PropertiesConfiguration("hcf.properties");
 
         new PropertiesConfiguration("database.properties", "database");
@@ -112,6 +105,8 @@ public final class HCF extends JavaPlugin {
         new PropertiesConfiguration("claims.properties", "factions");
         new PropertiesConfiguration("pvpclass.properties", "factions");
 
+        new PropertiesConfiguration("deathbans.properties", "game");
+
         new ItemDatabase();
 
         if (PropertiesConfiguration.canUpdate()) {
@@ -120,9 +115,6 @@ public final class HCF extends JavaPlugin {
         }
     }
 
-    public ConfigFile getConfiguration(String file) {
-        return files.stream().filter(configFile -> configFile.getName().equalsIgnoreCase(file)).findAny().orElse(null);
-    }
 
     private void registerCommands() {
         getLogger().info("Registering all commands...");
@@ -246,8 +238,8 @@ public final class HCF extends JavaPlugin {
     private void registerEvents() {
         getLogger().info("Registering all listeners...");
         Arrays.asList(new UserListener(), new ChatListener(this), new FactionListener(), new FactionTerritoryProtectionListener(), new FactionClaimingListener(),
-                new PlayerListener(), new GlassListener(), new TimerListener(), new MiningListener(), new PlayerPacketListener(), new HCFBoardAdapter(),
-                new PvPClassListener(), new ZombieListener(), new KothListener(), new SignListener(), new PortalListener()
+                new PlayerListener(), new GlassListener(), new MiningListener(), new PlayerPacketListener(),
+                new PvPClassListener(), new ZombieListener(), new KothListener(), new SignListener(), new PortalListener(), new ScoreboardListener()
         ).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
         // Load kitmap stuff separately
         if (PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("kitmap")) {

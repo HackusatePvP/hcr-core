@@ -1,8 +1,8 @@
 package dev.hcr.hcf.pvpclass.types;
 
-import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.pvpclass.events.ClassUnequippedEvent;
+import dev.hcr.hcf.pvpclass.events.archer.ArcherTagExpireEvent;
 import dev.hcr.hcf.pvpclass.events.archer.ArcherTagPlayerEvent;
 import dev.hcr.hcf.pvpclass.structure.Abilities;
 import dev.hcr.hcf.pvpclass.types.bard.objects.Effect;
@@ -27,7 +27,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class ArcherClass extends PvPClass implements Listener {
     private final Effect[] effects;
@@ -104,8 +103,6 @@ public class ArcherClass extends PvPClass implements Listener {
         User user = User.getUser(player.getUniqueId());
         user.setTimer("archer_tag", true);
         archerTagged.add(player.getUniqueId());
-
-        HCF.getPlugin().getTeamManager().setArcherTag(player, true);
     }
 
     @EventHandler
@@ -115,7 +112,8 @@ public class ArcherClass extends PvPClass implements Listener {
         if (timer == null) return;
         Player player = event.getAffected()[0];
         archerTagged.remove(player.getUniqueId());
-        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
+        ArcherTagExpireEvent event1 = new ArcherTagExpireEvent(player);
+        Bukkit.getPluginManager().callEvent(event1);
     }
 
     @EventHandler
@@ -125,7 +123,8 @@ public class ArcherClass extends PvPClass implements Listener {
         if (timer == null) return;
         Player player = event.getAffected()[0];
         archerTagged.remove(player.getUniqueId());
-        HCF.getPlugin().getTeamManager().setArcherTag(player, false);
+        ArcherTagExpireEvent event1 = new ArcherTagExpireEvent(player);
+        Bukkit.getPluginManager().callEvent(event1);
     }
 
 

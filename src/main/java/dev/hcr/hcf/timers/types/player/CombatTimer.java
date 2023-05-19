@@ -2,6 +2,7 @@ package dev.hcr.hcf.timers.types.player;
 
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
+import dev.hcr.hcf.users.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -44,7 +45,7 @@ public class CombatTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
        return  "&cCombat";
     }
 

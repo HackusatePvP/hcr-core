@@ -14,7 +14,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.*;
 
-public class HCFBoardAdapter implements AssembleAdapter, Listener {
+public class HCFBoardAdapter implements AssembleAdapter {
 
     @Override
     public String getTitle(Player player) {
@@ -29,15 +29,7 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
         List<String> lines = new ArrayList<>();
         lines.add("----------------");
         for (Timer timer : Timer.getTimers()) {
-            if (timer instanceof SOTWTimer) {
-                if (user.hasSotw()) {
-                    lines.add("| " + timer.getDisplayName() + ": " + timer.getTimerDisplay());
-                } else {
-                    lines.add("| &m" + timer.getDisplayName() + ": " + timer.getTimerDisplay());
-                }
-            } else {
-                lines.add(timer.getDisplayName() + ": " + timer.getTimerDisplay());
-            }
+            lines.add("| " + timer.getDisplayName(user) + ": " + timer.getTimerDisplay());
         }
         List<Timer> kitTimers = new ArrayList<>();
         if (user.getActiveTimers() != null) {
@@ -48,7 +40,7 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
                     kitTimers.add(timer);
                   //lines.add("| * " + timer.getDisplayName() + ": " + timer.getTimerDisplay());
                 } else {
-                    lines.add("| " + timer.getDisplayName() + ": &7" + timer.getTimerDisplay());
+                    lines.add("| " + timer.getDisplayName(user) + ": &7" + timer.getTimerDisplay());
                 }
             }
         }
@@ -60,7 +52,7 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
                     lines.add("|  &dEnergy: &7" + bardClass.getEnergyTracker(player).getEnergy());
                 }
                 for (Timer timer : kitTimers) {
-                    lines.add("| " + timer.getDisplayName() + ": &7" + timer.getTimerDisplay());
+                    lines.add("| " + timer.getDisplayName(user) + ": &7" + timer.getTimerDisplay());
                 }
             } else {
                 lines.add("| " + user.getCurrentClass().getDisplayName() + ": &7(Equipped)");
@@ -81,12 +73,4 @@ public class HCFBoardAdapter implements AssembleAdapter, Listener {
         return lines;
     }
 
-    @EventHandler
-    public void onBoardCreate(AssembleBoardCreatedEvent event) {
-        Scoreboard scoreboard = event.getBoard().getScoreboard();
-        HCF.getPlugin().getTeamManager().registerTeams(scoreboard);
-
-        User user = User.getUser(event.getBoard().getUuid());
-        HCF.getPlugin().getTeamManager().loadPlayer(user.toPlayer());
-    }
 }

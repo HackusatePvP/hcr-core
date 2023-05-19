@@ -43,8 +43,12 @@ public class SOTWTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
-        return "&a&lSOTW";
+    public String getDisplayName(User user) {
+        if (user.hasSotw()) {
+            return "&a&lSOTW";
+        } else {
+            return "&a&mSOTW";
+        }
     }
 
     @Override
@@ -79,7 +83,6 @@ public class SOTWTimer extends Timer implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
-        // TODO: 2/12/2022 Implement SOTW enable
         if (!active) return;
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
@@ -92,7 +95,6 @@ public class SOTWTimer extends Timer implements Listener {
 
     @EventHandler
     public void onEntityAttack(EntityDamageByEntityEvent event) {
-        // TODO: 2/12/2022 Implement SOTW enable
         if (!active) return;
         if (event.getEntity() instanceof Player && event.getDamager() instanceof Player) {
             Player player = (Player) event.getEntity();
@@ -100,16 +102,12 @@ public class SOTWTimer extends Timer implements Listener {
             User user = User.getUser(player.getUniqueId());
             User target = User.getUser(damager.getUniqueId());
             boolean cancelled = false;
-            if (user.hasSotw()) {
-                player.sendMessage(ChatColor.RED + "You cannot pvp whilst SOTW is active. /sotw enable");
-                cancelled = true;
-            }
             if (target.hasSotw()) {
-                player.sendMessage(ChatColor.RED + damager.getName() + " has an active SOTW Timer.");
+                damager.sendMessage(ChatColor.RED + "You cannot pvp whilst SOTW is active. /sotw enable");
                 cancelled = true;
-            }
-            if (!user.hasSotw() && !target.hasSotw()) {
-                cancelled = false;
+            } else if (user.hasSotw()) {
+                damager.sendMessage(ChatColor.RED + player.getName() + " has an active SOTW Timer.");
+                cancelled = true;
             }
             event.setCancelled(cancelled);
         }

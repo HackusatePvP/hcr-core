@@ -80,10 +80,8 @@ public class PlayerFaction extends Faction {
             this.points = (Integer) map.get("points");
         }
         if (map.containsKey("members")) {
-            List<String> members = (List<String>) map.get("members");
-            for (String s : members) {
-                factionMembers.add(UUID.fromString(s));
-            }
+            List<UUID> members = (List<UUID>) map.get("members");
+            factionMembers.addAll(members);
         }
         if (map.containsKey("roles")) {
             List<String> roles = (List<String>) map.get("roles");

@@ -3,6 +3,7 @@ package dev.hcr.hcf.timers.types.server;
 import dev.hcr.hcf.koths.KothFaction;
 import dev.hcr.hcf.timers.structure.TimerType;
 import dev.hcr.hcf.timers.types.PauseTimer;
+import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class KothTimer extends PauseTimer {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return kothFaction.getDisplayName().replace("Koth", "");
     }
 

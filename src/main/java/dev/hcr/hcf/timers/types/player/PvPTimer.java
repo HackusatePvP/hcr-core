@@ -3,6 +3,7 @@ package dev.hcr.hcf.timers.types.player;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.events.TimerExpireEvent;
 import dev.hcr.hcf.timers.types.PauseTimer;
+import dev.hcr.hcf.users.User;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
@@ -102,7 +103,7 @@ public class PvPTimer extends PauseTimer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return "&aPvP-Timer";
     }
 

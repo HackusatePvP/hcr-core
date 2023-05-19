@@ -20,10 +20,12 @@ import dev.hcr.hcf.koths.KothFaction;
 import dev.hcr.hcf.timers.Timer;
 import dev.hcr.hcf.timers.types.PauseTimer;
 import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.users.events.AsyncUserLoadEvent;
 import dev.hcr.hcf.utils.TaskUtils;
 import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import java.lang.reflect.Type;
@@ -68,7 +70,6 @@ public class MongoStorage implements IStorage {
         // Last
         loadFactions();
         loadDeathBans();
-      //  loadTimers();
     }
 
     public Document findFactionEntry(String factionName) {
@@ -91,10 +92,7 @@ public class MongoStorage implements IStorage {
     }
 
     public void appendFactionData(Map<String, Object> map) {
-
-        String gsonString = gson.toJson(map, type);
-        Document document = Document.parse(gsonString);
-
+        Document document = new Document(map);
         Bson filter = Filters.eq("uuid", document.getString("uuid"));
         Bson update = new Document("$set", document);
         UpdateOptions options = new UpdateOptions().upsert(true);
@@ -116,10 +114,7 @@ public class MongoStorage implements IStorage {
     }
 
     private void appendUserData(Map<String, Object> map) {
-        String gsonString = gson.toJson(map, type);
-        Document document = Document.parse(gsonString);
-
-        if (document == null) return;
+        Document document = new Document(map);
         Bson filter = Filters.eq("uuid", document.getString("uuid"));
         Bson update = new Document("$set", document);
         UpdateOptions options = new UpdateOptions().upsert(true);
@@ -153,19 +148,30 @@ public class MongoStorage implements IStorage {
             user.load(map);
             loadUserLives(uuid);
             loadTimers(uuid);
+
+            // Call API Event for third party plugins
+            AsyncUserLoadEvent loadEvent = new AsyncUserLoadEvent(user);
+            Bukkit.getPluginManager().callEvent(loadEvent);
         });
     }
 
     public void loadUserAsync(UUID uuid) {
-        Document document = users.find(Filters.eq("uuid", uuid.toString())).first();
-        if (document == null) {
-            return;
-        }
-        String name = document.getString("name");
-        User user = new User(uuid, name);
-        user.load(document);
-        loadUserLives(uuid);
-        loadTimers(uuid);
+        TaskUtils.runAsync(() -> {
+            Document document = users.find(Filters.eq("uuid", uuid.toString())).first();
+            if (document == null) {
+                return;
+            }
+            String name = document.getString("name");
+            User user = new User(uuid, name);
+            user.load(document);
+            loadUserLives(uuid);
+            loadTimers(uuid);
+
+            // Call API Event for third party plugins
+            AsyncUserLoadEvent loadEvent = new AsyncUserLoadEvent(user);
+            Bukkit.getPluginManager().callEvent(loadEvent);
+        });
+
     }
 
     private void loadUserLives(UUID uuid) {
@@ -183,9 +189,7 @@ public class MongoStorage implements IStorage {
     }
 
     public void appendTimerData(Map<String, Object> map) {
-        String gsonString = gson.toJson(map, type);
-        Document document = Document.parse(gsonString);
-
+        Document document = new Document(map);
         Bson uuidFilter = Filters.eq("uuid", document.getString("uuid"));
         Bson typeFilter = Filters.eq("type", document.getString("type"));
         Bson update = new Document("$set", document);

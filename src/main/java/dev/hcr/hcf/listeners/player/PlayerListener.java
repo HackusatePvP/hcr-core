@@ -1,11 +1,10 @@
 package dev.hcr.hcf.listeners.player;
 
-import dev.hcr.hcf.HCF;
-import dev.hcr.hcf.factions.types.PlayerFaction;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.pvpclass.events.ClassEquippedEvent;
 import dev.hcr.hcf.pvpclass.events.ClassUnequippedEvent;
-import dev.hcr.hcf.users.User;
+import dev.hcr.hcf.scoreboard.events.PlayerInvisibilityEvent;
+import dev.hcr.hcf.scoreboard.events.PlayerVisibilityEvent;
 import dev.hcr.hcf.utils.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,9 +13,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scoreboard.NameTagVisibility;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +42,18 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
             if (!invisList.contains(player.getUniqueId())) {
-                HCF.getPlugin().getTeamManager().setInvisibility(player, true);
+                System.out.println("Setting player to invis teams");
+                PlayerInvisibilityEvent event1 = new PlayerInvisibilityEvent(player);
+                Bukkit.getPluginManager().callEvent(event1);
+                invisList.add(player.getUniqueId());
             }
         } else {
             if (invisList.contains(player.getUniqueId())) {
-                HCF.getPlugin().getTeamManager().setInvisibility(player, false);
+                System.out.println("Removing player from invis teams");
+                PlayerVisibilityEvent event1 = new PlayerVisibilityEvent(player);
+                Bukkit.getPluginManager().callEvent(event1);
                 invisList.remove(player.getUniqueId());
             }
         }
     }
-
 }

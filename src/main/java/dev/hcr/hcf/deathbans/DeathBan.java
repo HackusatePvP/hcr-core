@@ -2,7 +2,7 @@ package dev.hcr.hcf.deathbans;
 
 import dev.hcr.hcf.HCF;
 import dev.hcr.hcf.utils.CC;
-import dev.hcr.hcf.utils.backend.ConfigFile;
+import dev.hcr.hcf.utils.backend.types.PropertiesConfiguration;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.bukkit.entity.Player;
 
@@ -84,12 +84,12 @@ public class DeathBan {
     }
 
     public static long getRankDuration(String rank) {
-        ConfigFile config = HCF.getPlugin().getConfiguration("config");
+        PropertiesConfiguration configuration = PropertiesConfiguration.getPropertiesConfiguration("deathbans.properties");
         int minutes;
-        if (config.getConfiguration().contains("deathbans." + rank)) {
-            minutes = config.getInt("deathbans." + rank);
+        if (configuration.has(rank)) {
+            minutes = configuration.getInteger(rank);
         } else {
-            minutes = config.getInt("deathbans.default");
+            minutes = configuration.getInteger("default");
         }
         return TimeUnit.MINUTES.toMillis(minutes);
     }

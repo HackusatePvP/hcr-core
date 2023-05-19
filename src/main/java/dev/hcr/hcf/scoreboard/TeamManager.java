@@ -15,16 +15,6 @@ import java.util.Collection;
 public class TeamManager {
     private final boolean debug = PropertiesConfiguration.getPropertiesConfiguration("hcf.properties").getBoolean("debug");
 
-    public void registerTeams(Scoreboard scoreboard) {
-        Team friendly = (scoreboard.getTeam("friendly") == null ? scoreboard.registerNewTeam("friendly") : scoreboard.getTeam("friendly"));
-        Team enemy = (scoreboard.getTeam("enemy") == null ? scoreboard.registerNewTeam("enemy") : scoreboard.getTeam("enemy"));
-        Team focus = (scoreboard.getTeam("focus") == null ? scoreboard.registerNewTeam("focus") : scoreboard.getTeam("focus"));
-        Team ally = (scoreboard.getTeam("ally") == null ? scoreboard.registerNewTeam("ally") : scoreboard.getTeam("ally"));
-        Team invis = (scoreboard.getTeam("invis") == null ? scoreboard.registerNewTeam("invis") : scoreboard.getTeam("invis"));
-        Team archertag = (scoreboard.getTeam("archertag") == null ? scoreboard.registerNewTeam("archertag") : scoreboard.getTeam("archertag"));
-        applyPrefix(friendly, enemy, ally, invis, focus, archertag);
-    }
-
     public void loadPlayer(Player player) {
         User user = User.getUser(player.getUniqueId());
 
@@ -204,41 +194,6 @@ public class TeamManager {
         invis.setNameTagVisibility(NameTagVisibility.NEVER);
         // Allow teammates to see invis
         friendly.setCanSeeFriendlyInvisibles(true);
-    }
-
-    public void setArcherTag(Player player, boolean add) {
-        User user = User.getUser(player.getUniqueId());
-        boolean inFaction = user.hasFaction();
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            Scoreboard scoreboard = online.getScoreboard();
-            Team enemy = (scoreboard.getTeam("enemy") == null ? scoreboard.registerNewTeam("enemy") : scoreboard.getTeam("enemy"));
-            Team invis = (scoreboard.getTeam("enemy") == null ? scoreboard.registerNewTeam("enemy") : scoreboard.getTeam("enemy"));
-            Team archertag = (scoreboard.getTeam("archertag") == null ? scoreboard.registerNewTeam("archertag") : scoreboard.getTeam("archertag"));
-            if (inFaction) {
-                PlayerFaction faction = (PlayerFaction) user.getFaction();
-                if (!faction.hasMember(online.getUniqueId())) {
-                    if (add) {
-                        archertag.addPlayer(player);
-                        enemy.removePlayer(player);
-                    } else {
-                        archertag.removePlayer(player);
-                        enemy.addPlayer(player);
-                    }
-                }
-            } else {
-                if (add) {
-                    archertag.addPlayer(player);
-                    enemy.removePlayer(player);
-                    invis.removePlayer(player);
-                } else {
-                    archertag.removePlayer(player);
-                    enemy.addPlayer(player);
-                    if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                        invis.addPlayer(player);
-                    }
-                }
-            }
-        }
     }
 
     public void setInvisibility(Player player, boolean add) {

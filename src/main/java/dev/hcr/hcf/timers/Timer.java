@@ -97,7 +97,7 @@ public abstract class Timer extends BukkitRunnable {
         return timers;
     }
 
-    public abstract String getDisplayName();
+    public abstract String getDisplayName(User user);
 
     public abstract void run();
 

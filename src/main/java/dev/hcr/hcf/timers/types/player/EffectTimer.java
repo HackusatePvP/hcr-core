@@ -3,6 +3,7 @@ package dev.hcr.hcf.timers.types.player;
 import dev.hcr.hcf.pvpclass.PvPClass;
 import dev.hcr.hcf.pvpclass.structure.Abilities;
 import dev.hcr.hcf.timers.Timer;
+import dev.hcr.hcf.users.User;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -59,7 +60,7 @@ public class EffectTimer extends Timer implements Listener {
     }
 
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(User user) {
         return display;
     }
 
